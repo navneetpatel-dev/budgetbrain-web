@@ -1,7 +1,7 @@
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
-import { useBottomInset } from '@/shared/hooks/useTabBarInset';
+import { useBottomInset, useFloatingBlockGap } from '@/shared/hooks/useTabBarInset';
 import type { CSSProperties, ReactNode } from 'react';
 
 type ScreenInset = 'tab' | 'stack' | 'none';
@@ -15,6 +15,8 @@ export function ScreenWrapper({
   const theme = useTheme();
   const { frame, sectionGap } = useScreenInsets();
   const bottomPadding = useBottomInset(inset);
+  const blockGap = useFloatingBlockGap();
+  const contentGap = inset === 'tab' ? blockGap : sectionGap;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background, ...style }}>
@@ -27,7 +29,7 @@ export function ScreenWrapper({
           paddingBottom: bottomPadding,
           ...contentContainerStyle,
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: sectionGap }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: contentGap }}>
             {children}
           </div>
         </div>

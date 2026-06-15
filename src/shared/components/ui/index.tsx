@@ -566,46 +566,67 @@ export function ProgressBar({ progress, color, height = 8 }: { progress: number;
 /* ── ListRow ── */
 
 export function ListRow({
-  icon, label, value, onPress, chevron, destructive, isLast,
+  icon, label, subtitle, value, onPress, chevron, destructive, isLast,
 }: {
-  icon?: AppIconName; label: string; value?: string;
+  icon?: AppIconName; label: string; subtitle?: string; value?: string;
   onPress?: () => void; chevron?: boolean; destructive?: boolean; isLast?: boolean;
 }) {
   const theme = useTheme();
+  const showChevron = chevron ?? !!onPress;
 
   const content = (
     <div style={{
       display: 'flex', alignItems: 'center', gap: theme.spacing.md,
-      padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+      padding: '14px 16px',
+      minHeight: 52,
       cursor: onPress ? 'pointer' : 'default',
       borderBottom: isLast ? 'none' : `1px solid ${theme.colors.borderSubtle}`,
     }}>
       {icon && (
-        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: destructive ? theme.colors.dangerSoft : theme.colors.primarySoft }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: destructive ? theme.colors.dangerSoft : theme.colors.primarySoft, flexShrink: 0 }}>
           <AppIcon name={icon} size={18} color={destructive ? theme.colors.danger : theme.colors.primary} />
         </div>
       )}
-      <span style={{
-        fontFamily: 'Inter, sans-serif',
-        fontSize: theme.typography.body.fontSize,
-        fontWeight: Number(theme.typography.body.fontWeight),
-        color: destructive ? theme.colors.danger : theme.colors.text,
-        flex: 1,
-      }}>{label}</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span style={{
+          display: 'block',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: theme.typography.body.fontSize,
+          fontWeight: Number(theme.typography.bodyMedium.fontWeight),
+          color: destructive ? theme.colors.danger : theme.colors.text,
+        }}>{label}</span>
+        {subtitle && (
+          <span style={{
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12,
+            color: theme.colors.textTertiary, marginTop: 2,
+          }}>{subtitle}</span>
+        )}
+      </div>
       {value && (
         <span style={{
           fontFamily: 'Inter, sans-serif',
-          fontSize: theme.typography.bodyMedium.fontSize,
-          fontWeight: Number(theme.typography.bodyMedium.fontWeight),
+          fontSize: theme.typography.caption.fontSize,
+          fontWeight: 600,
           color: theme.colors.textSecondary,
+          flexShrink: 0,
         }}>{value}</span>
       )}
-      {(chevron || onPress) && <AppIcon name="chevronRight" size={16} color={theme.colors.textTertiary} />}
+      {showChevron && onPress && <AppIcon name="chevronRight" size={14} color={theme.colors.textTertiary} />}
     </div>
   );
 
   if (onPress) {
-    return <button onClick={onPress} style={{ width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}>{content}</button>;
+    return (
+      <button
+        type="button"
+        onClick={onPress}
+        style={{ width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.colors.surfaceHover; }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+      >
+        {content}
+      </button>
+    );
   }
 
   return <div>{content}</div>;
@@ -617,16 +638,24 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
   const theme = useTheme();
 
   return (
-    <Card variant="elevated" style={{ padding: 0, ...style }}>
+    <div style={{ marginBottom: theme.spacing.section, ...style }}>
       {title && (
-        <div style={{ padding: theme.spacing.lg, paddingBottom: 0 }}>
-          <SectionHeader title={title} />
-        </div>
+        <span style={{
+          display: 'block',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: 0.9,
+          textTransform: 'uppercase',
+          color: theme.colors.textTertiary,
+          marginBottom: theme.spacing.sm,
+          marginLeft: theme.spacing.xs,
+        }}>{title}</span>
       )}
-      <div style={{ padding: title ? `0 ${theme.spacing.lg}px ${theme.spacing.lg}px` : 0 }}>
+      <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
         {children}
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }
 

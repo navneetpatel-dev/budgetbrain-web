@@ -5,7 +5,8 @@ import {
   PiggyBank, CreditCard, Globe, Shield, FileText, HelpCircle,
   Users, MessageCircle, Sparkles, Download, ChevronRight, Trash2,
   Edit3, MoreHorizontal, ArrowUp, ArrowDown, RefreshCw, LogOut,
-  Lock, X, Upload, type LucideIcon,
+  Lock, X, Upload, Flag, CircleArrowDown, Landmark, Link,
+  Sun, Moon, Monitor, type LucideIcon,
 } from 'lucide-react';
 
 export type AppIconName =
@@ -17,7 +18,10 @@ export type AppIconName =
   | 'fileText' | 'helpCircle' | 'users' | 'chat' | 'sparkles'
   | 'download' | 'chevronRight' | 'trash' | 'edit' | 'more'
   | 'arrowUp' | 'arrowDown' | 'refresh' | 'logout' | 'lock'
-  | 'close' | 'upload';
+  | 'close' | 'upload'
+  | 'goals' | 'income' | 'ai' | 'netWorth' | 'wallet' | 'family'
+  | 'link' | 'bell' | 'support' | 'document' | 'sun' | 'moon'
+  | 'auto' | 'personFill';
 
 const ICON_MAP: Record<AppIconName, LucideIcon> = {
   home: Home,
@@ -61,6 +65,20 @@ const ICON_MAP: Record<AppIconName, LucideIcon> = {
   lock: Lock,
   close: X,
   upload: Upload,
+  goals: Flag,
+  income: CircleArrowDown,
+  ai: Sparkles,
+  netWorth: Landmark,
+  wallet: Wallet,
+  family: Users,
+  link: Link,
+  bell: Bell,
+  support: HelpCircle,
+  document: FileText,
+  sun: Sun,
+  moon: Moon,
+  auto: Monitor,
+  personFill: User,
 };
 
 interface AppIconProps {

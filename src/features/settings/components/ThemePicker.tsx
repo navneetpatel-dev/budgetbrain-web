@@ -1,10 +1,10 @@
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme, ACCENT_OPTIONS, type ThemeMode, type AccentPalette } from '@/shared/theme';
 
-const MODES: { id: ThemeMode; label: string; Icon: typeof Sun }[] = [
-  { id: 'light', label: 'Light', Icon: Sun },
-  { id: 'dark', label: 'Dark', Icon: Moon },
-  { id: 'system', label: 'Auto', Icon: Monitor },
+const MODES: { id: ThemeMode; label: string; icon: 'sun' | 'moon' | 'auto' }[] = [
+  { id: 'light', label: 'Light', icon: 'sun' },
+  { id: 'dark', label: 'Dark', icon: 'moon' },
+  { id: 'system', label: 'Auto', icon: 'auto' },
 ];
 
 export function ThemePicker({
@@ -23,7 +23,7 @@ export function ThemePicker({
   return (
     <div>
       <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-        {MODES.map(({ id, label, Icon }) => {
+        {MODES.map(({ id, label, icon }) => {
           const active = mode === id;
           return (
             <button
@@ -43,7 +43,7 @@ export function ThemePicker({
                 cursor: 'pointer',
               }}
             >
-              <Icon size={20} color={active ? theme.colors.primary : theme.colors.textSecondary} />
+              <AppIcon name={icon} size={20} color={active ? theme.colors.primary : theme.colors.textSecondary} />
               <span style={{
                 fontFamily: 'Inter, sans-serif', fontSize: 12,
                 fontWeight: active ? 700 : 500,

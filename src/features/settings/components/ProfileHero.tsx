@@ -101,7 +101,7 @@ export function ProfileHero({
                 backgroundColor: 'rgba(255,255,255,0.14)',
                 fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', fontFamily: 'Inter, sans-serif',
               }}>
-                <AppIcon name="piggyBank" size={11} color="rgba(255,255,255,0.85)" />
+                <AppIcon name="wallet" size={11} color="rgba(255,255,255,0.85)" />
                 {currency}
               </span>
             )}

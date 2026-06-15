@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Button, Input, GroupedCard, ListRow, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
-import { FormSection } from '@/shared/components/ui/forms';
+import { FormSection, FormFieldLabel } from '@/shared/components/ui/forms';
 import { OptionChips } from '@/shared/components/ui/feature-screen';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { SettingsSkeleton } from '@/shared/components/ui/skeleton';
@@ -20,27 +20,8 @@ import { useTheme } from '@/shared/theme';
 import { ProfileHero } from '../components/ProfileHero';
 import { PremiumUpsellCard } from '../components/PremiumUpsellCard';
 import { ThemePicker } from '../components/ThemePicker';
-import type { AppIconName } from '@/shared/components/ui/icons/AppIcon';
-
-const FEATURE_LINKS: { label: string; href: string; icon: AppIconName }[] = [
-  { label: 'Goals', href: '/goals', icon: 'target' },
-  { label: 'Income', href: '/income', icon: 'trendingUp' },
-  { label: 'AI Insights', href: '/ai', icon: 'sparkles' },
-  { label: 'Net Worth', href: '/net-worth', icon: 'piggyBank' },
-  { label: 'Reports', href: '/reports', icon: 'chart' },
-  { label: 'Categories', href: '/categories', icon: 'category' },
-];
-
-const ACCOUNT_LINKS: { label: string; href: string; icon: AppIconName }[] = [
-  { label: 'Accounts', href: '/accounts', icon: 'creditCard' },
-  { label: 'Investments', href: '/investments', icon: 'chart' },
-  { label: 'Family Groups', href: '/family', icon: 'users' },
-  { label: 'Integrations', href: '/integrations', icon: 'globe' },
-  { label: 'Notifications', href: '/notifications', icon: 'notification' },
-  { label: 'Support', href: '/support', icon: 'helpCircle' },
-  { label: 'Privacy Policy', href: '/privacy', icon: 'shield' },
-  { label: 'Terms of Service', href: '/terms', icon: 'fileText' },
-];
+import { SecurityPreferencesSection } from '../components/SecurityPreferencesSection';
+import { PROFILE_FEATURE_LINKS, PROFILE_ACCOUNT_LINKS } from '../constants/profileLinks';
 
 export function SettingsPage() {
   const theme = useTheme();
@@ -118,25 +99,25 @@ export function SettingsPage() {
         {!isPremium && <PremiumUpsellCard />}
 
         <GroupedCard title="Features">
-          {FEATURE_LINKS.map((link, i) => (
+          {PROFILE_FEATURE_LINKS.map((link, i) => (
             <ListRow
               key={link.href}
               icon={link.icon}
               label={link.label}
               onPress={() => navigate(link.href)}
-              isLast={i === FEATURE_LINKS.length - 1}
+              isLast={i === PROFILE_FEATURE_LINKS.length - 1}
             />
           ))}
         </GroupedCard>
 
         <GroupedCard title="Account">
-          {ACCOUNT_LINKS.map((link, i) => (
+          {PROFILE_ACCOUNT_LINKS.map((link, i) => (
             <ListRow
               key={link.href}
               icon={link.icon}
               label={link.label}
               onPress={() => navigate(link.href)}
-              isLast={i === ACCOUNT_LINKS.length - 1}
+              isLast={i === PROFILE_ACCOUNT_LINKS.length - 1}
             />
           ))}
         </GroupedCard>
@@ -153,12 +134,7 @@ export function SettingsPage() {
         </GroupedCard>
 
         <GroupedCard title="Security & preferences">
-          <ListRow
-            icon="lock"
-            label="Biometric lock"
-            value="Mobile app only"
-            isLast
-          />
+          <SecurityPreferencesSection />
         </GroupedCard>
 
         <GroupedCard title="Profile">
@@ -169,11 +145,11 @@ export function SettingsPage() {
               if (editingProfile) clearSubmitError();
               setEditingProfile(!editingProfile);
             }}
-            isLast={!editingProfile}
+            isLast={false}
           />
           {!editingProfile ? (
             <>
-              <ListRow icon="creditCard" label="Currency" value={user.currency ?? 'INR'} />
+              <ListRow icon="wallet" label="Currency" value={user.currency ?? 'INR'} />
               <ListRow icon="profile" label="Country" value={user.country ?? '—'} />
               <ListRow icon="chart" label="Plan" value={subscription?.role ?? user.role ?? 'free'} isLast />
             </>
@@ -181,15 +157,12 @@ export function SettingsPage() {
             <FormSection title="Edit profile" style={{ margin: theme.spacing.lg, marginTop: 0 }}>
               {profileError ? <FormErrorBanner message={profileError} /> : null}
               <Controller control={control} name="name" render={({ field: { onChange, value } }) => (
-                <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} disabled={profileLoading} />
+                <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} leftIcon="personFill" disabled={profileLoading} />
               )} />
               <Controller control={control} name="country" render={({ field: { onChange, value } }) => (
                 <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} disabled={profileLoading} />
               )} />
-              <span style={{
-                display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13,
-                fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8,
-              }}>Currency</span>
+              <FormFieldLabel>Currency</FormFieldLabel>
               <Controller control={control} name="currency" render={({ field: { onChange, value } }) => (
                 <OptionChips
                   options={[...SUPPORTED_CURRENCIES]}

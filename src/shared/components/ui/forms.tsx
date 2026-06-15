@@ -3,6 +3,16 @@ import type { CSSProperties, ChangeEvent } from 'react';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useState } from 'react';
 
+export function FormFieldLabel({ children, style }: { children: React.ReactNode; style?: CSSProperties }) {
+  const theme = useTheme();
+  return (
+    <span style={{
+      display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13,
+      fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8, ...style,
+    }}>{children}</span>
+  );
+}
+
 export function FormSection({
   title, subtitle, children, style,
 }: {

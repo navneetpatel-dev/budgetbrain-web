@@ -29,7 +29,7 @@ export function PremiumUpsellCard() {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         backgroundColor: theme.colors.primarySoft, flexShrink: 0,
       }}>
-        <AppIcon name="sparkles" size={20} color={theme.colors.primary} />
+        <AppIcon name="ai" size={20} color={theme.colors.primary} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>

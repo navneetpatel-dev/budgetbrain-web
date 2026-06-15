@@ -1,6 +1,12 @@
 import { useMemo } from 'react';
 import { useTheme } from '@/shared/theme';
-import { useResponsive } from './useResponsive';
+import { useResponsive } from '@/shared/hooks/useResponsive';
+
+/** Matches the floating tab bar bottom margin rhythm on mobile. */
+export function useFloatingBlockGap() {
+  const { tabBarBottomInset } = useResponsive();
+  return Math.max(0, tabBarBottomInset);
+}
 
 const TAB_BAR_BODY = 84;
 const FAB_OVERFLOW = 36;
