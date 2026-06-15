@@ -499,12 +499,13 @@ export function FormStackScreen({
 }
 
 export function StickyHeaderFlatScreen<T>({
-  header, data, renderItem, keyExtractor, ListEmptyComponent, contentContainerStyle, inset = 'tab',
+  header, data, renderItem, keyExtractor, ListEmptyComponent, ListHeaderComponent, contentContainerStyle, inset = 'tab',
 }: {
   header: React.ReactNode; data: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   keyExtractor: (item: T, index: number) => string;
   ListEmptyComponent?: React.ReactNode;
+  ListHeaderComponent?: React.ReactNode;
   contentContainerStyle?: CSSProperties;
   inset?: 'tab' | 'stack' | 'none';
 }) {
@@ -524,9 +525,13 @@ export function StickyHeaderFlatScreen<T>({
         ...contentContainerStyle,
       }}>
         {safeData.length === 0 && ListEmptyComponent ? (
-          ListEmptyComponent
+          <>
+            {ListHeaderComponent}
+            {ListEmptyComponent}
+          </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: stackGap }}>
+            {ListHeaderComponent}
             {safeData.map((item, index) => (
               <div key={keyExtractor(item, index)}>
                 {renderItem(item, index)}

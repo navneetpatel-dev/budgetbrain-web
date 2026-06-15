@@ -1,17 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, ACCENT_OPTIONS } from '@/shared/theme';
+import { useQuery } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card } from '@/shared/components/ui/index';
+import { Button, Input, GroupedCard, ListRow, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { FormSection } from '@/shared/components/ui/forms';
+import { OptionChips } from '@/shared/components/ui/feature-screen';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
-import { ListRow } from '@/shared/components/ui/lists';
 import { SettingsSkeleton } from '@/shared/components/ui/skeleton';
 import { useAppSelector, useAppDispatch } from '@/shared/store/hooks';
 import { setTheme, setAccent } from '@/shared/store/settingsSlice';
 import { useSignOut } from '@/features/auth/hooks/useAuthHooks';
 import { useDeleteAccount } from '@/features/settings/hooks/useDeleteAccount';
+import { useEditProfile, type ProfileForm } from '@/features/settings/hooks/useEditProfile';
 import { CONFIRM, type ConfirmCopy } from '@/shared/constants/confirmations';
+import { apiGet } from '@/shared/services/api';
+import { SUBSCRIPTION_PLANS, SUPPORTED_CURRENCIES } from '@/shared/constants/config';
+import { useTheme } from '@/shared/theme';
 import { ProfileHero } from '../components/ProfileHero';
+import { PremiumUpsellCard } from '../components/PremiumUpsellCard';
+import { ThemePicker } from '../components/ThemePicker';
+import type { AppIconName } from '@/shared/components/ui/icons/AppIcon';
+
+const FEATURE_LINKS: { label: string; href: string; icon: AppIconName }[] = [
+  { label: 'Goals', href: '/goals', icon: 'target' },
+  { label: 'Income', href: '/income', icon: 'trendingUp' },
+  { label: 'AI Insights', href: '/ai', icon: 'sparkles' },
+  { label: 'Net Worth', href: '/net-worth', icon: 'piggyBank' },
+  { label: 'Reports', href: '/reports', icon: 'chart' },
+  { label: 'Categories', href: '/categories', icon: 'category' },
+];
+
+const ACCOUNT_LINKS: { label: string; href: string; icon: AppIconName }[] = [
+  { label: 'Accounts', href: '/accounts', icon: 'creditCard' },
+  { label: 'Investments', href: '/investments', icon: 'chart' },
+  { label: 'Family Groups', href: '/family', icon: 'users' },
+  { label: 'Integrations', href: '/integrations', icon: 'globe' },
+  { label: 'Notifications', href: '/notifications', icon: 'notification' },
+  { label: 'Support', href: '/support', icon: 'helpCircle' },
+  { label: 'Privacy Policy', href: '/privacy', icon: 'shield' },
+  { label: 'Terms of Service', href: '/terms', icon: 'fileText' },
+];
 
 export function SettingsPage() {
   const theme = useTheme();
@@ -19,13 +48,31 @@ export function SettingsPage() {
   const dispatch = useAppDispatch();
   const { signOut } = useSignOut();
   const { deleteAccount, loading: deleteLoading } = useDeleteAccount();
+  const { save: saveProfile, loading: profileLoading, submitError: profileError, clearSubmitError } = useEditProfile();
+  const [editingProfile, setEditingProfile] = useState(false);
   const [confirmCopy, setConfirmCopy] = useState<ConfirmCopy | null>(null);
   const [confirmAction, setConfirmAction] = useState<(() => Promise<void>) | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const user = useAppSelector((s) => s.auth.user);
-  const settingsTheme = useAppSelector((s) => s.settings.theme);
+  const settings = useAppSelector((s) => s.settings);
+
+  const { control, handleSubmit, reset } = useForm<ProfileForm>({
+    defaultValues: { name: user?.name ?? '', country: user?.country ?? '', currency: user?.currency ?? 'INR' },
+  });
+
+  useEffect(() => {
+    reset({ name: user?.name ?? '', country: user?.country ?? '', currency: user?.currency ?? 'INR' });
+  }, [user, reset]);
+
+  const { data: subscription } = useQuery({
+    queryKey: ['subscription'],
+    queryFn: () => apiGet<{ role: string; plans: typeof SUBSCRIPTION_PLANS }>('/subscriptions/status'),
+    enabled: !!user,
+  });
 
   if (!user) return <SettingsSkeleton />;
+
+  const isPremium = ['premium', 'lifetime', 'admin'].includes(user.role ?? '');
 
   const openConfirm = (copy: ConfirmCopy, action: () => Promise<void>) => {
     setConfirmCopy(copy);
@@ -49,6 +96,11 @@ export function SettingsPage() {
     setConfirmAction(null);
   };
 
+  const onSaveProfile = async (data: ProfileForm) => {
+    const ok = await saveProfile(data);
+    if (ok) setEditingProfile(false);
+  };
+
   return (
     <>
       <ScreenWrapper
@@ -58,46 +110,109 @@ export function SettingsPage() {
             email={user.email}
             role={user.role}
             currency={user.currency}
+            onEditPress={() => setEditingProfile((v) => !v)}
           />
         }
         inset="tab"
       >
-        <Card variant="elevated">
-          <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.md }}>Theme Mode</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {(['light', 'dark', 'system'] as const).map((mode) => (
-              <button key={mode} onClick={() => dispatch(setTheme(mode))} style={{ flex: 1, padding: '10px', borderRadius: theme.radii.md, border: `1.5px solid ${settingsTheme === mode ? theme.colors.primary : theme.colors.borderSubtle}`, backgroundColor: settingsTheme === mode ? theme.colors.primarySoft : theme.colors.surface, color: settingsTheme === mode ? theme.colors.primary : theme.colors.text, fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>{mode}</button>
-            ))}
+        {!isPremium && <PremiumUpsellCard />}
+
+        <GroupedCard title="Features">
+          {FEATURE_LINKS.map((link, i) => (
+            <ListRow
+              key={link.href}
+              icon={link.icon}
+              label={link.label}
+              onPress={() => navigate(link.href)}
+              isLast={i === FEATURE_LINKS.length - 1}
+            />
+          ))}
+        </GroupedCard>
+
+        <GroupedCard title="Account">
+          {ACCOUNT_LINKS.map((link, i) => (
+            <ListRow
+              key={link.href}
+              icon={link.icon}
+              label={link.label}
+              onPress={() => navigate(link.href)}
+              isLast={i === ACCOUNT_LINKS.length - 1}
+            />
+          ))}
+        </GroupedCard>
+
+        <GroupedCard title="Appearance">
+          <div style={{ padding: theme.spacing.lg }}>
+            <ThemePicker
+              mode={settings.theme}
+              accent={settings.accent}
+              onModeChange={(m) => dispatch(setTheme(m))}
+              onAccentChange={(a) => dispatch(setAccent(a))}
+            />
           </div>
-          <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginTop: theme.spacing.lg, marginBottom: theme.spacing.md }}>Accent Color</span>
-          <div style={{ display: 'flex', gap: 10 }}>
-            {ACCENT_OPTIONS.map((opt) => (
-              <button key={opt.id} onClick={() => dispatch(setAccent(opt.id))} style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: opt.swatch, border: theme.accent === opt.id ? `2.5px solid ${theme.colors.text}` : '2.5px solid transparent', cursor: 'pointer' }} aria-label={opt.label} />
-            ))}
-          </div>
-        </Card>
-        <Card variant="elevated" style={{ padding: 0 }}>
-          <ListRow icon="piggyBank" label="Net Worth" onPress={() => navigate('/net-worth')} />
-          <ListRow icon="category" label="Categories" onPress={() => navigate('/categories')} />
-          <ListRow icon="creditCard" label="Accounts" onPress={() => navigate('/accounts')} />
-          <ListRow icon="chart" label="Investments" onPress={() => navigate('/investments')} />
-          <ListRow icon="search" label="Search" onPress={() => navigate('/search')} />
-          <ListRow icon="download" label="Reports" onPress={() => navigate('/reports')} />
-          <ListRow icon="notification" label="Notifications" onPress={() => navigate('/notifications')} />
-          <ListRow icon="users" label="Family" onPress={() => navigate('/family')} />
-          <ListRow icon="chat" label="AI Coach" onPress={() => navigate('/ai')} />
-          <ListRow icon="globe" label="Integrations" onPress={() => navigate('/integrations')} />
-        </Card>
-        <Card variant="elevated" style={{ padding: 0 }}>
-          <ListRow icon="dollar" label="Subscription" onPress={() => navigate('/subscription')} />
-          <ListRow icon="helpCircle" label="Support" onPress={() => navigate('/support')} />
-          <ListRow icon="shield" label="Privacy Policy" onPress={() => navigate('/privacy')} />
-          <ListRow icon="fileText" label="Terms of Service" onPress={() => navigate('/terms')} />
-        </Card>
-        <Card variant="elevated" style={{ padding: 0 }}>
-          <ListRow icon="logout" label="Sign Out" onPress={() => openConfirm(CONFIRM.signOut, signOut)} destructive />
-          <ListRow icon="trash" label="Delete Account" onPress={() => openConfirm(CONFIRM.deleteAccount, deleteAccount)} destructive />
-        </Card>
+        </GroupedCard>
+
+        <GroupedCard title="Security & preferences">
+          <ListRow
+            icon="lock"
+            label="Biometric lock"
+            value="Mobile app only"
+            isLast
+          />
+        </GroupedCard>
+
+        <GroupedCard title="Profile">
+          <ListRow
+            icon="profile"
+            label={editingProfile ? 'Cancel editing' : 'Edit profile'}
+            onPress={() => {
+              if (editingProfile) clearSubmitError();
+              setEditingProfile(!editingProfile);
+            }}
+            isLast={!editingProfile}
+          />
+          {!editingProfile ? (
+            <>
+              <ListRow icon="creditCard" label="Currency" value={user.currency ?? 'INR'} />
+              <ListRow icon="profile" label="Country" value={user.country ?? '—'} />
+              <ListRow icon="chart" label="Plan" value={subscription?.role ?? user.role ?? 'free'} isLast />
+            </>
+          ) : (
+            <FormSection title="Edit profile" style={{ margin: theme.spacing.lg, marginTop: 0 }}>
+              {profileError ? <FormErrorBanner message={profileError} /> : null}
+              <Controller control={control} name="name" render={({ field: { onChange, value } }) => (
+                <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} disabled={profileLoading} />
+              )} />
+              <Controller control={control} name="country" render={({ field: { onChange, value } }) => (
+                <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} disabled={profileLoading} />
+              )} />
+              <span style={{
+                display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8,
+              }}>Currency</span>
+              <Controller control={control} name="currency" render={({ field: { onChange, value } }) => (
+                <OptionChips
+                  options={[...SUPPORTED_CURRENCIES]}
+                  value={value}
+                  onChange={onChange}
+                  disabled={profileLoading}
+                />
+              )} />
+              <FormActions
+                primaryTitle="Save profile"
+                onPrimary={handleSubmit(onSaveProfile)}
+                primaryLoading={profileLoading}
+                secondaryTitle="Cancel"
+                onSecondary={() => setEditingProfile(false)}
+              />
+            </FormSection>
+          )}
+        </GroupedCard>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
+          <Button title="Sign out" onPress={() => openConfirm(CONFIRM.signOut, signOut)} variant="outline" />
+          <Button title="Delete account" onPress={() => openConfirm(CONFIRM.deleteAccount, deleteAccount)} variant="danger" loading={deleteLoading} />
+        </div>
       </ScreenWrapper>
       <ConfirmDialog
         open={confirmCopy != null}

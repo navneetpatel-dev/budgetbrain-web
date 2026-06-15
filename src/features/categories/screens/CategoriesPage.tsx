@@ -1,63 +1,177 @@
-import { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { Controller } from 'react-hook-form';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
-import { ACCENT_OPTIONS } from '@/shared/theme';
-import { useCategories } from '@/features/shared/hooks/useFeatures';
+import { useCategories, COLORS_PRESET } from '@/features/categories/hooks/useCategories';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 
 export function CategoriesPage() {
   const theme = useTheme();
-  const { categories, createMutation, archiveMutation, error, setError } = useCategories();
+  const {
+    categories,
+    isLoading,
+    editingId,
+    showForm,
+    setShowForm,
+    loading,
+    submitError,
+    listError,
+    control,
+    handleSubmit,
+    setValue,
+    errors,
+    selectedColor,
+    openCreate,
+    openEdit,
+    onSubmit,
+    archiveCategory,
+    moveCategory,
+  } = useCategories();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const [showAdd, setShowAdd] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newColor, setNewColor] = useState('#6366F1');
 
   const handleArchive = async (id: string, name: string) => {
-    if (await confirm(CONFIRM.archiveCategory(name))) archiveMutation.mutate(id);
+    if (await confirm(CONFIRM.archiveCategory(name))) await archiveCategory(id);
   };
 
+  if (isLoading) return <ListSkeleton count={5} />;
+
+  const items = categories ?? [];
+
   return (
-  <>
-    <div style={{ height: '100%', position: 'relative' }}>
-      <StickyHeaderFlatScreen
-        header={<ProfileStackHeader screen="categories" subtitle="Manage your categories" />}
-        inset="stack"
-        data={categories}
-        keyExtractor={(item) => item.id}
-        renderItem={(cat) => (
-          <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: theme.shadows.sm }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: (cat.color || theme.colors.primary) + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${(cat.color || theme.colors.primary)}44` }}><div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: cat.color || theme.colors.primary }} /></div>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.text }}>{cat.name}</span>
+    <>
+      <div style={{ height: '100%', position: 'relative' }}>
+        <StickyHeaderFlatScreen
+          header={
+            <ProfileStackHeader
+              screen="categories"
+              subtitle={`${items.length} categor${items.length !== 1 ? 'ies' : 'y'}`}
+            />
+          }
+          inset="stack"
+          data={items}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={listError ? <FormErrorBanner message={listError} /> : undefined}
+          renderItem={(cat, index) => (
+            <div style={{
+              backgroundColor: theme.colors.surface,
+              borderRadius: theme.radii.lg,
+              border: `1px solid ${theme.colors.borderSubtle}`,
+              padding: theme.spacing.lg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: theme.shadows.sm,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, flex: 1, minWidth: 0 }}>
+                <div style={{
+                  width: 12, height: 12, borderRadius: '50%',
+                  backgroundColor: cat.color || theme.colors.primary,
+                  flexShrink: 0,
+                }} />
+                <span style={{
+                  fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600,
+                  color: theme.colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>{cat.name}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <button type="button" onClick={() => { void moveCategory(index, -1); }} style={actionStyle(theme.colors.primary)}>↑</button>
+                <button type="button" onClick={() => { void moveCategory(index, 1); }} style={actionStyle(theme.colors.primary)}>↓</button>
+                <button type="button" onClick={() => openEdit(cat)} style={actionStyle(theme.colors.primary)}>Edit</button>
+                {!cat.isDefault && (
+                  <button type="button" onClick={() => { void handleArchive(cat.id, cat.name); }} style={actionStyle(theme.colors.danger)}>Archive</button>
+                )}
+              </div>
             </div>
-            <button onClick={() => { void handleArchive(cat.id, cat.name); }} style={{ fontSize: 12, fontWeight: 600, color: theme.colors.danger, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Archive</button>
+          )}
+          ListEmptyComponent={
+            <EmptyState
+              title="No categories"
+              subtitle="Create categories to organize expenses"
+              icon="category"
+              action="Add category"
+              onAction={openCreate}
+            />
+          }
+        />
+        {showForm && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: theme.colors.overlay, padding: 24,
+          }}>
+            <div style={{
+              backgroundColor: theme.colors.surface, borderRadius: theme.radii.xl,
+              padding: theme.spacing.xl, maxWidth: 420, width: '100%', boxShadow: theme.shadows.lg,
+            }}>
+              <h3 style={{
+                fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
+                color: theme.colors.text, margin: '0 0 4px 0',
+              }}>{editingId ? 'Edit Category' : 'New Category'}</h3>
+              <p style={{
+                fontFamily: 'Inter, sans-serif', fontSize: 13, color: theme.colors.textSecondary,
+                margin: '0 0 16px 0',
+              }}>Pick a name and color</p>
+              {submitError ? <FormErrorBanner message={submitError} /> : null}
+              <Controller
+                control={control}
+                name="name"
+                rules={{ required: 'Name is required' }}
+                render={({ field: { onChange, value } }) => (
+                  <Input
+                    label="Category name"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    error={errors.name?.message}
+                    placeholder="e.g. Food, Travel"
+                    disabled={loading}
+                    autoFocus
+                  />
+                )}
+              />
+              <div style={{ marginBottom: theme.spacing.lg }}>
+                <span style={{
+                  fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary,
+                  marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif',
+                }}>Color</span>
+                <ColorPicker
+                  value={selectedColor}
+                  options={COLORS_PRESET.map((c) => ({ id: c, swatch: c }))}
+                  onChange={(c) => setValue('color', c)}
+                  disabled={loading}
+                />
+              </div>
+              <FormActions
+                primaryTitle={editingId ? 'Update' : 'Create'}
+                onPrimary={handleSubmit(onSubmit)}
+                primaryLoading={loading}
+                secondaryTitle="Cancel"
+                onSecondary={() => setShowForm(false)}
+              />
+            </div>
           </div>
         )}
-        ListEmptyComponent={<EmptyState title="No categories" subtitle="Add categories to organize your expenses" icon="category" />}
-      />
-      {showAdd && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.overlay, padding: 24 }}>
-          <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.xl, padding: theme.spacing.xl, maxWidth: 420, width: '100%', boxShadow: theme.shadows.lg }}>
-            <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: '0 0 16px 0' }}>New Category</h3>
-            <Input label="Name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Transport" autoFocus disabled={createMutation.isPending} />
-            <div style={{ marginBottom: theme.spacing.lg }}><span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif' }}>Color</span><ColorPicker value={newColor} options={ACCENT_OPTIONS.map((o) => ({ id: o.swatch, swatch: o.swatch }))} onChange={setNewColor} disabled={createMutation.isPending} /></div>
-            {error ? <FormErrorBanner message={error} /> : null}
-            <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-              <Button title="Add" onPress={() => createMutation.mutate({ name: newName, color: newColor })} loading={createMutation.isPending} />
-              <Button title="Cancel" onPress={() => { setShowAdd(false); setError(null); }} variant="outline" disabled={createMutation.isPending} />
-            </div>
-          </div>
-        </div>
-      )}
-      <ActionFab onPress={() => setShowAdd(true)} label="Add Category" />
-    </div>
-    <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
-  </>
+        {!showForm && <ActionFab onPress={openCreate} label="Add category" />}
+      </div>
+      <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+    </>
   );
+}
+
+function actionStyle(color: string): CSSProperties {
+  return {
+    fontSize: 13,
+    fontWeight: 600,
+    color,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: 'Inter, sans-serif',
+    padding: '4px 2px',
+  };
 }

@@ -566,10 +566,10 @@ export function ProgressBar({ progress, color, height = 8 }: { progress: number;
 /* ── ListRow ── */
 
 export function ListRow({
-  icon, label, value, onPress, chevron, destructive,
+  icon, label, value, onPress, chevron, destructive, isLast,
 }: {
   icon?: AppIconName; label: string; value?: string;
-  onPress?: () => void; chevron?: boolean; destructive?: boolean;
+  onPress?: () => void; chevron?: boolean; destructive?: boolean; isLast?: boolean;
 }) {
   const theme = useTheme();
 
@@ -578,6 +578,7 @@ export function ListRow({
       display: 'flex', alignItems: 'center', gap: theme.spacing.md,
       padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
       cursor: onPress ? 'pointer' : 'default',
+      borderBottom: isLast ? 'none' : `1px solid ${theme.colors.borderSubtle}`,
     }}>
       {icon && (
         <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: destructive ? theme.colors.dangerSoft : theme.colors.primarySoft }}>

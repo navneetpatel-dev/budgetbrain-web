@@ -2,32 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { ensureArray } from '@/shared/utils/listData';
-import type { Category, FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
+import type { FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
 import { useState } from 'react';
-
-export function useCategories() {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-
-  const { data, isLoading, isRefetching, refetch } = usePaginatedList<Category, 'categories'>({
-    queryKey: ['categories'],
-    url: '/categories',
-    itemsKey: 'categories',
-  });
-
-  const createMutation = useMutation({
-    mutationFn: (d: { name: string; color: string }) => apiPost('/categories', d),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories'] }),
-    onError: (err) => setError(getApiErrorMessage(err)),
-  });
-
-  const archiveMutation = useMutation({
-    mutationFn: (id: string) => apiPost(`/categories/${id}/archive`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories'] }),
-  });
-
-  return { categories: data, isLoading, isRefetching, refetch, createMutation, archiveMutation, error, setError };
-}
 
 export function useAccounts() {
   const { data } = usePaginatedList<FinancialAccount, 'accounts'>({
