@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -46,12 +47,22 @@ import { SupportPage } from '@/features/support/screens/SupportPage';
 import { SubscriptionPage } from '@/features/subscription/screens/SubscriptionPage';
 import { PrivacyPage, TermsPage } from '@/features/legal/screens/LegalPages';
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
+function AppProviders({ children }: { children: React.ReactNode }) {
+  if (googleClientId) {
+    return <GoogleOAuthProvider clientId={googleClientId}>{children}</GoogleOAuthProvider>;
+  }
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
+            <AppProviders>
             <AuthBootstrap>
               <BrowserRouter>
                 <Routes>
@@ -107,6 +118,7 @@ export default function App() {
                 </Routes>
               </BrowserRouter>
             </AuthBootstrap>
+            </AppProviders>
           </ThemeProvider>
         </QueryClientProvider>
       </PersistGate>

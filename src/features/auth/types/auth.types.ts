@@ -28,3 +28,5 @@ export interface OtpVerifyInput {
   email: string;
   code: string;
 }
+
+export type SocialAuthProvider = 'google' | 'apple';

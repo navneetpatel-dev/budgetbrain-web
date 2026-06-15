@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthLink, AuthForm } from '../components';
+import { AuthShell, AuthFooter, AuthLink, AuthForm, SocialAuthButtons } from '../components';
 import { useLogin } from '../hooks/useAuthHooks';
 import { useTheme } from '@/shared/theme';
 
@@ -27,6 +27,7 @@ export function LoginPage() {
         {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
         <AuthLink to="/forgot-password" align="right">Forgot password?</AuthLink>
         <Button title="Sign In" onPress={handleSubmit} loading={loading} size="lg" />
+        <SocialAuthButtons />
         <AuthLink to="/otp-login" align="center">Sign in with OTP</AuthLink>
       </AuthForm>
     </AuthShell>
