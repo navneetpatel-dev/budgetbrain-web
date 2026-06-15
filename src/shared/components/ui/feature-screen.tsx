@@ -159,6 +159,7 @@ export function FeatureHeader({
         width: '100%',
       }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+        {showBack ? <BackButton onPress={onBack ?? stackBack} size="compact" /> : null}
         {icon && (
           <div style={{
             width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -32,13 +32,11 @@ export function ProfileHero({
   email,
   role,
   currency,
-  onEditPress,
 }: {
   name: string;
   email?: string;
   role?: string;
   currency?: string;
-  onEditPress?: () => void;
 }) {
   const theme = useTheme();
   const { tabBarPaddingX, contentMaxWidth, isDesktop } = useResponsive();
@@ -107,21 +105,6 @@ export function ProfileHero({
             )}
           </div>
         </div>
-
-        {onEditPress ? (
-          <button
-            type="button"
-            onClick={onEditPress}
-            aria-label="Edit profile"
-            style={{
-              width: 38, height: 38, borderRadius: 19, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: 'rgba(255,255,255,0.14)', border: 'none', cursor: 'pointer',
-            }}
-          >
-            <AppIcon name="settings" size={18} color="rgba(255,255,255,0.95)" />
-          </button>
-        ) : null}
       </div>
     </div>
   );

@@ -8,8 +8,8 @@ import { FormSection, FormFieldLabel } from '@/shared/components/ui/forms';
 import { OptionChips } from '@/shared/components/ui/feature-screen';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { SettingsSkeleton } from '@/shared/components/ui/skeleton';
-import { useAppSelector, useAppDispatch } from '@/shared/store/hooks';
-import { setTheme, setAccent } from '@/shared/store/settingsSlice';
+import { useAppSelector } from '@/shared/store/hooks';
+import { useSyncedPreferences } from '@/features/settings/hooks/useSyncedPreferences';
 import { useSignOut } from '@/features/auth/hooks/useAuthHooks';
 import { useDeleteAccount } from '@/features/settings/hooks/useDeleteAccount';
 import { useEditProfile, type ProfileForm } from '@/features/settings/hooks/useEditProfile';
@@ -26,7 +26,6 @@ import { PROFILE_FEATURE_LINKS, PROFILE_ACCOUNT_LINKS } from '../constants/profi
 export function SettingsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const { signOut } = useSignOut();
   const { deleteAccount, loading: deleteLoading } = useDeleteAccount();
   const { save: saveProfile, loading: profileLoading, submitError: profileError, clearSubmitError } = useEditProfile();
@@ -35,7 +34,7 @@ export function SettingsPage() {
   const [confirmAction, setConfirmAction] = useState<(() => Promise<void>) | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const user = useAppSelector((s) => s.auth.user);
-  const settings = useAppSelector((s) => s.settings);
+  const { theme: themeMode, accent, setThemeMode, setAccentPalette } = useSyncedPreferences();
 
   const { control, handleSubmit, reset } = useForm<ProfileForm>({
     defaultValues: { name: user?.name ?? '', country: user?.country ?? '', currency: user?.currency ?? 'INR' },
@@ -91,7 +90,6 @@ export function SettingsPage() {
             email={user.email}
             role={user.role}
             currency={user.currency}
-            onEditPress={() => setEditingProfile((v) => !v)}
           />
         }
         inset="tab"
@@ -125,10 +123,10 @@ export function SettingsPage() {
         <GroupedCard title="Appearance">
           <div style={{ padding: theme.spacing.lg }}>
             <ThemePicker
-              mode={settings.theme}
-              accent={settings.accent}
-              onModeChange={(m) => dispatch(setTheme(m))}
-              onAccentChange={(a) => dispatch(setAccent(a))}
+              mode={themeMode}
+              accent={accent}
+              onModeChange={setThemeMode}
+              onAccentChange={setAccentPalette}
             />
           </div>
         </GroupedCard>

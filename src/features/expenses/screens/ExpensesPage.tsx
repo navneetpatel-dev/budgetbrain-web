@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, HeaderIconButton, SearchField, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { FeatureHeader, HeaderIconButton, SearchField, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -11,6 +11,7 @@ import type { Transaction } from '@/shared/types';
 export function ExpensesPage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useExpenses();
 
   if (isLoading) return <ListSkeleton count={6} />;
@@ -21,6 +22,8 @@ export function ExpensesPage() {
     <StickyHeaderFlatScreen
       header={
         <FeatureHeader
+          showBack
+          onBack={goBack}
           eyebrow="TRACK"
           title="Activity"
           subtitle={`${total} transaction${total !== 1 ? 's' : ''}`}

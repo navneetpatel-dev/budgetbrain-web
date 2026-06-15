@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -11,6 +11,7 @@ import type { Budget } from '@/shared/types';
 export function BudgetsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useBudgets();
 
   if (isLoading) return <ListSkeleton count={4} />;
@@ -20,6 +21,8 @@ export function BudgetsPage() {
     <StickyHeaderFlatScreen
       header={
         <FeatureHeader
+          showBack
+          onBack={goBack}
           eyebrow="PLAN"
           title="Budgets"
           subtitle={`${budgets.length} active`}

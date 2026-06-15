@@ -4,13 +4,13 @@ import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon'
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 
-type QuickAction = { label: string; icon: AppIconName; href: string; primary?: boolean };
+type QuickAction = { label: string; icon: AppIconName; href: string };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Expense', icon: 'receipt', href: '/expense/add', primary: true },
-  { label: 'Income', icon: 'trendingUp', href: '/income/add' },
-  { label: 'Budget', icon: 'budgets', href: '/budget/add' },
-  { label: 'AI', icon: 'sparkles', href: '/ai' },
+  { label: 'Expense', icon: 'receipt', href: '/expenses' },
+  { label: 'Income', icon: 'income', href: '/income' },
+  { label: 'Budget', icon: 'budgets', href: '/budgets' },
+  { label: 'AI', icon: 'ai', href: '/ai' },
 ];
 
 function getGreeting() {
@@ -123,14 +123,14 @@ export function DashboardHero({
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
               padding: '9px 4px', borderRadius: theme.radii.md, cursor: 'pointer',
-              backgroundColor: action.primary ? '#fff' : 'rgba(255,255,255,0.08)',
-              border: `1px solid ${action.primary ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.1)'}`,
+              backgroundColor: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.1)',
             }}
           >
-            <AppIcon name={action.icon} size={15} color={action.primary ? theme.colors.primary : 'rgba(255,255,255,0.95)'} />
+            <AppIcon name={action.icon} size={15} color="rgba(255,255,255,0.95)" />
             <span style={{
               fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-              color: action.primary ? theme.colors.primary : 'rgba(255,255,255,0.92)',
+              color: 'rgba(255,255,255,0.92)',
             }}>{action.label}</span>
           </button>
         ))}

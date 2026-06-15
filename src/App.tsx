@@ -7,6 +7,7 @@ import { store, persistor } from '@/shared/store';
 import { queryClient } from '@/shared/services/queryClient';
 import { ThemeProvider } from '@/shared/theme';
 import { FeatureSplashScreen } from '@/shared/components/brand/FeatureSplashScreen';
+import { PreferencesHydrator } from '@/features/settings/components/PreferencesHydrator';
 import { AuthGate } from '@/app/layouts/AuthGate';
 import { AuthBootstrap } from '@/app/layouts/AuthBootstrap';
 import { AuthLayout } from '@/app/layouts/AuthLayout';
@@ -63,6 +64,7 @@ export default function App() {
       <PersistGate loading={<FeatureSplashScreen />} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
+            <PreferencesHydrator />
             <AppProviders>
             <AuthBootstrap>
               <BrowserRouter>
