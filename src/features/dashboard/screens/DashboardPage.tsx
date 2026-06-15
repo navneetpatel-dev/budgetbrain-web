@@ -7,6 +7,8 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { useAppSelector } from '@/shared/store/hooks';
 import { DashboardHero } from '../components/DashboardHero';
 import { useDashboard } from '../hooks/useDashboard';
+import { ensureArray } from '@/shared/utils/listData';
+import type { Budget, Goal, Transaction } from '@/shared/types';
 
 export function DashboardPage() {
   const theme = useTheme();
@@ -16,7 +18,11 @@ export function DashboardPage() {
 
   if (isLoading) return <DashboardSkeleton />;
   if (!data) return null;
-  const { summary, recentTransactions, budgets, goals, categoryBreakdown } = data;
+  const { summary, recentTransactions: rawTransactions, budgets: rawBudgets, goals: rawGoals, categoryBreakdown: rawBreakdown } = data;
+  const recentTransactions = ensureArray<Transaction>(rawTransactions);
+  const budgets = ensureArray<Budget>(rawBudgets);
+  const goals = ensureArray<Goal>(rawGoals);
+  const categoryBreakdown = ensureArray<{ categoryId: string; total: string; category?: import('@/shared/types').Category }>(rawBreakdown);
 
   return (
     <ScreenWrapper

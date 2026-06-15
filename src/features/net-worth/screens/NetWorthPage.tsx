@@ -4,6 +4,7 @@ import { Card, SummaryCard } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { ensureArray } from '@/shared/utils/listData';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/services/api';
 import type { FinancialAccount, Investment } from '@/shared/types';
@@ -17,6 +18,7 @@ export function NetWorthPage() {
 
   if (isLoading) return <ListSkeleton count={4} />;
   if (!data) return null;
+  const accounts = ensureArray<FinancialAccount>(data.accounts);
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="net-worth" subtitle="Your financial overview" />} inset="stack">
@@ -28,7 +30,7 @@ export function NetWorthPage() {
         <SummaryCard title="Assets" amount={formatCurrency(data.totalAssets)} color={theme.colors.success} icon="trendingUp" />
         <SummaryCard title="Liabilities" amount={formatCurrency(data.totalLiabilities)} color={theme.colors.danger} icon="activity" />
       </ResponsiveGrid>
-      {data.accounts.map((acc) => (
+      {accounts.map((acc) => (
         <Card key={acc.id} variant="elevated">
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{acc.name}</span>
           <span style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{acc.institution ?? acc.type} {acc.accountNumberLast4 ? `· ****${acc.accountNumberLast4}` : ''}</span>

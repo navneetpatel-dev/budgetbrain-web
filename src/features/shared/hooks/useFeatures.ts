@@ -1,16 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
+import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
+import { ensureArray } from '@/shared/utils/listData';
 import type { Category, FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export function useCategories() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = useQuery({
+  const { data, isLoading, isRefetching, refetch } = usePaginatedList<Category, 'categories'>({
     queryKey: ['categories'],
-    queryFn: () => apiGet<Category[]>('/categories'),
+    url: '/categories',
+    itemsKey: 'categories',
   });
 
   const createMutation = useMutation({
@@ -24,30 +26,33 @@ export function useCategories() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories'] }),
   });
 
-  return { categories: data ?? [], createMutation, archiveMutation, error, setError };
+  return { categories: data, isLoading, isRefetching, refetch, createMutation, archiveMutation, error, setError };
 }
 
 export function useAccounts() {
-  const { data } = useQuery({
+  const { data } = usePaginatedList<FinancialAccount, 'accounts'>({
     queryKey: ['accounts'],
-    queryFn: () => apiGet<FinancialAccount[]>('/accounts'),
+    url: '/accounts',
+    itemsKey: 'accounts',
   });
-  return { accounts: data ?? [] };
+  return { accounts: data };
 }
 
 export function useInvestments() {
-  const { data } = useQuery({
+  const { data } = usePaginatedList<Investment, 'investments'>({
     queryKey: ['investments'],
-    queryFn: () => apiGet<Investment[]>('/investments'),
+    url: '/investments',
+    itemsKey: 'investments',
   });
-  return { investments: data ?? [] };
+  return { investments: data };
 }
 
 export function useSearch(query: string) {
   return useQuery({
     queryKey: ['search', query],
-    queryFn: () => apiGet<{ transactions: import('@/shared/types').Transaction[] }>('/expenses/search', { q: query, page: 1, limit: 50 }),
+    queryFn: () => apiGet<{ transactions: import('@/shared/types').Transaction[]; total: number }>('/expenses/search', { q: query, page: 1, limit: 50 }),
     enabled: query.length >= 2,
+    select: (data) => ({ transactions: ensureArray(data.transactions) }),
   });
 }
 
@@ -55,9 +60,10 @@ export function useFamily() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = useQuery({
+  const { data } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
     queryKey: ['family'],
-    queryFn: () => apiGet<Array<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }>>('/family/groups'),
+    url: '/family/groups',
+    itemsKey: 'memberships',
   });
 
   const createMutation = useMutation({
@@ -71,24 +77,26 @@ export function useFamily() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { memberships: data ?? [], createMutation, joinMutation, error, setError };
+  return { memberships: data, createMutation, joinMutation, error, setError };
 }
 
 export function useNotifications() {
-  const { data } = useQuery({
+  const { data } = usePaginatedList<NotificationItem, 'notifications'>({
     queryKey: ['notifications'],
-    queryFn: () => apiGet<NotificationItem[]>('/notifications'),
+    url: '/notifications',
+    itemsKey: 'notifications',
   });
-  return { notifications: data ?? [] };
+  return { notifications: data };
 }
 
 export function useSupportTickets() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = useQuery({
+  const { data } = usePaginatedList<{ id: string; subject: string; status: string; createdAt: string }, 'tickets'>({
     queryKey: ['support-tickets'],
-    queryFn: () => apiGet<Array<{ id: string; subject: string; status: string; createdAt: string }>>('/support/tickets'),
+    url: '/support/tickets',
+    itemsKey: 'tickets',
   });
 
   const createMutation = useMutation({
@@ -97,15 +105,16 @@ export function useSupportTickets() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { tickets: data ?? [], createMutation, error, setError };
+  return { tickets: data, createMutation, error, setError };
 }
 
 export function useIntegrations() {
   const queryClient = useQueryClient();
 
-  const { data } = useQuery({
+  const { data } = usePaginatedList<ParsedTransactionPending, 'pending'>({
     queryKey: ['integrations-pending'],
-    queryFn: () => apiGet<ParsedTransactionPending[]>('/integrations/pending'),
+    url: '/integrations/pending',
+    itemsKey: 'pending',
   });
 
   const confirmMutation = useMutation({
@@ -121,7 +130,7 @@ export function useIntegrations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integrations-pending'] }),
   });
 
-  return { pending: data ?? [], confirmMutation, rejectMutation };
+  return { pending: data, confirmMutation, rejectMutation };
 }
 
 export function useReports() {
@@ -142,7 +151,7 @@ export function useReports() {
       const a = document.createElement('a');
       a.href = url; a.download = `report.${format}`; a.click();
       URL.revokeObjectURL(url);
-    } catch (err) { setError('Download failed'); }
+    } catch { setError('Download failed'); }
     finally { setLoading(false); }
   };
 

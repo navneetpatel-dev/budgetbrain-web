@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
+import { ensureArray } from '@/shared/utils/listData';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useBottomInset } from '@/shared/hooks/useTabBarInset';
 import { useResponsive } from '@/shared/hooks/useResponsive';
@@ -325,10 +326,12 @@ export function OptionChipList({
 }) {
   const theme = useTheme();
 
+  const safeItems = ensureArray<{ id: string; label: string; color?: string }>(items);
+
   return (
     <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {items.map((item) => {
+        {safeItems.map((item) => {
           const selected = selectedId === item.id;
           const accent = item.color ?? theme.colors.primary;
           return (
@@ -508,6 +511,7 @@ export function StickyHeaderFlatScreen<T>({
   const theme = useTheme();
   const { frame, stackGap } = useScreenInsets();
   const bottomPadding = useBottomInset(inset);
+  const safeData = ensureArray<T>(data);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
@@ -519,11 +523,11 @@ export function StickyHeaderFlatScreen<T>({
         paddingBottom: bottomPadding,
         ...contentContainerStyle,
       }}>
-        {data.length === 0 && ListEmptyComponent ? (
+        {safeData.length === 0 && ListEmptyComponent ? (
           ListEmptyComponent
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: stackGap }}>
-            {data.map((item, index) => (
+            {safeData.map((item, index) => (
               <div key={keyExtractor(item, index)}>
                 {renderItem(item, index)}
               </div>

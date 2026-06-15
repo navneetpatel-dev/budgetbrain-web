@@ -4,7 +4,9 @@ import { StackNavHeader, useStackBack, StickyHeaderFlatScreen } from '@/shared/c
 import { Input, EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { ensureArray } from '@/shared/utils/listData';
 import { useSearch } from '@/features/shared/hooks/useFeatures';
+import type { Transaction } from '@/shared/types';
 
 export function SearchPage() {
   const theme = useTheme();
@@ -12,7 +14,7 @@ export function SearchPage() {
   const [query, setQuery] = useState('');
   const { data } = useSearch(query);
 
-  const results = data?.transactions ?? [];
+  const results = ensureArray<Transaction>(data?.transactions);
 
   const goBack = useStackBack('/expenses');
 

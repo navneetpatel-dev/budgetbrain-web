@@ -38,7 +38,7 @@ export function AddIncomePage() {
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Source</label>
         <OptionChips options={['existing', 'new'] as const} value={sourceMode} onChange={setSourceMode} getLabel={(v) => v === 'existing' ? 'Existing source' : 'New source'} disabled={isPending} />
         {sourceMode === 'existing' ? (
-          <OptionChipList items={(sources ?? []).map((s) => ({ id: s.id, label: s.name }))} selectedId={selectedSource} onSelect={setSelectedSource} disabled={isPending} />
+          <OptionChipList items={sources.map((s) => ({ id: s.id, label: s.name }))} selectedId={selectedSource} onSelect={setSelectedSource} disabled={isPending} />
         ) : (
           <>
             <Input label="Source Name" value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} placeholder="e.g. Salary" disabled={isPending} />

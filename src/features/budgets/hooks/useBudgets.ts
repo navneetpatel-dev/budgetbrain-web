@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import type { Budget } from '@/shared/types';
 
 export function useBudgets() {
-  return useQuery({
+  return usePaginatedList<Budget, 'budgets'>({
     queryKey: ['budgets'],
-    queryFn: () => apiGet<Budget[]>('/budgets'),
+    url: '/budgets',
+    itemsKey: 'budgets',
   });
 }
 

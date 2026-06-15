@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import type { Transaction, IncomeSource } from '@/shared/types';
 
 export function useIncome() {
-  return useQuery({
+  return usePaginatedList<Transaction, 'transactions'>({
     queryKey: ['income-list'],
-    queryFn: () => apiGet<Transaction[]>('/income', { page: 1, limit: 50 }),
+    url: '/income',
+    itemsKey: 'transactions',
+    pageSize: 50,
   });
 }
 
@@ -80,8 +83,9 @@ export function useCreateIncome() {
 }
 
 export function useIncomeSources() {
-  return useQuery({
+  return usePaginatedList<IncomeSource, 'sources'>({
     queryKey: ['income-sources'],
-    queryFn: () => apiGet<IncomeSource[]>('/income/sources'),
+    url: '/income/sources',
+    itemsKey: 'sources',
   });
 }

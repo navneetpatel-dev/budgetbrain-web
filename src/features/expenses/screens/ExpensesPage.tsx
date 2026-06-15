@@ -4,6 +4,7 @@ import { EmptyState } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { ensureArray } from '@/shared/utils/listData';
 import { useExpenses } from '../hooks/useExpenses';
 import type { Transaction } from '@/shared/types';
 
@@ -13,7 +14,7 @@ export function ExpensesPage() {
   const { data, isLoading } = useExpenses();
 
   if (isLoading) return <ListSkeleton count={6} />;
-  const transactions = data?.transactions ?? [];
+  const transactions = ensureArray<Transaction>(data?.transactions);
   const total = transactions.length;
 
   return (

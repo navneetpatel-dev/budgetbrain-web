@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import type { Goal } from '@/shared/types';
 
 export function useGoals() {
-  return useQuery({
+  return usePaginatedList<Goal, 'goals'>({
     queryKey: ['goals'],
-    queryFn: () => apiGet<Goal[]>('/goals'),
+    url: '/goals',
+    itemsKey: 'goals',
   });
 }
 
