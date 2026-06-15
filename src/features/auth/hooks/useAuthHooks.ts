@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPost, apiPatch, getApiErrorMessage } from '@/shared/services/api';
 import { useAppDispatch } from '@/shared/store/hooks';
 import { setUser } from '@/shared/store/authSlice';
 import { persistAuthSession } from '../services/auth.service';
-import type { AuthSession } from '../types/auth.types';
+import type { AuthSession, LoginCredentials, RegisterCredentials } from '../types/auth.types';
 import type { User } from '@/shared/types';
 
 export function useLogin() {
@@ -13,6 +13,7 @@ export function useLogin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const clearError = useCallback(() => setError(null), []);
 
   const handleSuccess = async (session: AuthSession) => {
     await persistAuthSession(session);
@@ -20,16 +21,16 @@ export function useLogin() {
     navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (credentials: LoginCredentials) => {
     setLoading(true); setError(null);
     try {
-      const session = await apiPost<AuthSession>('/auth/login', { email, password });
+      const session = await apiPost<AuthSession>('/auth/login', credentials);
       await handleSuccess(session);
     } catch (err) { setError(getApiErrorMessage(err, 'Invalid credentials')); }
     finally { setLoading(false); }
   };
 
-  return { login, loading, error, setError };
+  return { login, loading, error, clearError };
 }
 
 export function useRegister() {
@@ -37,6 +38,7 @@ export function useRegister() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const clearError = useCallback(() => setError(null), []);
 
   const handleSuccess = async (session: AuthSession) => {
     await persistAuthSession(session);
@@ -44,22 +46,23 @@ export function useRegister() {
     navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (credentials: RegisterCredentials) => {
     setLoading(true); setError(null);
     try {
-      const session = await apiPost<AuthSession>('/auth/register', { name, email, password });
+      const session = await apiPost<AuthSession>('/auth/register', credentials);
       await handleSuccess(session);
     } catch (err) { setError(getApiErrorMessage(err, 'Could not create account')); }
     finally { setLoading(false); }
   };
 
-  return { register, loading, error, setError };
+  return { register, loading, error, clearError };
 }
 
 export function useForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const clearError = useCallback(() => setError(null), []);
 
   const request = async (email: string) => {
     setLoading(true); setError(null);
@@ -70,7 +73,7 @@ export function useForgotPassword() {
     finally { setLoading(false); }
   };
 
-  return { request, loading, error, setError, sent, reset: () => setSent(false) };
+  return { request, loading, error, clearError, sent, reset: () => setSent(false) };
 }
 
 export function useResetPassword(token: string) {
@@ -78,6 +81,7 @@ export function useResetPassword(token: string) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const clearError = useCallback(() => setError(null), []);
 
   const reset = async (password: string) => {
     setLoading(true); setError(null);
@@ -88,7 +92,7 @@ export function useResetPassword(token: string) {
     finally { setLoading(false); }
   };
 
-  return { reset, loading, error, setError, done };
+  return { reset, loading, error, clearError, done };
 }
 
 export function useOtpLogin() {
@@ -96,14 +100,21 @@ export function useOtpLogin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
+  const clearError = useCallback(() => setError(null), []);
 
-  const sendOtp = async (email: string): Promise<boolean> => {
+  const sendOtp = async (email: string) => {
     setLoading(true); setError(null);
     try {
       await apiPost('/auth/otp/request', { email });
+      setOtpSent(true);
+      setInfo('Check your email for the 6-digit code.');
       return true;
-    } catch (err) { setError(getApiErrorMessage(err)); return false; }
-    finally { setLoading(false); }
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Could not send verification code'));
+      return false;
+    } finally { setLoading(false); }
   };
 
   const verifyOtp = async (email: string, code: string) => {
@@ -113,11 +124,11 @@ export function useOtpLogin() {
       await persistAuthSession(session);
       dispatch(setUser(session.user as User));
       navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
-    } catch (err) { setError(getApiErrorMessage(err, 'Invalid OTP')); }
+    } catch (err) { setError(getApiErrorMessage(err, 'Invalid verification code')); }
     finally { setLoading(false); }
   };
 
-  return { sendOtp, verifyOtp, loading, error, setError };
+  return { sendOtp, verifyOtp, loading, error, info, otpSent, clearError };
 }
 
 export function useSignOut() {
@@ -143,6 +154,8 @@ export function useOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const clearError = useCallback(() => setError(null), []);
+
   const submit = async (data: {
     name: string; country: string; currency: string;
     financialGoals: string[]; salaryRange: string; monthlySavingsTarget: number;
@@ -156,5 +169,5 @@ export function useOnboarding() {
     finally { setLoading(false); }
   };
 
-  return { submit, loading, error, setError };
+  return { submit, loading, error, clearError, setError };
 }

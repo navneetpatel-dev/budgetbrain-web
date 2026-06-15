@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card, Button, Input, EmptyState } from '@/shared/components/ui/index';
+import { Card, Button, Input, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useFamily } from '@/features/shared/hooks/useFeatures';
 
@@ -21,14 +21,14 @@ export function FamilyPage() {
       {showCreate && (
         <Card variant="elevated">
           <Input label="Group Name" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Family Budget" />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif', marginBottom: theme.spacing.md }}>{error}</p>}
+          {error ? <FormErrorBanner message={error} /> : null}
           <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Create" onPress={() => createMutation.mutate({ name: groupName })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); }} variant="outline" /></div>
         </Card>
       )}
       {showJoin && (
         <Card variant="elevated">
           <Input label="Invite Code" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} placeholder="Enter invite code" />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif', marginBottom: theme.spacing.md }}>{error}</p>}
+          {error ? <FormErrorBanner message={error} /> : null}
           <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Join" onPress={() => joinMutation.mutate({ inviteCode })} loading={joinMutation.isPending} /><Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); }} variant="outline" /></div>
         </Card>
       )}

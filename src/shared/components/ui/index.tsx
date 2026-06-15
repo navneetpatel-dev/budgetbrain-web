@@ -4,6 +4,8 @@ import type { AppTheme } from '@/shared/theme';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import type { CSSProperties } from 'react';
 
+import { FormErrorBanner } from './FormErrorBanner';
+
 export const FIELD_CONTROL_HEIGHT = 48;
 const FIELD_CONTROL_BORDER = 1.5;
 
@@ -246,13 +248,16 @@ interface InputProps {
   multiline?: boolean;
   rows?: number;
   autoFocus?: boolean;
+  autoComplete?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
   onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export function Input({
   label, error, helperText, secureToggle, leftIcon,
   variant = 'default', value, onChange, placeholder, type: inputType,
-  name, multiline, rows = 4, autoFocus, onKeyDown,
+  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, onKeyDown,
 }: InputProps) {
   const theme = useTheme();
   const [hidden, setHidden] = useState(inputType === 'password');
@@ -324,6 +329,9 @@ export function Input({
             name={name}
             rows={rows}
             autoFocus={autoFocus}
+            autoComplete={autoComplete}
+            readOnly={readOnly}
+            disabled={disabled}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
@@ -337,6 +345,9 @@ export function Input({
             placeholder={placeholder}
             name={name}
             autoFocus={autoFocus}
+            autoComplete={autoComplete}
+            readOnly={readOnly}
+            disabled={disabled}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
@@ -662,3 +673,5 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
     </Card>
   );
 }
+
+export { FormErrorBanner };

@@ -1,29 +1,29 @@
-import { useState, type FormEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthForm } from '../components';
+import { AuthShell, AuthFooter, AuthForm, AuthInfoBanner, AuthErrorBanner } from '../components';
+import { authFieldRules } from '../utils/authValidation';
 import { useOtpLogin } from '../hooks/useAuthHooks';
-import { useTheme } from '@/shared/theme';
+
+interface OtpForm {
+  email: string;
+  otp: string;
+}
 
 export function OtpLoginPage() {
-  const theme = useTheme();
-  const { sendOtp, verifyOtp, loading, error, setError } = useOtpLogin();
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const { sendOtp, verifyOtp, loading, error, info, otpSent, clearError } = useOtpLogin();
+  const { control, handleSubmit, formState: { errors } } = useForm<OtpForm>({
+    defaultValues: { email: '', otp: '' },
+  });
 
-  const handleSendOtp = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    const sent = await sendOtp(email);
-    if (sent) setOtpSent(true);
-  };
+  const handleRequestOtp = handleSubmit((data) => {
+    clearError();
+    void sendOtp(data.email);
+  });
 
-  const handleVerifyOtp = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!otp) { setError('Enter the OTP code'); return; }
-    verifyOtp(email, otp);
-  };
+  const onSubmit = handleSubmit((data) => {
+    clearError();
+    void verifyOtp(data.email, data.otp);
+  });
 
   return (
     <AuthShell
@@ -32,20 +32,36 @@ export function OtpLoginPage() {
       backHref="/login"
       footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
     >
-      {!otpSent ? (
-        <AuthForm onSubmit={handleSendOtp}>
-          <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-          <Button title="Send Code" onPress={handleSendOtp} loading={loading} size="lg" />
-        </AuthForm>
-      ) : (
-        <AuthForm onSubmit={handleVerifyOtp}>
-          <Input label="Verification code" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="000000" type="text" autoFocus />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-          <Button title="Verify & Sign In" onPress={handleVerifyOtp} loading={loading} size="lg" />
-          <Button title="Resend code" onPress={handleSendOtp} variant="ghost" loading={loading} />
-        </AuthForm>
-      )}
+      <AuthForm onSubmit={onSubmit}>
+        <Controller
+          control={control}
+          name="email"
+          rules={authFieldRules.email}
+          render={({ field }) => (
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" readOnly={otpSent} error={errors.email?.message} />
+          )}
+        />
+
+        {info ? <AuthInfoBanner message={info} /> : null}
+        {error ? <AuthErrorBanner message={error} /> : null}
+
+        {!otpSent ? (
+          <Button title="Send Code" onPress={handleRequestOtp} loading={loading} size="lg" />
+        ) : (
+          <>
+            <Controller
+              control={control}
+              name="otp"
+              rules={authFieldRules.otp}
+              render={({ field }) => (
+                <Input label="Verification code" value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus error={errors.otp?.message} />
+              )}
+            />
+            <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />
+            <Button title="Resend code" onPress={handleRequestOtp} variant="ghost" loading={loading} />
+          </>
+        )}
+      </AuthForm>
     </AuthShell>
   );
 }

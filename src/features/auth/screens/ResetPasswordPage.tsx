@@ -1,25 +1,28 @@
-import { useState, type FormEvent } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm } from '../components';
+import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
+import { authFieldRules } from '../utils/authValidation';
 import { useResetPassword } from '../hooks/useAuthHooks';
-import { useTheme } from '@/shared/theme';
+
+interface ResetForm {
+  password: string;
+  confirmPassword: string;
+}
 
 export function ResetPasswordPage() {
-  const theme = useTheme();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
-  const { reset, loading, error, setError, done } = useResetPassword(token);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const { reset, loading, error, clearError, done } = useResetPassword(token);
+  const { control, handleSubmit, watch, formState: { errors } } = useForm<ResetForm>({
+    defaultValues: { password: '', confirmPassword: '' },
+  });
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!password || password.length < 8) { setError('Password must be at least 8 characters'); return; }
-    if (password !== confirmPassword) { setError('Passwords do not match'); return; }
-    reset(password);
+  const password = watch('password');
+
+  const onSubmit = (data: ResetForm) => {
+    clearError();
+    void reset(data.password);
   };
 
   return (
@@ -30,16 +33,30 @@ export function ResetPasswordPage() {
       footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
     >
       {done ? (
-        <>
-          <AuthSuccessBanner message="Your password has been reset successfully." />
-          <Button title="Continue to Sign In" onPress={() => navigate('/login', { replace: true })} size="lg" />
-        </>
+        <AuthSuccessBanner message="Your password has been reset successfully." />
       ) : (
-        <AuthForm onSubmit={handleSubmit}>
-          <Input label="New password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" type="password" secureToggle />
-          <Input label="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" type="password" secureToggle />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-          <Button title="Update Password" onPress={handleSubmit} loading={loading} disabled={!token} size="lg" />
+        <AuthForm onSubmit={handleSubmit(onSubmit)}>
+          <Controller
+            control={control}
+            name="password"
+            rules={authFieldRules.passwordMin8}
+            render={({ field }) => (
+              <Input label="New password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" error={errors.password?.message} />
+            )}
+          />
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{
+              required: 'Confirm your password',
+              validate: (value) => value === password || 'Passwords do not match',
+            }}
+            render={({ field }) => (
+              <Input label="Confirm password" value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" error={errors.confirmPassword?.message} />
+            )}
+          />
+          {error ? <AuthErrorBanner message={error} /> : null}
+          <Button title="Update Password" onPress={handleSubmit(onSubmit)} loading={loading} disabled={!token} size="lg" />
         </AuthForm>
       )}
     </AuthShell>

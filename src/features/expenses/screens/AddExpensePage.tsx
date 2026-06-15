@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
-import { Input, Button } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateExpense } from '../hooks/useExpenses';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
@@ -30,7 +30,7 @@ export function AddExpensePage() {
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
         <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} />
         <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+        {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Save Expense" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
       </form>
     </FormStackScreen>

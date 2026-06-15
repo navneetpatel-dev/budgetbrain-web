@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card } from '@/shared/components/ui/index';
+import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -31,7 +31,7 @@ export function ExpenseDetailPage() {
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
           <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} />
           <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+          {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={handleSave} loading={updateMutation.isPending} size="lg" />
           <Button title="Cancel" onPress={cancelEdit} variant="outline" />
         </form>

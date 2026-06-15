@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Button, Input, fieldControlStyle } from '@/shared/components/ui/index';
+import { Button, Input, fieldControlStyle, FormErrorBanner } from '@/shared/components/ui/index';
 import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
@@ -7,7 +7,7 @@ import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/
 
 export function OnboardingPage() {
   const theme = useTheme();
-  const { submit, loading, error, setError } = useOnboarding();
+  const { submit, loading, error, clearError, setError } = useOnboarding();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('IN');
   const [currency, setCurrency] = useState('INR');
@@ -17,7 +17,7 @@ export function OnboardingPage() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setError(null);
+    clearError();
     if (!name) { setError('Please enter your name'); return; }
     if (!salaryRange) { setError('Select your salary range'); return; }
     if (!savingsTarget) { setError('Enter your monthly savings target'); return; }
@@ -42,7 +42,7 @@ export function OnboardingPage() {
         <div><label style={labelStyle}>Financial Goals</label><MultiOptionChips options={FINANCIAL_GOALS.map((g) => g.id)} selected={goals} onToggle={(id) => setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id])} getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id} /></div>
         <div><label style={labelStyle}>Salary Range</label><OptionChips options={SALARY_RANGES.map((s) => s.id)} value={salaryRange} onChange={setSalaryRange} getLabel={(id) => SALARY_RANGES.find((s) => s.id === id)?.label ?? id} /></div>
         <Input label="Monthly Savings Target" value={savingsTarget} onChange={(e) => setSavingsTarget(e.target.value)} placeholder="e.g. 5000" type="number" />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+        {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Complete Setup" onPress={handleSubmit} loading={loading} size="lg" />
       </form>
     </StackScrollScreen>

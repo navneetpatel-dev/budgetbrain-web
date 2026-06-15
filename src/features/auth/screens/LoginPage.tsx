@@ -1,32 +1,43 @@
-import { useState, type FormEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthLink, AuthForm, SocialAuthButtons } from '../components';
+import { AuthShell, AuthFooter, AuthLink, AuthForm, AuthErrorBanner, SocialAuthButtons } from '../components';
+import { authFieldRules } from '../utils/authValidation';
 import { useLogin } from '../hooks/useAuthHooks';
-import { useTheme } from '@/shared/theme';
+import type { LoginCredentials } from '../types/auth.types';
 
 export function LoginPage() {
-  const theme = useTheme();
-  const { login, loading, error, setError } = useLogin();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { login, loading, error, clearError } = useLogin();
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginCredentials>({
+    defaultValues: { email: '', password: '' },
+  });
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!email || !password) { setError('Please fill in all fields'); return; }
-    login(email, password);
+  const onSubmit = (data: LoginCredentials) => {
+    clearError();
+    void login(data);
   };
 
   return (
-    <AuthShell
-      footer={<AuthFooter text="Don't have an account?" linkText="Sign Up" href="/register" />}
-    >
-      <AuthForm onSubmit={handleSubmit}>
-        <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
-        <Input label="Password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" type="password" secureToggle />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+    <AuthShell footer={<AuthFooter text="Don't have an account?" linkText="Sign Up" href="/register" />}>
+      <AuthForm onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          control={control}
+          name="email"
+          rules={authFieldRules.email}
+          render={({ field }) => (
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" error={errors.email?.message} />
+          )}
+        />
+        <Controller
+          control={control}
+          name="password"
+          rules={authFieldRules.password}
+          render={({ field }) => (
+            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Your password" type="password" secureToggle autoComplete="current-password" error={errors.password?.message} />
+          )}
+        />
+        {error ? <AuthErrorBanner message={error} /> : null}
         <AuthLink to="/forgot-password" align="right">Forgot password?</AuthLink>
-        <Button title="Sign In" onPress={handleSubmit} loading={loading} size="lg" />
+        <Button title="Sign In" onPress={handleSubmit(onSubmit)} loading={loading} size="lg" />
         <SocialAuthButtons />
         <AuthLink to="/otp-login" align="center">Sign in with OTP</AuthLink>
       </AuthForm>

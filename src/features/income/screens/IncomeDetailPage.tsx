@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card } from '@/shared/components/ui/index';
+import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -25,7 +25,7 @@ export function IncomeDetailPage() {
           <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" />
           <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
           <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+          {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={updateMutation.isPending} size="lg" />
           <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" />
         </form>

@@ -1,22 +1,19 @@
-import { useState, type FormEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthForm } from '../components';
+import { AuthShell, AuthFooter, AuthForm, AuthErrorBanner } from '../components';
+import { authFieldRules } from '../utils/authValidation';
 import { useRegister } from '../hooks/useAuthHooks';
-import { useTheme } from '@/shared/theme';
+import type { RegisterCredentials } from '../types/auth.types';
 
 export function RegisterPage() {
-  const theme = useTheme();
-  const { register, loading, error, setError } = useRegister();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const { register, loading, error, clearError } = useRegister();
+  const { control, handleSubmit, formState: { errors } } = useForm<RegisterCredentials>({
+    defaultValues: { name: '', email: '', password: '' },
+  });
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    if (!name || !email || !password) { setError('Please fill in all fields'); return; }
-    if (password.length < 8) { setError('Password must be at least 8 characters'); return; }
-    register(name, email, password);
+  const onSubmit = (data: RegisterCredentials) => {
+    clearError();
+    void register(data);
   };
 
   return (
@@ -26,12 +23,33 @@ export function RegisterPage() {
       backHref="/login"
       footer={<AuthFooter text="Already have an account?" linkText="Sign In" href="/login" />}
     >
-      <AuthForm onSubmit={handleSubmit}>
-        <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
-        <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
-        <Input label="Password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" type="password" secureToggle />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-        <Button title="Create Account" onPress={handleSubmit} loading={loading} size="lg" />
+      <AuthForm onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          control={control}
+          name="name"
+          rules={authFieldRules.name}
+          render={({ field }) => (
+            <Input label="Full name" value={field.value} onChange={field.onChange} placeholder="Jane Doe" autoComplete="name" error={errors.name?.message} />
+          )}
+        />
+        <Controller
+          control={control}
+          name="email"
+          rules={authFieldRules.email}
+          render={({ field }) => (
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" error={errors.email?.message} />
+          )}
+        />
+        <Controller
+          control={control}
+          name="password"
+          rules={authFieldRules.passwordMin8}
+          render={({ field }) => (
+            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" error={errors.password?.message} />
+          )}
+        />
+        {error ? <AuthErrorBanner message={error} /> : null}
+        <Button title="Create Account" onPress={handleSubmit(onSubmit)} loading={loading} size="lg" />
       </AuthForm>
     </AuthShell>
   );

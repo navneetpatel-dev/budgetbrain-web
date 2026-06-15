@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateBudget } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
@@ -30,7 +30,7 @@ export function AddBudgetPage() {
         <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
         <Input label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
         <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} placeholder="80" type="number" helperText="Get notified when spending reaches this percentage" />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+        {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Create Budget" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
       </form>
     </FormStackScreen>

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card, ProgressBar } from '@/shared/components/ui/index';
+import { Input, Button, Card, ProgressBar, FormErrorBanner } from '@/shared/components/ui/index';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -28,7 +28,7 @@ export function BudgetDetailPage() {
           <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} />
           <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" />
           <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} type="number" />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+          {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={updateMutation.isPending} size="lg" />
           <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" />
         </form>

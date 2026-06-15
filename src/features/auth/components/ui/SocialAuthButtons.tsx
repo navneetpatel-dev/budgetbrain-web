@@ -3,6 +3,7 @@ import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { useTheme } from '@/shared/theme';
 import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
 import { AuthDivider } from './AuthDivider';
+import { AuthErrorBanner } from './AuthBanners';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 const googleEnabled = Boolean(GOOGLE_CLIENT_ID?.trim());
@@ -28,22 +29,7 @@ function GoogleMark() {
 }
 
 function SocialAuthError({ message }: { message: string }) {
-  const theme = useTheme();
-  return (
-    <p
-      role="alert"
-      style={{
-        color: theme.colors.danger,
-        fontSize: 13,
-        fontWeight: 500,
-        lineHeight: '18px',
-        margin: `${theme.spacing.sm}px 0 0`,
-        fontFamily: 'Inter, sans-serif',
-      }}
-    >
-      {message}
-    </p>
-  );
+  return <AuthErrorBanner message={message} />;
 }
 
 export function SocialAuthButtons() {

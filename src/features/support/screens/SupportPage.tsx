@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card, EmptyState } from '@/shared/components/ui/index';
+import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
 
@@ -32,7 +32,7 @@ export function SupportPage() {
           <Card variant="elevated">
             <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief description" />
             <Input label="Message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Describe your issue" multiline />
-            {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif', marginBottom: theme.spacing.md }}>{error}</p>}
+            {error ? <FormErrorBanner message={error} /> : null}
             <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Submit" onPress={() => createMutation.mutate({ subject, message })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => setShowForm(false)} variant="outline" /></div>
           </Card>
         ) : <EmptyState title="No tickets" subtitle="Need help? Create a support ticket" icon="helpCircle" action="New Ticket" onAction={() => setShowForm(true)} />

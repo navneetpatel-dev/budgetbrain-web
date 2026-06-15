@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, EmptyState } from '@/shared/components/ui/index';
+import { Input, Button, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
 import { ACCENT_OPTIONS } from '@/shared/theme';
@@ -38,7 +38,7 @@ export function CategoriesPage() {
             <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: '0 0 16px 0' }}>New Category</h3>
             <Input label="Name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Transport" autoFocus />
             <div style={{ marginBottom: theme.spacing.lg }}><span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif' }}>Color</span><ColorPicker value={newColor} options={ACCENT_OPTIONS.map((o) => ({ id: o.swatch, swatch: o.swatch }))} onChange={setNewColor} /></div>
-            {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif', marginBottom: 12 }}>{error}</p>}
+            {error ? <FormErrorBanner message={error} /> : null}
             <div style={{ display: 'flex', gap: theme.spacing.sm }}>
               <Button title="Add" onPress={() => createMutation.mutate({ name: newName, color: newColor })} loading={createMutation.isPending} />
               <Button title="Cancel" onPress={() => { setShowAdd(false); setError(null); }} variant="outline" />

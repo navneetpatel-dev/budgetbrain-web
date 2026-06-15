@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips, OptionChipList } from '@/shared/components/ui/feature-screen';
-import { Input, Button } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateIncome, useIncomeSources } from '../hooks/useIncome';
 
@@ -44,7 +44,7 @@ export function AddIncomePage() {
           </>
         )}
         <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
-        {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+        {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Save Income" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
       </form>
     </FormStackScreen>
