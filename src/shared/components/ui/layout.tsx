@@ -1,0 +1,121 @@
+import { useMemo, useCallback } from 'react';
+import { useTheme } from '@/shared/theme';
+import { useResponsive } from '@/shared/hooks/useResponsive';
+import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
+import type { CSSProperties, ReactNode } from 'react';
+
+type ScreenInset = 'tab' | 'stack' | 'none';
+
+export function ScreenWrapper({
+  header, children, inset = 'tab', scroll = true, contentContainerStyle, style,
+}: {
+  header?: ReactNode; children: ReactNode; inset?: ScreenInset;
+  scroll?: boolean; contentContainerStyle?: CSSProperties; style?: CSSProperties;
+}) {
+  const theme = useTheme();
+  const { frame, sectionGap } = useScreenInsets();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background, ...style }}>
+      {header}
+      {scroll ? (
+        <div style={{
+          flex: 1, overflowY: 'auto',
+          ...frame,
+          paddingTop: theme.spacing.md,
+          paddingBottom: inset === 'tab' ? 100 : theme.spacing.xxl,
+          ...contentContainerStyle,
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: sectionGap }}>
+            {children}
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          flex: 1,
+          ...frame,
+          paddingTop: theme.spacing.md,
+          paddingBottom: inset === 'tab' ? 100 : theme.spacing.xxl,
+          ...contentContainerStyle,
+        }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── ResponsiveGrid ── */
+
+export function ResponsiveGrid({
+  children, columns: colsProp, gap: gapProp, style,
+}: {
+  children: ReactNode; columns?: number; gap?: number; style?: CSSProperties;
+}) {
+  const { columns: defaultCols, gridGap } = useResponsive();
+  const cols = colsProp ?? defaultCols;
+  const gap = gapProp ?? gridGap;
+
+  return (
+    <div style={{
+      display: 'flex', flexWrap: 'wrap', gap,
+      ...style,
+    }}>
+      {Array.isArray(children) ? children.map((child, i) => (
+        <div key={i} style={{
+          flexGrow: 1, flexShrink: 1,
+          flexBasis: cols === 1 ? '100%' : cols === 2 ? '48%' : '31%',
+          minWidth: cols === 1 ? '100%' : cols === 2 ? 160 : 140,
+        }}>
+          {child}
+        </div>
+      )) : children}
+    </div>
+  );
+}
+
+/* ── ScreenLoader ── */
+
+export function ScreenLoader() {
+  const theme = useTheme();
+
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      height: '100%', backgroundColor: theme.colors.background,
+    }}>
+      <div style={{
+        width: 40, height: 40,
+        borderRadius: '50%',
+        border: `3px solid ${theme.colors.primarySoft}`,
+        borderTopColor: theme.colors.primary,
+        animation: 'spin 0.6s linear infinite',
+      }} />
+    </div>
+  );
+}
+
+/* ── ScreenSkeleton ── */
+
+export function ScreenSkeleton({ rows = 4 }: { rows?: number }) {
+  const theme = useTheme();
+  const { frame } = useScreenInsets();
+
+  return (
+    <div style={{
+      backgroundColor: theme.colors.background, paddingTop: theme.spacing.lg,
+      display: 'flex', flexDirection: 'column', gap: theme.spacing.md,
+      ...frame,
+    }}>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div
+          key={i}
+          style={{
+            height: 72, borderRadius: theme.radii.lg,
+            backgroundColor: theme.colors.surfaceHover, opacity: 0.7,
+          }}
+        />
+      ))}
+    </div>
+  );
+}

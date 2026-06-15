@@ -1,0 +1,459 @@
+import { useMemo, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AppIcon, type AppIconName } from './icons/AppIcon';
+import { useTheme } from '@/shared/theme';
+import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
+import type { CSSProperties } from 'react';
+
+/* ── Back Navigation ── */
+
+export function useStackBack(fallback = '/') {
+  const navigate = useNavigate();
+  return () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate(fallback, { replace: true });
+    }
+  };
+}
+
+export function useProfileBack() {
+  return useStackBack('/settings');
+}
+
+export function BackButton({ onPress, size = 'default' }: { onPress?: () => void; size?: 'default' | 'compact' }) {
+  const theme = useTheme();
+  const stackBack = useStackBack();
+  const compact = size === 'compact';
+
+  return (
+    <button
+      onClick={onPress ?? stackBack}
+      style={{
+        width: compact ? 36 : 40, height: compact ? 36 : 40,
+        borderRadius: compact ? 10 : 12,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
+        border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+        cursor: 'pointer',
+      }}
+      aria-label="Go back"
+    >
+      <AppIcon name="arrowLeft" size={compact ? 18 : 20} color={theme.colors.primary} />
+    </button>
+  );
+}
+
+/* ── StackNavHeader ── */
+
+export function StackNavHeader({
+  title, subtitle, showBack = true, onBack, actionIcon, onAction, actionLabel, footer,
+}: {
+  title: string; subtitle?: string; showBack?: boolean; onBack?: () => void;
+  actionIcon?: AppIconName; onAction?: () => void; actionLabel?: string; footer?: React.ReactNode;
+}) {
+  const theme = useTheme();
+  const stackBack = useStackBack();
+  const { paddingX } = useScreenInsets();
+
+  return (
+    <div style={{
+      ...paddingX,
+      paddingBottom: 10,
+      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
+      backgroundColor: theme.colors.background,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, minHeight: 36,
+      }}>
+        {showBack && <BackButton onPress={onBack ?? stackBack} size="compact" />}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
+            color: theme.colors.text, letterSpacing: -0.2,
+          }}>{title}</span>
+          {subtitle && (
+            <span style={{
+              display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textSecondary,
+              marginTop: 1, lineHeight: '16px', fontFamily: 'Inter, sans-serif',
+            }}>{subtitle}</span>
+          )}
+        </div>
+        {onAction && actionIcon && (
+          <button
+            onClick={onAction}
+            style={{
+              width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
+              border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+              cursor: 'pointer',
+            }}
+            aria-label={actionLabel ?? 'Action'}
+          >
+            <AppIcon name={actionIcon} size={18} color={theme.colors.primary} />
+          </button>
+        )}
+      </div>
+      {footer && <div style={{ marginTop: theme.spacing.sm }}>{footer}</div>}
+    </div>
+  );
+}
+
+/* ── FeatureHeader ── */
+
+export function FeatureHeader({
+  title, subtitle, eyebrow, icon, actionIcon, onAction, actionLabel,
+  footer, showBack, onBack, variant = 'tab',
+}: {
+  title: string; subtitle?: string; eyebrow?: string; icon?: AppIconName;
+  actionIcon?: AppIconName; onAction?: () => void; actionLabel?: string;
+  footer?: React.ReactNode; showBack?: boolean; onBack?: () => void;
+  variant?: 'tab' | 'stack';
+}) {
+  const theme = useTheme();
+  const stackBack = useStackBack();
+  const { paddingX } = useScreenInsets();
+
+  if (variant === 'stack') {
+    return (
+      <StackNavHeader
+        title={title} subtitle={subtitle} showBack={showBack} onBack={onBack ?? stackBack}
+        actionIcon={actionIcon} onAction={onAction} actionLabel={actionLabel} footer={footer}
+      />
+    );
+  }
+
+  return (
+    <div style={{
+      ...paddingX,
+      paddingBottom: theme.spacing.md,
+      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+      backgroundColor: theme.colors.background,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+        {icon && (
+          <div style={{
+            width: 44, height: 44, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: `linear-gradient(135deg, ${theme.colors.primary}38, ${theme.colors.gradientEnd}22)`,
+            border: `1px solid ${theme.colors.primary}33`,
+          }}>
+            <AppIcon name={icon} size={20} color={theme.colors.primary} />
+          </div>
+        )}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {eyebrow && (
+            <span style={{
+              display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '1.1px',
+              color: theme.colors.textTertiary, marginBottom: 3, fontFamily: 'Inter, sans-serif',
+            }}>{eyebrow}</span>
+          )}
+          <span style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 22, fontWeight: 800,
+            color: theme.colors.text, letterSpacing: -0.3,
+          }}>{title}</span>
+          {subtitle && (
+            <span style={{
+              display: 'block', fontSize: theme.typography.caption.fontSize,
+              fontWeight: 500, color: theme.colors.textSecondary,
+              marginTop: 3, lineHeight: '18px', fontFamily: 'Inter, sans-serif',
+            }}>{subtitle}</span>
+          )}
+        </div>
+        {onAction && actionIcon && (
+          <button
+            onClick={onAction}
+            style={{
+              width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: `linear-gradient(135deg, ${theme.colors.primary}33, ${theme.colors.gradientEnd}22)`,
+              border: `1px solid ${theme.colors.primary}33`, cursor: 'pointer',
+            }}
+            aria-label={actionLabel ?? 'Action'}
+          >
+            <AppIcon name={actionIcon} size={20} color={theme.colors.primary} />
+          </button>
+        )}
+      </div>
+      {footer && <div style={{ marginTop: theme.spacing.sm }}>{footer}</div>}
+    </div>
+  );
+}
+
+/* ── SearchField ── */
+
+export function SearchField({ placeholder, onPress }: { placeholder: string; onPress: () => void }) {
+  const theme = useTheme();
+
+  return (
+    <button
+      onClick={onPress}
+      style={{
+        display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+        backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
+        borderRadius: theme.radii.lg, padding: '11px 12px',
+        border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
+        cursor: 'pointer', width: '100%',
+      }}
+    >
+      <AppIcon name="search" size={17} color={theme.colors.textTertiary} />
+      <span style={{
+        fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.textTertiary,
+      }}>{placeholder}</span>
+    </button>
+  );
+}
+
+/* ── OptionChips ── */
+
+export function OptionChips<T extends string>({
+  options, value, onChange, getLabel = (v) => v, getColor, error,
+}: {
+  options: T[]; value: T; onChange: (v: T) => void;
+  getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string;
+}) {
+  const theme = useTheme();
+
+  return (
+    <div style={{ marginBottom: theme.spacing.lg }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map((opt) => {
+          const selected = value === opt;
+          const accent = getColor?.(opt) ?? theme.colors.primary;
+          return (
+            <button
+              key={opt}
+              onClick={() => onChange(opt)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: theme.radii.full,
+                border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
+                backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
+                textTransform: 'capitalize',
+              }}
+            >
+              {selected && (
+                <span style={{
+                  width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: accent,
+                }}>
+                  <AppIcon name="checkmark" size={10} color="#fff" />
+                </span>
+              )}
+              {getLabel(opt)}
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+      )}
+    </div>
+  );
+}
+
+export function OptionChipList({
+  items, selectedId, onSelect, error,
+}: {
+  items: { id: string; label: string; color?: string }[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  error?: string;
+}) {
+  const theme = useTheme();
+
+  return (
+    <div style={{ marginBottom: theme.spacing.lg }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {items.map((item) => {
+          const selected = selectedId === item.id;
+          const accent = item.color ?? theme.colors.primary;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSelect(item.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: theme.radii.full,
+                border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
+                backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
+                textTransform: 'capitalize',
+              }}
+            >
+              {selected && (
+                <span style={{
+                  width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: accent,
+                }}>
+                  <AppIcon name="checkmark" size={10} color="#fff" />
+                </span>
+              )}
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+      )}
+    </div>
+  );
+}
+
+export function MultiOptionChips({
+  options, selected, onToggle, getLabel = (v) => v, error,
+}: {
+  options: string[]; selected: string[]; onToggle: (v: string) => void;
+  getLabel?: (v: string) => string; error?: string;
+}) {
+  const theme = useTheme();
+
+  return (
+    <div style={{ marginBottom: theme.spacing.lg }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map((opt) => {
+          const isSelected = selected.includes(opt);
+          const accent = theme.colors.primary;
+          return (
+            <button
+              key={opt}
+              onClick={() => onToggle(opt)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: theme.radii.full,
+                border: `1.5px solid ${isSelected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
+                backgroundColor: isSelected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
+                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                fontWeight: isSelected ? 700 : 600, color: isSelected ? accent : theme.colors.text,
+                textTransform: 'capitalize',
+              }}
+            >
+              {isSelected && (
+                <span style={{
+                  width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: accent,
+                }}>
+                  <AppIcon name="checkmark" size={10} color="#fff" />
+                </span>
+              )}
+              {getLabel(opt)}
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+      )}
+    </div>
+  );
+}
+
+/* ── ActionFab ── */
+
+export function ActionFab({ onPress, label = 'Add' }: { onPress: () => void; label?: string }) {
+  const theme = useTheme();
+
+  return (
+    <button
+      onClick={onPress}
+      style={{
+        position: 'fixed', bottom: 100, right: 24, width: 56, height: 56,
+        borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
+        border: 'none', cursor: 'pointer', zIndex: 50,
+        boxShadow: theme.shadows.lg,
+      }}
+      aria-label={label}
+    >
+      <AppIcon name="add" size={26} color={theme.colors.onPrimary} />
+    </button>
+  );
+}
+
+/* ── Screen Wrappers ── */
+
+export function StackScrollScreen({
+  header, children, contentContainerStyle,
+}: {
+  header: React.ReactNode; children: React.ReactNode; contentContainerStyle?: CSSProperties;
+}) {
+  const theme = useTheme();
+  const { frame, sectionGap } = useScreenInsets();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
+      {header}
+      <div style={{
+        flex: 1, overflowY: 'auto',
+        ...frame,
+        paddingTop: theme.spacing.md,
+        paddingBottom: theme.spacing.xxl,
+        ...contentContainerStyle,
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sectionGap }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function FormStackScreen({
+  eyebrow, title, subtitle, icon, onBack, children,
+}: {
+  eyebrow?: string; title: string; subtitle?: string; icon?: AppIconName; onBack?: () => void; children: React.ReactNode;
+}) {
+  const theme = useTheme();
+
+  return (
+    <StackScrollScreen
+      header={
+        <FeatureHeader variant="stack" showBack onBack={onBack} icon={icon} eyebrow={eyebrow} title={title} subtitle={subtitle} />
+      }
+      contentContainerStyle={{ paddingTop: theme.spacing.sm }}
+    >
+      {children}
+    </StackScrollScreen>
+  );
+}
+
+export function StickyHeaderFlatScreen<T>({
+  header, data, renderItem, keyExtractor, ListEmptyComponent, contentContainerStyle,
+}: {
+  header: React.ReactNode; data: T[];
+  renderItem: (item: T, index: number) => React.ReactNode;
+  keyExtractor: (item: T, index: number) => string;
+  ListEmptyComponent?: React.ReactNode;
+  contentContainerStyle?: CSSProperties;
+}) {
+  const theme = useTheme();
+  const { frame, stackGap } = useScreenInsets();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
+      {header}
+      <div style={{
+        flex: 1, overflowY: 'auto',
+        ...frame,
+        paddingTop: stackGap,
+        paddingBottom: 100,
+        ...contentContainerStyle,
+      }}>
+        {data.length === 0 && ListEmptyComponent ? (
+          ListEmptyComponent
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: stackGap }}>
+            {data.map((item, index) => (
+              <div key={keyExtractor(item, index)}>
+                {renderItem(item, index)}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
