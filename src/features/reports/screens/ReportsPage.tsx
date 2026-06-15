@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { FeatureHeader } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card, Button } from '@/shared/components/ui/index';
+import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useReports } from '@/features/shared/hooks/useFeatures';
 
@@ -20,9 +20,9 @@ export function ReportsPage() {
       <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Date Range</label>
         <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={{ flex: 1, padding: '12px', borderRadius: theme.radii.md, border: `1.5px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.inputBg, color: theme.colors.text, fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
           <span style={{ alignSelf: 'center', color: theme.colors.textTertiary }}>to</span>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={{ flex: 1, padding: '12px', borderRadius: theme.radii.md, border: `1.5px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.inputBg, color: theme.colors.text, fontSize: 14, fontFamily: 'Inter, sans-serif', outline: 'none' }} />
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
         </div>
       </Card>
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>

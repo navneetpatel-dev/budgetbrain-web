@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Button, Input } from '@/shared/components/ui/index';
+import { Button, Input, fieldControlStyle } from '@/shared/components/ui/index';
 import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
@@ -24,7 +24,7 @@ export function OnboardingPage() {
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
   };
 
-  const selectStyle: React.CSSProperties = { width: '100%', padding: '14px 12px', borderRadius: theme.radii.lg, border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`, backgroundColor: theme.colors.inputBg, color: theme.colors.text, fontSize: 16, fontFamily: 'Inter, sans-serif', outline: 'none' };
+  const selectStyle = fieldControlStyle(theme);
   const labelStyle: React.CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' };
 
   return (

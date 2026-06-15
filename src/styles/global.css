@@ -37,6 +37,16 @@ input, textarea, select {
   font-family: 'Inter', sans-serif;
 }
 
-::placeholder {
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]),
+textarea,
+select {
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input::placeholder,
+textarea::placeholder {
   color: #94A3B8;
+  opacity: 1;
 }

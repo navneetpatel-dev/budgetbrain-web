@@ -1,7 +1,68 @@
 import { useMemo, useState } from 'react';
 import { useTheme } from '@/shared/theme';
+import type { AppTheme } from '@/shared/theme';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import type { CSSProperties } from 'react';
+
+export const FIELD_CONTROL_HEIGHT = 48;
+const FIELD_CONTROL_BORDER = 1.5;
+
+function fieldBorderColor(theme: AppTheme, error?: boolean, focused?: boolean) {
+  if (error) return theme.colors.danger;
+  if (focused) return theme.colors.primary + '88';
+  return theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle;
+}
+
+function fieldBackground(theme: AppTheme, focused?: boolean) {
+  if (focused) return theme.colors.primarySoft;
+  return theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg;
+}
+
+/** Shared single-line / multiline field sizing for inputs and selects. */
+export function fieldControlStyle(
+  theme: AppTheme,
+  options: {
+    error?: boolean;
+    focused?: boolean;
+    multiline?: boolean;
+    flex?: number;
+    borderRadius?: number;
+    fontSize?: number;
+  } = {},
+): CSSProperties {
+  const { error, focused, multiline, flex, borderRadius, fontSize = 16 } = options;
+  const innerHeight = FIELD_CONTROL_HEIGHT - FIELD_CONTROL_BORDER * 2;
+
+  const base: CSSProperties = {
+    boxSizing: 'border-box',
+    border: `${FIELD_CONTROL_BORDER}px solid ${fieldBorderColor(theme, error, focused)}`,
+    borderRadius: borderRadius ?? theme.radii.lg,
+    backgroundColor: fieldBackground(theme, focused),
+    color: theme.colors.text,
+    fontSize,
+    fontFamily: 'Inter, sans-serif',
+    outline: 'none',
+    transition: 'border-color 0.2s, background-color 0.2s',
+    ...(flex !== undefined ? { flex } : { width: '100%' }),
+  };
+
+  if (multiline) {
+    return {
+      ...base,
+      padding: '14px 12px',
+      lineHeight: '22px',
+      minHeight: 96,
+      resize: 'vertical',
+    };
+  }
+
+  return {
+    ...base,
+    height: FIELD_CONTROL_HEIGHT,
+    padding: '0 12px',
+    lineHeight: `${innerHeight}px`,
+  };
+}
 
 function cssProps(style: CSSProperties): string {
   return Object.entries(style)
@@ -199,30 +260,40 @@ export function Input({
   const isSecure = inputType === 'password' && (secureToggle ? hidden : true);
   const actualType = isSecure ? 'password' : (inputType === 'password' ? 'text' : (inputType ?? 'text'));
 
+  const innerHeight = FIELD_CONTROL_HEIGHT - FIELD_CONTROL_BORDER * 2;
+
   const wrapperStyle: CSSProperties = {
     display: 'flex',
-    alignItems: multiline ? 'flex-start' : 'center',
-    border: `1.5px solid ${error ? theme.colors.danger : focused ? theme.colors.primary + '88' : theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+    alignItems: multiline ? 'flex-start' : 'stretch',
+    border: `${FIELD_CONTROL_BORDER}px solid ${fieldBorderColor(theme, !!error, focused)}`,
     borderRadius: theme.radii.lg,
-    backgroundColor: focused ? theme.colors.primarySoft : theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg,
+    backgroundColor: fieldBackground(theme, focused),
     transition: 'border-color 0.2s, background-color 0.2s',
-    minHeight: multiline ? 112 : undefined,
+    minHeight: multiline ? 112 : FIELD_CONTROL_HEIGHT,
   };
 
   const sharedInputStyle: CSSProperties = {
     flex: 1,
+    width: '100%',
+    minWidth: 0,
     border: 'none',
     outline: 'none',
     background: 'transparent',
-    padding: multiline ? '14px 12px' : '14px 12px',
-    paddingLeft: leftIcon ? 4 : undefined,
-    paddingRight: secureToggle ? 4 : undefined,
     fontSize: 16,
     color: theme.colors.text,
     fontFamily: 'Inter, sans-serif',
+    boxSizing: 'border-box',
     resize: multiline ? 'vertical' : 'none',
-    minHeight: multiline ? 96 : undefined,
-    lineHeight: multiline ? '22px' : undefined,
+    ...(multiline ? {
+      padding: '14px 12px',
+      lineHeight: '22px',
+      minHeight: 96,
+    } : {
+      height: innerHeight,
+      padding: `0 ${leftIcon ? 4 : 12}px`,
+      paddingRight: secureToggle ? 4 : 12,
+      lineHeight: `${innerHeight}px`,
+    }),
   };
 
   return (
@@ -277,7 +348,8 @@ export function Input({
             type="button"
             onClick={() => setHidden((v) => !v)}
             style={{
-              width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 44, height: 44, flexShrink: 0, alignSelf: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               marginRight: theme.spacing.xs, background: 'none', border: 'none', cursor: 'pointer',
             }}
             aria-label={hidden ? 'Show password' : 'Hide password'}
