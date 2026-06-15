@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
 
 export function SupportPage() {
   const theme = useTheme();
-  const { tickets, createMutation, error, setError } = useSupportTickets();
+  const { tickets, isLoading, createMutation, error, setError } = useSupportTickets();
   const [showForm, setShowForm] = useState(false);
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+
+  if (isLoading) return <ListSkeleton count={5} />;
 
   return (
     <StickyHeaderFlatScreen

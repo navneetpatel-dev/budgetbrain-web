@@ -19,7 +19,8 @@ export function IncomeDetailPage() {
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
 
-  if (isLoading || !income) return null;
+  if (isLoading) return <DetailSkeleton />;
+  if (!income) return null;
 
   const handleDelete = async () => {
     if (await confirm(CONFIRM.deleteIncome)) deleteMutation.mutate();

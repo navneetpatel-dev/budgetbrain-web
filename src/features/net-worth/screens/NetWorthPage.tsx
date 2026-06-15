@@ -1,7 +1,7 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
 import { Card, SummaryCard } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ScreenSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { ensureArray } from '@/shared/utils/listData';
@@ -30,7 +30,7 @@ export function NetWorthPage() {
     queryFn: () => apiGet<NetWorthData>('/net-worth'),
   });
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ScreenSkeleton rows={5} />;
   if (!data) return null;
 
   const summary = data.summary;

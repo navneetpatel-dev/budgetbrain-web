@@ -1,12 +1,15 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
 
 export function IntegrationsPage() {
   const theme = useTheme();
-  const { pending, confirmMutation, rejectMutation } = useIntegrations();
+  const { pending, isLoading, confirmMutation, rejectMutation } = useIntegrations();
+
+  if (isLoading) return <ListSkeleton count={4} />;
 
   return (
     <StickyHeaderFlatScreen

@@ -1,12 +1,15 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useNotifications } from '@/features/shared/hooks/useFeatures';
 
 export function NotificationsPage() {
   const theme = useTheme();
-  const { notifications } = useNotifications();
+  const { notifications, isLoading } = useNotifications();
+
+  if (isLoading) return <ListSkeleton count={5} />;
 
   return (
     <StickyHeaderFlatScreen

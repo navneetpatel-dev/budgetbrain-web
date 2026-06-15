@@ -117,11 +117,20 @@ export function DashboardSkeleton() {
 }
 
 export function ListSkeleton({ count = 4 }: { count?: number }) {
-  const theme = useTheme();
   return (
     <SkeletonScreen>
       {Array.from({ length: count }).map((_, i) => (
         <SkeletonCard key={i} height={68} />
+      ))}
+    </SkeletonScreen>
+  );
+}
+
+export function ScreenSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <SkeletonScreen>
+      {Array.from({ length: rows }).map((_, i) => (
+        <SkeletonCard key={i} height={72} />
       ))}
     </SkeletonScreen>
   );

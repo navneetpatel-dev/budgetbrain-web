@@ -3,6 +3,7 @@ import { apiGet } from '@/shared/services/api';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import type { FinancialAccount } from '@/shared/types';
@@ -10,10 +11,12 @@ import type { FinancialAccount } from '@/shared/types';
 export function AccountsPage() {
   const theme = useTheme();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => apiGet<FinancialAccount[]>('/accounts'),
   });
+
+  if (isLoading) return <ListSkeleton count={4} />;
 
   const accounts = data ?? [];
 

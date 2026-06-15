@@ -57,19 +57,19 @@ export function useFamily() {
 }
 
 export function useNotifications() {
-  const { data } = usePaginatedList<NotificationItem, 'notifications'>({
+  const { data, isLoading } = usePaginatedList<NotificationItem, 'notifications'>({
     queryKey: ['notifications'],
     url: '/notifications',
     itemsKey: 'notifications',
   });
-  return { notifications: data };
+  return { notifications: data, isLoading };
 }
 
 export function useSupportTickets() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = usePaginatedList<{ id: string; subject: string; status: string; createdAt: string }, 'tickets'>({
+  const { data, isLoading } = usePaginatedList<{ id: string; subject: string; status: string; createdAt: string }, 'tickets'>({
     queryKey: ['support-tickets'],
     url: '/support/tickets',
     itemsKey: 'tickets',
@@ -81,13 +81,13 @@ export function useSupportTickets() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { tickets: data, createMutation, error, setError };
+  return { tickets: data, isLoading, createMutation, error, setError };
 }
 
 export function useIntegrations() {
   const queryClient = useQueryClient();
 
-  const { data } = usePaginatedList<ParsedTransactionPending, 'pending'>({
+  const { data, isLoading } = usePaginatedList<ParsedTransactionPending, 'pending'>({
     queryKey: ['integrations-pending'],
     url: '/integrations/pending',
     itemsKey: 'pending',
@@ -106,7 +106,7 @@ export function useIntegrations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integrations-pending'] }),
   });
 
-  return { pending: data, confirmMutation, rejectMutation };
+  return { pending: data, isLoading, confirmMutation, rejectMutation };
 }
 
 export function useReports() {
