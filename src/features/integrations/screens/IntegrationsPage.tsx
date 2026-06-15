@@ -1,4 +1,5 @@
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
@@ -9,7 +10,8 @@ export function IntegrationsPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Integrations" subtitle="SMS & Email parsing" icon="globe" variant="stack" showBack />}
+      header={<ProfileStackHeader screen="integrations" subtitle="SMS & Email parsing" />}
+      inset="stack"
       data={pending}
       keyExtractor={(item) => item.id}
       renderItem={(item) => (

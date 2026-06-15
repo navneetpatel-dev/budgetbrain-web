@@ -1,12 +1,11 @@
-import { FeatureHeader } from '@/shared/components/ui/feature-screen';
+import { StackNavHeader, useProfileBack } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
-import { useNavigate } from 'react-router-dom';
 
 export function SubscriptionPage() {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const goBack = useProfileBack();
 
   const plans = [
     { name: 'Monthly', price: '₹199', period: '/month', id: 'monthly' },
@@ -15,9 +14,7 @@ export function SubscriptionPage() {
   ];
 
   return (
-    <ScreenWrapper
-      header={<FeatureHeader title="Subscription" subtitle="Choose your plan" icon="dollar" variant="stack" showBack />}
-    >
+    <ScreenWrapper header={<StackNavHeader title="Subscription" subtitle="Choose your plan" onBack={goBack} />} inset="stack">
       {plans.map((plan) => (
         <Card
           key={plan.id}

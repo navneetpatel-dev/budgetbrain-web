@@ -1,4 +1,5 @@
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useNotifications } from '@/features/shared/hooks/useFeatures';
@@ -9,7 +10,8 @@ export function NotificationsPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Notifications" icon="notification" variant="stack" showBack />}
+      header={<ProfileStackHeader screen="notifications" />}
+      inset="stack"
       data={notifications}
       keyExtractor={(item) => item.id}
       renderItem={(n) => (

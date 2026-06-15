@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { FeatureHeader } from '@/shared/components/ui/feature-screen';
+import { useNavigate } from 'react-router-dom';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
+import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
 
 export function AiCoachPage() {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { frame } = useScreenInsets();
   const { messages, send, isPending, isPremium } = useAiChat();
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -15,13 +19,13 @@ export function AiCoachPage() {
   if (!isPremium) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.colors.background }}>
-        <FeatureHeader title="AI Coach" subtitle="Premium feature" icon="sparkles" />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <ProfileStackHeader screen="ai" subtitle="Premium feature" />
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', ...frame, paddingBottom: theme.spacing.xxl }}>
           <Card variant="elevated" style={{ textAlign: 'center', maxWidth: 320 }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primarySoft, margin: '0 auto 16px' }}><span style={{ fontSize: 24 }}>✨</span></div>
             <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: 0 }}>Unlock AI Coach</h3>
             <p style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8, fontFamily: 'Inter, sans-serif', lineHeight: '20px' }}>Upgrade to Premium to get personalized AI-powered financial insights and guidance.</p>
-            <div style={{ marginTop: 16 }}><Button title="Upgrade to Premium" onPress={() => {}} size="lg" /></div>
+            <div style={{ marginTop: 16 }}><Button title="Upgrade to Premium" onPress={() => navigate('/subscription')} size="lg" /></div>
           </Card>
         </div>
       </div>
@@ -30,8 +34,8 @@ export function AiCoachPage() {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.colors.background }}>
-      <FeatureHeader title="AI Coach" subtitle="Your personal finance assistant" icon="sparkles" />
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 720, margin: '0 auto', width: '100%' }}>
+      <ProfileStackHeader screen="ai" subtitle="Your personal finance assistant" />
+      <div style={{ flex: 1, overflowY: 'auto', ...frame, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <p style={{ fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Ask me anything about your finances. Try:</p>
@@ -50,7 +54,7 @@ export function AiCoachPage() {
         {isPending && <div style={{ display: 'flex', justifyContent: 'flex-start' }}><div style={{ padding: '12px 16px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.surfaceHover, borderBottomLeftRadius: 4 }}><div style={{ display: 'flex', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /></div></div></div>}
         <div ref={bottomRef} />
       </div>
-      <div style={{ padding: '12px 16px 24px', borderTop: `1px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.background, maxWidth: 720, margin: '0 auto', width: '100%' }}>
+      <div style={{ ...frame, paddingTop: 12, paddingBottom: 24, borderTop: `1px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.background }}>
         <div style={{ display: 'flex', gap: 8 }}>
           <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { send(input); setInput(''); } }} placeholder="Ask about your finances..." style={fieldControlStyle(theme, { flex: 1, fontSize: 14 })} />
           <button onClick={() => { send(input); setInput(''); }} disabled={!input.trim() || isPending} style={{ width: 44, height: 44, borderRadius: theme.radii.lg, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, border: 'none', cursor: 'pointer', opacity: input.trim() ? 1 : 0.5 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.colors.onPrimary} strokeWidth="2"><path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" /></svg></button>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FeatureHeader } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button, Input, EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
@@ -14,7 +14,7 @@ export function FamilyPage() {
   const [inviteCode, setInviteCode] = useState('');
 
   return (
-    <ScreenWrapper header={<FeatureHeader title="Family Groups" subtitle="Manage expenses together" icon="users" variant="stack" showBack />}>
+    <ScreenWrapper header={<ProfileStackHeader screen="family" subtitle="Manage expenses together" />} inset="stack">
       {memberships.length > 0 ? memberships.map((m) => (
         <Card key={m.id} variant="elevated"><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
       )) : <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />}

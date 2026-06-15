@@ -32,6 +32,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return buildTheme(resolved, accent);
   }, [themeMode, accent, systemScheme]);
 
+  useEffect(() => {
+    document.body.style.backgroundColor = theme.colors.background;
+    document.body.style.color = theme.colors.text;
+    document.documentElement.style.colorScheme = theme.isDark ? 'dark' : 'light';
+  }, [theme]);
+
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }
 

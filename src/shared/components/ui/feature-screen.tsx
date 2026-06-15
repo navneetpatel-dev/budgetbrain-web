@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
+import { useBottomInset } from '@/shared/hooks/useTabBarInset';
+import { useResponsive } from '@/shared/hooks/useResponsive';
 import type { CSSProperties } from 'react';
 
 /* ── Back Navigation ── */
@@ -48,54 +50,70 @@ export function BackButton({ onPress, size = 'default' }: { onPress?: () => void
 /* ── StackNavHeader ── */
 
 export function StackNavHeader({
-  title, subtitle, showBack = true, onBack, actionIcon, onAction, actionLabel, footer,
+  title, subtitle, eyebrow, showBack = true, onBack, actionIcon, onAction, actionLabel, footer,
 }: {
-  title: string; subtitle?: string; showBack?: boolean; onBack?: () => void;
+  title: string; subtitle?: string; eyebrow?: string; showBack?: boolean; onBack?: () => void;
   actionIcon?: AppIconName; onAction?: () => void; actionLabel?: string; footer?: React.ReactNode;
 }) {
   const theme = useTheme();
   const stackBack = useStackBack();
-  const { paddingX } = useScreenInsets();
+  const { paddingX, contentMaxWidth } = useScreenInsets();
+  const { isDesktop } = useResponsive();
 
   return (
     <div style={{
-      ...paddingX,
-      paddingBottom: 10,
-      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
       backgroundColor: theme.colors.background,
+      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
     }}>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 10, minHeight: 36,
+        ...paddingX,
+        paddingTop: isDesktop ? 20 : 12,
+        paddingBottom: 10,
+        maxWidth: contentMaxWidth ?? '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        width: '100%',
       }}>
-        {showBack && <BackButton onPress={onBack ?? stackBack} size="compact" />}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <span style={{
-            fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
-            color: theme.colors.text, letterSpacing: -0.2,
-          }}>{title}</span>
-          {subtitle && (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, minHeight: 36,
+        }}>
+          {showBack && <BackButton onPress={onBack ?? stackBack} size="compact" />}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {eyebrow && (
+              <span style={{
+                display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '1.1px',
+                color: theme.colors.textTertiary, marginBottom: 2, fontFamily: 'Inter, sans-serif',
+                textTransform: 'uppercase',
+              }}>{eyebrow}</span>
+            )}
             <span style={{
-              display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textSecondary,
-              marginTop: 1, lineHeight: '16px', fontFamily: 'Inter, sans-serif',
-            }}>{subtitle}</span>
+              fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
+              color: theme.colors.text, letterSpacing: -0.2,
+            }}>{title}</span>
+            {subtitle && (
+              <span style={{
+                display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textSecondary,
+                marginTop: 1, lineHeight: '16px', fontFamily: 'Inter, sans-serif',
+              }}>{subtitle}</span>
+            )}
+          </div>
+          {onAction && actionIcon && (
+            <button
+              onClick={onAction}
+              style={{
+                width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
+                border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+                cursor: 'pointer',
+              }}
+              aria-label={actionLabel ?? 'Action'}
+            >
+              <AppIcon name={actionIcon} size={18} color={theme.colors.primary} />
+            </button>
           )}
         </div>
-        {onAction && actionIcon && (
-          <button
-            onClick={onAction}
-            style={{
-              width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface,
-              border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
-              cursor: 'pointer',
-            }}
-            aria-label={actionLabel ?? 'Action'}
-          >
-            <AppIcon name={actionIcon} size={18} color={theme.colors.primary} />
-          </button>
-        )}
+        {footer && <div style={{ marginTop: theme.spacing.sm }}>{footer}</div>}
       </div>
-      {footer && <div style={{ marginTop: theme.spacing.sm }}>{footer}</div>}
     </div>
   );
 }
@@ -113,12 +131,13 @@ export function FeatureHeader({
 }) {
   const theme = useTheme();
   const stackBack = useStackBack();
-  const { paddingX } = useScreenInsets();
+  const { paddingX, contentMaxWidth } = useScreenInsets();
+  const { isDesktop } = useResponsive();
 
   if (variant === 'stack') {
     return (
       <StackNavHeader
-        title={title} subtitle={subtitle} showBack={showBack} onBack={onBack ?? stackBack}
+        title={title} subtitle={subtitle} eyebrow={eyebrow} showBack={showBack} onBack={onBack ?? stackBack}
         actionIcon={actionIcon} onAction={onAction} actionLabel={actionLabel} footer={footer}
       />
     );
@@ -126,11 +145,18 @@ export function FeatureHeader({
 
   return (
     <div style={{
-      ...paddingX,
-      paddingBottom: theme.spacing.md,
-      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
       backgroundColor: theme.colors.background,
+      borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
     }}>
+      <div style={{
+        ...paddingX,
+        paddingTop: isDesktop ? 24 : 12,
+        paddingBottom: theme.spacing.md,
+        maxWidth: contentMaxWidth ?? '100%',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        width: '100%',
+      }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
         {icon && (
           <div style={{
@@ -175,31 +201,64 @@ export function FeatureHeader({
         )}
       </div>
       {footer && <div style={{ marginTop: theme.spacing.sm }}>{footer}</div>}
+      </div>
     </div>
   );
 }
 
-/* ── SearchField ── */
+/* ── HeaderIconButton ── */
 
-export function SearchField({ placeholder, onPress }: { placeholder: string; onPress: () => void }) {
+export function HeaderIconButton({
+  icon, onPress, label, variant = 'soft',
+}: {
+  icon: AppIconName; onPress: () => void; label: string; variant?: 'soft' | 'solid';
+}) {
   const theme = useTheme();
+  const isSolid = variant === 'solid';
 
   return (
     <button
       onClick={onPress}
       style={{
-        display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
-        backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
-        borderRadius: theme.radii.lg, padding: '11px 12px',
-        border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
-        cursor: 'pointer', width: '100%',
+        width: 42, height: 42, borderRadius: 14, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: isSolid
+          ? `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`
+          : (theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
+        border: `1px solid ${isSolid ? 'transparent' : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
+        cursor: 'pointer',
       }}
+      aria-label={label}
     >
-      <AppIcon name="search" size={17} color={theme.colors.textTertiary} />
-      <span style={{
-        fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.textTertiary,
-      }}>{placeholder}</span>
+      <AppIcon name={icon} size={20} color={isSolid ? theme.colors.onPrimary : theme.colors.primary} />
     </button>
+  );
+}
+
+/* ── SearchField ── */
+
+export function SearchField({ placeholder, onPress, rightAction }: { placeholder: string; onPress: () => void; rightAction?: React.ReactNode }) {
+  const theme = useTheme();
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
+      <button
+        onClick={onPress}
+        style={{
+          flex: 1, display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
+          backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
+          borderRadius: theme.radii.lg, padding: '11px 12px',
+          border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
+          cursor: 'pointer', width: '100%',
+        }}
+      >
+        <AppIcon name="search" size={17} color={theme.colors.textTertiary} />
+        <span style={{
+          fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.textTertiary,
+        }}>{placeholder}</span>
+      </button>
+      {rightAction}
+    </div>
   );
 }
 
@@ -355,12 +414,19 @@ export function MultiOptionChips({
 
 export function ActionFab({ onPress, label = 'Add' }: { onPress: () => void; label?: string }) {
   const theme = useTheme();
+  const { contentMaxWidth, tabBarPaddingX } = useResponsive();
+  const bottomInset = useBottomInset('tab');
 
   return (
     <button
       onClick={onPress}
       style={{
-        position: 'fixed', bottom: 100, right: 24, width: 56, height: 56,
+        position: 'fixed',
+        bottom: bottomInset - 56,
+        right: contentMaxWidth
+          ? `max(${tabBarPaddingX}px, calc((100% - ${contentMaxWidth}px) / 2 + ${tabBarPaddingX}px))`
+          : tabBarPaddingX + 14,
+        width: 56, height: 56,
         borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
         border: 'none', cursor: 'pointer', zIndex: 50,
@@ -382,6 +448,7 @@ export function StackScrollScreen({
 }) {
   const theme = useTheme();
   const { frame, sectionGap } = useScreenInsets();
+  const bottomPadding = useBottomInset('stack');
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
@@ -390,7 +457,7 @@ export function StackScrollScreen({
         flex: 1, overflowY: 'auto',
         ...frame,
         paddingTop: theme.spacing.md,
-        paddingBottom: theme.spacing.xxl,
+        paddingBottom: bottomPadding,
         ...contentContainerStyle,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: sectionGap }}>
@@ -421,16 +488,18 @@ export function FormStackScreen({
 }
 
 export function StickyHeaderFlatScreen<T>({
-  header, data, renderItem, keyExtractor, ListEmptyComponent, contentContainerStyle,
+  header, data, renderItem, keyExtractor, ListEmptyComponent, contentContainerStyle, inset = 'tab',
 }: {
   header: React.ReactNode; data: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   keyExtractor: (item: T, index: number) => string;
   ListEmptyComponent?: React.ReactNode;
   contentContainerStyle?: CSSProperties;
+  inset?: 'tab' | 'stack' | 'none';
 }) {
   const theme = useTheme();
   const { frame, stackGap } = useScreenInsets();
+  const bottomPadding = useBottomInset(inset);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
@@ -439,7 +508,7 @@ export function StickyHeaderFlatScreen<T>({
         flex: 1, overflowY: 'auto',
         ...frame,
         paddingTop: stackGap,
-        paddingBottom: 100,
+        paddingBottom: bottomPadding,
         ...contentContainerStyle,
       }}>
         {data.length === 0 && ListEmptyComponent ? (

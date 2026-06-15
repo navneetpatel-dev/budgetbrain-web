@@ -3,6 +3,7 @@ import { useMemo, useSyncExternalStore } from 'react';
 const BREAKPOINTS = {
   tablet: 768,
   largeTablet: 1024,
+  desktop: 1280,
 } as const;
 
 const PHONE = {
@@ -35,6 +36,16 @@ const LARGE_TABLET = {
   tabBarBottomInset: 12,
 } as const;
 
+const DESKTOP = {
+  tabBarPaddingX: 24,
+  sectionGap: 28,
+  stackGap: 16,
+  gridGap: 16,
+  inlineGap: 10,
+  cardPadding: 20,
+  tabBarBottomInset: 0,
+} as const;
+
 function subscribe(cb: () => void) {
   window.addEventListener('resize', cb);
   return () => window.removeEventListener('resize', cb);
@@ -50,15 +61,18 @@ export function useResponsive() {
   return useMemo(() => {
     const isTablet = width >= BREAKPOINTS.tablet;
     const isLargeTablet = width >= BREAKPOINTS.largeTablet;
-    const tokens = isLargeTablet ? LARGE_TABLET : isTablet ? TABLET : PHONE;
+    const isDesktop = width >= BREAKPOINTS.desktop;
+    const tokens = isDesktop ? DESKTOP : isLargeTablet ? LARGE_TABLET : isTablet ? TABLET : PHONE;
 
     return {
       width,
       isTablet,
       isLargeTablet,
+      isDesktop,
       isPhone: !isTablet,
-      contentMaxWidth: (isLargeTablet ? 840 : isTablet ? 720 : undefined) as number | undefined,
-      columns: isLargeTablet ? 3 : isTablet ? 2 : 1,
+      contentMaxWidth: (isDesktop ? 1120 : isLargeTablet ? 840 : isTablet ? 720 : undefined) as number | undefined,
+      columns: isDesktop ? 3 : isLargeTablet ? 3 : isTablet ? 2 : 1,
+      sidebarWidth: isDesktop ? 260 : 0,
       ...tokens,
       screenPaddingX: tokens.tabBarPaddingX,
       horizontalPadding: tokens.tabBarPaddingX,

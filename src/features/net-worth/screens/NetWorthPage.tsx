@@ -1,4 +1,4 @@
-import { FeatureHeader } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
 import { Card, SummaryCard } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
@@ -19,7 +19,7 @@ export function NetWorthPage() {
   if (!data) return null;
 
   return (
-    <ScreenWrapper header={<FeatureHeader title="Net Worth" subtitle="Your financial overview" icon="piggyBank" variant="stack" showBack />}>
+    <ScreenWrapper header={<ProfileStackHeader screen="net-worth" subtitle="Your financial overview" />} inset="stack">
       <div style={{ borderRadius: theme.radii.xl, padding: theme.spacing.xl, background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, color: theme.colors.onPrimary, textAlign: 'center' }}>
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.8, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Net Worth</span>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), margin: '4px 0' }}>{formatCurrency(data.totalAssets - data.totalLiabilities)}</p>

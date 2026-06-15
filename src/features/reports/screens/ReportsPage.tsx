@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FeatureHeader } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
@@ -16,7 +16,7 @@ export function ReportsPage() {
   if (endDate) params.endDate = endDate;
 
   return (
-    <ScreenWrapper header={<FeatureHeader title="Reports" subtitle="Export your data" icon="download" variant="stack" showBack />}>
+    <ScreenWrapper header={<ProfileStackHeader screen="reports" subtitle="Export your data" />} inset="stack">
       <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Date Range</label>
         <div style={{ display: 'flex', gap: theme.spacing.sm }}>

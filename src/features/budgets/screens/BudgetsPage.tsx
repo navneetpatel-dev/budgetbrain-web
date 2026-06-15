@@ -17,7 +17,16 @@ export function BudgetsPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Budgets" subtitle="Track your spending limits" icon="budgets" actionIcon="add" onAction={() => navigate('/budget/add')} actionLabel="Add Budget" />}
+      header={
+        <FeatureHeader
+          eyebrow="PLAN"
+          title="Budgets"
+          subtitle={`${budgets.length} active`}
+          actionIcon="add"
+          actionLabel="Create budget"
+          onAction={() => navigate('/budget/add')}
+        />
+      }
       data={budgets}
       keyExtractor={(b: Budget) => b.id}
       renderItem={(b) => {
@@ -37,7 +46,7 @@ export function BudgetsPage() {
           </div>
         );
       }}
-      ListEmptyComponent={<EmptyState title="No budgets yet" subtitle="Create a budget to track your spending" icon="budgets" action="Create Budget" onAction={() => navigate('/budget/add')} />}
+      ListEmptyComponent={<EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={() => navigate('/budget/add')} />}
     />
   );
 }

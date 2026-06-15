@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { StackNavHeader, useStackBack, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -14,9 +14,12 @@ export function SearchPage() {
 
   const results = data?.transactions ?? [];
 
+  const goBack = useStackBack('/expenses');
+
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Search" variant="stack" showBack footer={<Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transactions..." leftIcon="search" autoFocus />} />}
+      header={<StackNavHeader title="Search" onBack={goBack} footer={<Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transactions..." leftIcon="search" autoFocus />} />}
+      inset="stack"
       data={query.length >= 2 ? results : []}
       keyExtractor={(item) => item.id}
       renderItem={(txn) => (

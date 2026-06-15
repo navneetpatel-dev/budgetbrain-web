@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
@@ -23,12 +23,12 @@ function CustomTabBar() {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { tabBarBottomInset, tabBarPaddingX, contentMaxWidth } = useResponsive();
+  const { tabBarBottomInset, tabBarPaddingX, contentMaxWidth, isDesktop } = useResponsive();
 
   const currentPath = '/' + location.pathname.split('/').filter(Boolean)[0];
   const shouldHide = HIDDEN_TAB_BAR_PATHS.some((p) => location.pathname.startsWith(p));
 
-  if (shouldHide) return null;
+  if (shouldHide || isDesktop) return null;
 
   const leftTabs = TABS.slice(0, 2);
   const rightTabs = TABS.slice(2);

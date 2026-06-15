@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useGoals } from '../hooks/useGoals';
@@ -17,7 +18,16 @@ export function GoalsPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Goals" subtitle="Track your financial goals" icon="target" actionIcon="add" onAction={() => navigate('/goal/add')} actionLabel="Add Goal" />}
+      header={
+        <ProfileStackHeader
+          screen="goals"
+          subtitle={`${goals.length} active goal${goals.length !== 1 ? 's' : ''}`}
+          actionIcon="add"
+          actionLabel="Create goal"
+          onAction={() => navigate('/goal/add')}
+        />
+      }
+      inset="tab"
       data={goals}
       keyExtractor={(g: Goal) => g.id}
       renderItem={(g) => {
@@ -37,7 +47,7 @@ export function GoalsPage() {
           </div>
         );
       }}
-      ListEmptyComponent={<EmptyState title="No goals yet" subtitle="Set a financial goal to start saving" icon="target" action="Create Goal" onAction={() => navigate('/goal/add')} />}
+      ListEmptyComponent={<EmptyState title="No goals yet" subtitle="Set a financial goal to stay motivated" icon="target" action="Create goal" onAction={() => navigate('/goal/add')} />}
     />
   );
 }

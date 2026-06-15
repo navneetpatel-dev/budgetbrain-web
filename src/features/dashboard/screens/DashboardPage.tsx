@@ -1,15 +1,17 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, SearchField } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
 import { SummaryCard, SectionHeader, EmptyState, Card, ProgressBar } from '@/shared/components/ui/index';
 import { DashboardSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { useAppSelector } from '@/shared/store/hooks';
+import { DashboardHero } from '../components/DashboardHero';
 import { useDashboard } from '../hooks/useDashboard';
 
 export function DashboardPage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const user = useAppSelector((s) => s.auth.user);
   const { data, isLoading } = useDashboard();
 
   if (isLoading) return <DashboardSkeleton />;
@@ -17,22 +19,26 @@ export function DashboardPage() {
   const { summary, recentTransactions, budgets, goals, categoryBreakdown } = data;
 
   return (
-    <ScreenWrapper header={<FeatureHeader title="Dashboard" subtitle={`${summary.currency} overview`} icon="home" />} inset="tab">
-      <SearchField placeholder="Search transactions..." onPress={() => navigate('/search')} />
-      <div style={{ borderRadius: theme.radii.xl, padding: theme.spacing.xl, background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, color: theme.colors.onPrimary }}>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.8, textTransform: 'uppercase' }}>Net Savings</span>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), marginTop: 4, marginBottom: 0 }}>{formatCurrency(summary.netSavings, summary.currency)}</p>
-        <span style={{ fontSize: 13, fontWeight: 500, opacity: 0.85, fontFamily: 'Inter, sans-serif' }}>{summary.savingsRate.toFixed(1)}% savings rate</span>
-      </div>
+    <ScreenWrapper
+      header={
+        <DashboardHero
+          name={user?.name?.split(' ')[0] ?? 'there'}
+          netSavings={formatCurrency(summary.netSavings, summary.currency)}
+          currency={summary.currency}
+          savingsRate={Math.round(summary.savingsRate)}
+        />
+      }
+      inset="tab"
+    >
       <ResponsiveGrid>
         <SummaryCard title="Income" amount={formatCurrency(summary.totalIncome, summary.currency)} icon="trendingUp" color={theme.colors.success} />
         <SummaryCard title="Expenses" amount={formatCurrency(summary.totalExpenses, summary.currency)} icon="activity" color={theme.colors.danger} />
-        <SummaryCard title="Goals" amount={String(goals.length)} icon="target" color={theme.colors.warning} subtitle="Active goals" />
-        <SummaryCard title="Net Worth" amount={formatCurrency(summary.netSavings, summary.currency)} icon="piggyBank" />
+        <SummaryCard title="Goals" amount="Track" subtitle="Savings targets" icon="target" color={theme.colors.primary} onPress={() => navigate('/goals')} />
+        <SummaryCard title="Net Worth" amount="Overview" subtitle="Assets & liabilities" icon="piggyBank" color={theme.colors.primary} onPress={() => navigate('/net-worth')} />
       </ResponsiveGrid>
       {categoryBreakdown.length > 0 && (
         <div>
-          <SectionHeader title="Categories" />
+          <SectionHeader title="Spending by Category" />
           <Card variant="elevated">
             {categoryBreakdown.slice(0, 5).map((item) => {
               const total = Number(item.total);
@@ -53,46 +59,48 @@ export function DashboardPage() {
       )}
       {budgets.length > 0 && (
         <div>
-          <SectionHeader title="Budgets" action="See all" onAction={() => navigate('/budgets')} />
-          <ResponsiveGrid>
-            {budgets.slice(0, 3).map((b) => {
+          <SectionHeader title="Budget Progress" action="See all" onAction={() => navigate('/budgets')} />
+          <Card variant="elevated">
+            {budgets.slice(0, 3).map((b, i) => {
               const pct = b.amount > 0 ? Math.round(((b.spent ?? 0) / b.amount) * 100) : 0;
               return (
-                <Card key={b.id} variant="elevated" style={{ flex: 1, minWidth: 200 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{b.name}</span>
-                  <div style={{ marginTop: theme.spacing.xs }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>{formatCurrency(b.spent ?? 0, summary.currency)}</span>
-                    <span style={{ fontSize: 13, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}> / {formatCurrency(b.amount, summary.currency)}</span>
+                <div key={b.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(budgets.length, 3) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{b.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>{pct}%</span>
                   </div>
-                  <div style={{ marginTop: theme.spacing.sm }}><ProgressBar progress={pct} color={pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.success} /></div>
-                  <span style={{ fontSize: 11, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{pct}% used</span>
-                </Card>
+                  <ProgressBar progress={pct} color={pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary} />
+                  <span style={{ fontSize: 12, color: theme.colors.textTertiary, marginTop: 6, display: 'block', fontFamily: 'Inter, sans-serif' }}>{formatCurrency(b.spent ?? 0, summary.currency)} / {formatCurrency(b.amount, b.currency)}</span>
+                </div>
               );
             })}
-          </ResponsiveGrid>
+          </Card>
         </div>
       )}
       {goals.length > 0 && (
         <div>
-          <SectionHeader title="Goals" action="See all" onAction={() => navigate('/goals')} />
-          <ResponsiveGrid>
-            {goals.slice(0, 2).map((g) => {
+          <SectionHeader title="Goal Progress" action="See all" onAction={() => navigate('/goals')} />
+          <Card variant="elevated">
+            {goals.slice(0, 2).map((g, i) => {
               const pct = g.targetAmount > 0 ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0;
               return (
-                <Card key={g.id} variant="elevated" style={{ flex: 1, minWidth: 200 }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{g.name}</span>
-                  <div style={{ marginTop: theme.spacing.xs }}><span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>{formatCurrency(g.currentAmount, g.currency)}</span><span style={{ fontSize: 13, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}> / {formatCurrency(g.targetAmount, g.currency)}</span></div>
-                  <div style={{ marginTop: theme.spacing.sm }}><ProgressBar progress={pct} color={theme.colors.success} /></div>
-                </Card>
+                <div key={g.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(goals.length, 2) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{g.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>{pct}%</span>
+                  </div>
+                  <ProgressBar progress={pct} color={theme.colors.success} />
+                  <span style={{ fontSize: 12, color: theme.colors.textTertiary, marginTop: 6, display: 'block', fontFamily: 'Inter, sans-serif' }}>{formatCurrency(g.currentAmount, g.currency)} / {formatCurrency(g.targetAmount, g.currency)}</span>
+                </div>
               );
             })}
-          </ResponsiveGrid>
+          </Card>
         </div>
       )}
       <div>
-        <SectionHeader title="Recent Transactions" action="See all" onAction={() => navigate('/expenses')} />
+        <SectionHeader title="Recent Activity" action="See all" onAction={() => navigate('/expenses')} />
         {recentTransactions.length === 0 ? (
-          <EmptyState title="No transactions yet" subtitle="Add your first expense to start tracking" icon="receipt" action="Add Expense" onAction={() => navigate('/expense/add')} />
+          <EmptyState title="No transactions yet" subtitle="Tap + on the tab bar to log your first expense" icon="receipt" action="Add Expense" onAction={() => navigate('/expense/add')} />
         ) : (
           <Card variant="elevated" style={{ padding: 0 }}>
             {recentTransactions.map((txn, i) => (

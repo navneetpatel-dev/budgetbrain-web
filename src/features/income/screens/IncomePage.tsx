@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useIncome } from '../hooks/useIncome';
@@ -17,7 +18,16 @@ export function IncomePage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Income" subtitle="Track your earnings" icon="trendingUp" actionIcon="add" onAction={() => navigate('/income/add')} actionLabel="Add Income" />}
+      header={
+        <ProfileStackHeader
+          screen="income"
+          subtitle={`${incomeList.length} record${incomeList.length !== 1 ? 's' : ''}`}
+          actionIcon="add"
+          actionLabel="Add income"
+          onAction={() => navigate('/income/add')}
+        />
+      }
+      inset="tab"
       data={incomeList}
       keyExtractor={(txn: Transaction) => txn.id}
       renderItem={(txn) => (

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { FeatureHeader, HeaderIconButton, SearchField, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -14,10 +14,30 @@ export function ExpensesPage() {
 
   if (isLoading) return <ListSkeleton count={6} />;
   const transactions = data?.transactions ?? [];
+  const total = transactions.length;
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Activity" subtitle="All transactions" icon="activity" actionIcon="search" onAction={() => navigate('/search')} actionLabel="Search" />}
+      header={
+        <FeatureHeader
+          eyebrow="TRACK"
+          title="Activity"
+          subtitle={`${total} transaction${total !== 1 ? 's' : ''}`}
+          footer={
+            <SearchField
+              placeholder="Search transactions"
+              onPress={() => navigate('/search')}
+              rightAction={
+                <HeaderIconButton
+                  icon="trendingUp"
+                  label="Add income"
+                  onPress={() => navigate('/income/add')}
+                />
+              }
+            />
+          }
+        />
+      }
       data={transactions}
       keyExtractor={(item: Transaction) => item.id}
       renderItem={(txn) => (
@@ -29,7 +49,7 @@ export function ExpensesPage() {
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No transactions" subtitle="Add your first expense or income" icon="receipt" action="Add Expense" onAction={() => navigate('/expense/add')} />}
+      ListEmptyComponent={<EmptyState title="No expenses yet" subtitle="Your spending history will appear here" icon="activity" action="Add expense" onAction={() => navigate('/expense/add')} />}
     />
   );
 }

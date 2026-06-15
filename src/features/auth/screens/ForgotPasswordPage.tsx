@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { Button, Input } from '@/shared/components/ui/index';
+import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm } from '../components';
 import { useForgotPassword } from '../hooks/useAuthHooks';
 import { useTheme } from '@/shared/theme';
 
@@ -17,30 +17,21 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
-      <div>
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 24, fontWeight: 800, color: theme.colors.text, margin: 0 }}>Reset password</h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.body.fontSize, fontWeight: 400, color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>
-          {sent ? 'Check your email for the reset link' : 'Enter your email to receive a reset link'}
-        </p>
-      </div>
-
-      {!sent ? (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-          <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, marginBottom: theme.spacing.md, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-          <Button title="Send Reset Link" onPress={handleSubmit} loading={loading} size="lg" />
-        </form>
+    <AuthShell
+      tagline={sent ? 'Check your inbox for the link.' : 'Enter the email linked to your account.'}
+      panelTitle="Reset password"
+      backHref="/login"
+      footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
+    >
+      {sent ? (
+        <AuthSuccessBanner message="If an account exists for that email, a reset link has been sent." />
       ) : (
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Didn't receive it? Check spam or</p>
-          <button onClick={() => { setEmail(email); }} style={{ background: 'none', border: 'none', color: theme.colors.primary, fontWeight: 600, cursor: 'pointer', fontSize: 14, fontFamily: 'Inter, sans-serif', marginTop: 4 }}>try again</button>
-        </div>
+        <AuthForm onSubmit={handleSubmit}>
+          <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" type="email" />
+          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+          <Button title="Send Reset Link" onPress={handleSubmit} loading={loading} size="lg" />
+        </AuthForm>
       )}
-
-      <div style={{ textAlign: 'center' }}>
-        <Link to="/login" style={{ fontSize: 14, fontWeight: 600, color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>Back to sign in</Link>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FeatureHeader, ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
+import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
@@ -16,7 +17,8 @@ export function CategoriesPage() {
   return (
     <div style={{ height: '100%', position: 'relative' }}>
       <StickyHeaderFlatScreen
-        header={<FeatureHeader title="Categories" subtitle="Manage your categories" icon="category" variant="stack" showBack />}
+        header={<ProfileStackHeader screen="categories" subtitle="Manage your categories" />}
+        inset="stack"
         data={categories}
         keyExtractor={(item) => item.id}
         renderItem={(cat) => (

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Input } from '@/shared/components/ui/index';
+import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm } from '../components';
 import { useResetPassword } from '../hooks/useAuthHooks';
 import { useTheme } from '@/shared/theme';
 
@@ -11,32 +12,36 @@ export function ResetPasswordPage() {
   const token = searchParams.get('token') ?? '';
   const { reset, loading, error, setError, done } = useResetPassword(token);
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     if (!password || password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (password !== confirmPassword) { setError('Passwords do not match'); return; }
     reset(password);
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xl }}>
-      <div>
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 24, fontWeight: 800, color: theme.colors.text, margin: 0 }}>{done ? 'Password reset' : 'New password'}</h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.body.fontSize, fontWeight: 400, color: theme.colors.textSecondary, marginTop: theme.spacing.xs }}>{done ? 'Your password has been reset successfully.' : 'Choose a new password for your account'}</p>
-      </div>
-      {!done ? (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-          <Input label="New Password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" type="password" secureToggle />
-          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, marginBottom: theme.spacing.md, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
-          <Button title="Reset Password" onPress={handleSubmit} loading={loading} size="lg" />
-        </form>
+    <AuthShell
+      tagline={done ? 'You can now sign in with your new password.' : "Choose a strong password you haven't used before."}
+      panelTitle="New password"
+      backHref="/login"
+      footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
+    >
+      {done ? (
+        <>
+          <AuthSuccessBanner message="Your password has been reset successfully." />
+          <Button title="Continue to Sign In" onPress={() => navigate('/login', { replace: true })} size="lg" />
+        </>
       ) : (
-        <Button title="Go to Sign In" onPress={() => navigate('/login', { replace: true })} size="lg" />
+        <AuthForm onSubmit={handleSubmit}>
+          <Input label="New password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" type="password" secureToggle />
+          <Input label="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Re-enter password" type="password" secureToggle />
+          {error && <p style={{ color: theme.colors.danger, fontSize: 13, fontWeight: 500, margin: 0, fontFamily: 'Inter, sans-serif' }}>{error}</p>}
+          <Button title="Update Password" onPress={handleSubmit} loading={loading} disabled={!token} size="lg" />
+        </AuthForm>
       )}
-      <div style={{ textAlign: 'center' }}>
-        <Link to="/login" style={{ fontSize: 14, fontWeight: 600, color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>Back to sign in</Link>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

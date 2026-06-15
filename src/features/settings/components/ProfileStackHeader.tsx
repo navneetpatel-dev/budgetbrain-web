@@ -1,0 +1,65 @@
+import { StackNavHeader, useProfileBack } from '@/shared/components/ui/feature-screen';
+import type { AppIconName } from '@/shared/components/ui/icons/AppIcon';
+
+export type ProfileScreenKey =
+  | 'goals'
+  | 'income'
+  | 'ai'
+  | 'net-worth'
+  | 'reports'
+  | 'categories'
+  | 'accounts'
+  | 'investments'
+  | 'family'
+  | 'integrations'
+  | 'notifications'
+  | 'support'
+  | 'privacy'
+  | 'terms';
+
+const PROFILE_SCREEN_TITLES: Record<ProfileScreenKey, string> = {
+  goals: 'Goals',
+  income: 'Income',
+  ai: 'AI Coach',
+  'net-worth': 'Net Worth',
+  reports: 'Reports',
+  categories: 'Categories',
+  accounts: 'Accounts',
+  investments: 'Investments',
+  family: 'Family',
+  integrations: 'Integrations',
+  notifications: 'Notifications',
+  support: 'Support',
+  privacy: 'Privacy Policy',
+  terms: 'Terms of Service',
+};
+
+export function ProfileStackHeader({
+  screen,
+  subtitle,
+  footer,
+  actionIcon,
+  onAction,
+  actionLabel,
+}: {
+  screen: ProfileScreenKey;
+  subtitle?: string;
+  footer?: React.ReactNode;
+  actionIcon?: AppIconName;
+  onAction?: () => void;
+  actionLabel?: string;
+}) {
+  const goBack = useProfileBack();
+
+  return (
+    <StackNavHeader
+      title={PROFILE_SCREEN_TITLES[screen]}
+      subtitle={subtitle}
+      onBack={goBack}
+      footer={footer}
+      actionIcon={actionIcon}
+      onAction={onAction}
+      actionLabel={actionLabel}
+    />
+  );
+}

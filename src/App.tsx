@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/shared/theme';
 import { AuthGate } from '@/app/layouts/AuthGate';
 import { AuthBootstrap } from '@/app/layouts/AuthBootstrap';
 import { AuthLayout } from '@/app/layouts/AuthLayout';
+import { AppShell } from '@/app/layouts/AppShell';
 import { TabLayout } from '@/app/layouts/TabLayout';
 import { LoginPage } from '@/features/auth/screens/LoginPage';
 import { RegisterPage } from '@/features/auth/screens/RegisterPage';
@@ -64,41 +65,44 @@ export default function App() {
                       <Route path="/verify-email" element={<VerifyEmailPage />} />
                     </Route>
 
-                    <Route path="/onboarding" element={<OnboardingPage />} />
+                    <Route element={<AppShell />}>
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="/onboarding" element={<OnboardingPage />} />
 
-                    <Route element={<TabLayout />}>
-                      <Route path="/dashboard" element={<DashboardPage />} />
-                      <Route path="/expenses" element={<ExpensesPage />} />
-                      <Route path="/budgets" element={<BudgetsPage />} />
-                      <Route path="/goals" element={<GoalsPage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="/income" element={<IncomePage />} />
-                      <Route path="/ai" element={<AiCoachPage />} />
+                      <Route element={<TabLayout />}>
+                        <Route path="/dashboard" element={<DashboardPage />} />
+                        <Route path="/expenses" element={<ExpensesPage />} />
+                        <Route path="/budgets" element={<BudgetsPage />} />
+                        <Route path="/goals" element={<GoalsPage />} />
+                        <Route path="/settings" element={<SettingsPage />} />
+                        <Route path="/income" element={<IncomePage />} />
+                        <Route path="/ai" element={<AiCoachPage />} />
+                      </Route>
+
+                      <Route path="/expense/add" element={<AddExpensePage />} />
+                      <Route path="/expense/:id" element={<ExpenseDetailPage />} />
+                      <Route path="/income/add" element={<AddIncomePage />} />
+                      <Route path="/income/:id" element={<IncomeDetailPage />} />
+                      <Route path="/budget/add" element={<AddBudgetPage />} />
+                      <Route path="/budget/:id" element={<BudgetDetailPage />} />
+                      <Route path="/goal/add" element={<AddGoalPage />} />
+                      <Route path="/goal/:id" element={<GoalDetailPage />} />
+                      <Route path="/goal/:id/contribute" element={<ContributeGoalPage />} />
+                      <Route path="/net-worth" element={<NetWorthPage />} />
+                      <Route path="/categories" element={<CategoriesPage />} />
+                      <Route path="/accounts" element={<AccountsPage />} />
+                      <Route path="/investments" element={<InvestmentsPage />} />
+                      <Route path="/search" element={<SearchPage />} />
+                      <Route path="/reports" element={<ReportsPage />} />
+                      <Route path="/family" element={<FamilyPage />} />
+                      <Route path="/integrations" element={<IntegrationsPage />} />
+                      <Route path="/notifications" element={<NotificationsPage />} />
+                      <Route path="/support" element={<SupportPage />} />
+                      <Route path="/subscription" element={<SubscriptionPage />} />
+                      <Route path="/privacy" element={<PrivacyPage />} />
+                      <Route path="/terms" element={<TermsPage />} />
+                      <Route path="*" element={<div>Not Found</div>} />
                     </Route>
-
-                    <Route path="/expense/add" element={<AddExpensePage />} />
-                    <Route path="/expense/:id" element={<ExpenseDetailPage />} />
-                    <Route path="/income/add" element={<AddIncomePage />} />
-                    <Route path="/income/:id" element={<IncomeDetailPage />} />
-                    <Route path="/budget/add" element={<AddBudgetPage />} />
-                    <Route path="/budget/:id" element={<BudgetDetailPage />} />
-                    <Route path="/goal/add" element={<AddGoalPage />} />
-                    <Route path="/goal/:id" element={<GoalDetailPage />} />
-                    <Route path="/goal/:id/contribute" element={<ContributeGoalPage />} />
-                    <Route path="/net-worth" element={<NetWorthPage />} />
-                    <Route path="/categories" element={<CategoriesPage />} />
-                    <Route path="/accounts" element={<AccountsPage />} />
-                    <Route path="/investments" element={<InvestmentsPage />} />
-                    <Route path="/search" element={<SearchPage />} />
-                    <Route path="/reports" element={<ReportsPage />} />
-                    <Route path="/family" element={<FamilyPage />} />
-                    <Route path="/integrations" element={<IntegrationsPage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/support" element={<SupportPage />} />
-                    <Route path="/subscription" element={<SubscriptionPage />} />
-                    <Route path="/privacy" element={<PrivacyPage />} />
-                    <Route path="/terms" element={<TermsPage />} />
-                    <Route path="*" element={<div>Not Found</div>} />
                   </Route>
                 </Routes>
               </BrowserRouter>

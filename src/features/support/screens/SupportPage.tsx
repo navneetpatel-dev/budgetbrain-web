@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
@@ -13,7 +14,8 @@ export function SupportPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Support" subtitle="Get help" icon="helpCircle" variant="stack" showBack actionIcon="add" onAction={() => setShowForm(!showForm)} actionLabel="New Ticket" />}
+      header={<ProfileStackHeader screen="support" subtitle="Get help" actionIcon="add" onAction={() => setShowForm(!showForm)} actionLabel="New Ticket" />}
+      inset="stack"
       data={tickets}
       keyExtractor={(item) => item.id}
       renderItem={(t) => (

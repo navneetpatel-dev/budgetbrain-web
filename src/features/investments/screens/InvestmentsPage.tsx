@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/services/api';
-import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
+import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -18,7 +19,8 @@ export function InvestmentsPage() {
 
   return (
     <StickyHeaderFlatScreen
-      header={<FeatureHeader title="Investments" subtitle="Your portfolio" icon="chart" variant="stack" showBack />}
+      header={<ProfileStackHeader screen="investments" subtitle="Your portfolio" />}
+      inset="stack"
       data={investments}
       keyExtractor={(item) => item.id}
       renderItem={(inv) => (
