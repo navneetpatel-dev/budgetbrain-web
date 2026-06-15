@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
+import { BrandLogoBadge } from '@/shared/components/brand/BrandLogoBadge';
 import { useTheme } from '@/shared/theme';
 import { AuthFeatureTickerRail } from '../ui/AuthFeatureTicker';
 
@@ -29,29 +29,10 @@ export function AuthHeroHeader({
   const heroTagline = tagline ?? `${greeting} · Welcome back`;
 
   const padX = branded ? (compact ? theme.spacing.lg : theme.spacing.xxl) : compact ? theme.spacing.lg : theme.spacing.xl;
-  const logoSize = branded ? (compact ? 40 : 52) : compact ? 44 : 60;
-  const logoRadius = branded ? (compact ? 12 : 15) : compact ? 14 : 18;
-  const ringRadius = branded ? (compact ? 16 : 20) : compact ? 18 : 24;
-  const iconSize = branded ? (compact ? 20 : 26) : compact ? 22 : 28;
   const titleSize = branded ? (compact ? 22 : 28) : compact ? 26 : 32;
   const taglineSize = branded ? (compact ? 11 : 13) : 13;
 
-  const logo = (
-    <div style={{
-      padding: 2,
-      borderRadius: ringRadius,
-      border: '1px solid rgba(255,255,255,0.22)',
-      flexShrink: 0,
-    }}>
-      <div style={{
-        width: logoSize, height: logoSize, borderRadius: logoRadius,
-        backgroundColor: 'rgba(255,255,255,0.16)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <AppIcon name="piggyBank" size={iconSize} color="#fff" />
-      </div>
-    </div>
-  );
+  const logo = <BrandLogoBadge compact={compact} branded={branded} />;
 
   const titleEl = (
     <h1 style={{

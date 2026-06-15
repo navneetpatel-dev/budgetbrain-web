@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
+import { BrandMark } from '@/shared/components/brand/BrandMark';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useAppSelector } from '@/shared/store/hooks';
@@ -49,7 +50,7 @@ export function DesktopSidebar() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
         }}>
-          <AppIcon name="piggyBank" size={20} color={theme.colors.onPrimary} />
+          <BrandMark size={20} color={theme.colors.onPrimary} strokeWidth={2} />
         </div>
         <div>
           <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 800, color: theme.colors.text, letterSpacing: -0.3 }}>BudgetBrain</span>
