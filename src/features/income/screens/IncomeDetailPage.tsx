@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card } from '@/shared/components/ui/index';
+import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useIncomeDetail } from '../hooks/useIncome';

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
 import { Button, Card, ProgressBar } from '@/shared/components/ui/index';
+import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useGoalDetail } from '../hooks/useGoals';
@@ -11,7 +12,7 @@ export function GoalDetailPage() {
   const theme = useTheme();
   const { goal, isLoading, deleteMutation } = useGoalDetail(id);
 
-  if (isLoading || !goal) return null;
+  if (isLoading || !goal) return <DetailSkeleton />;
 
   const pct = goal.targetAmount > 0 ? Math.round((goal.currentAmount / goal.targetAmount) * 100) : 0;
 

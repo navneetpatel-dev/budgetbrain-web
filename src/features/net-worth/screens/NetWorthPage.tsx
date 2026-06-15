@@ -1,6 +1,7 @@
 import { FeatureHeader } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
-import { Card, SummaryCard, EmptyState } from '@/shared/components/ui/index';
+import { Card, SummaryCard } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useQuery } from '@tanstack/react-query';
@@ -9,12 +10,13 @@ import type { FinancialAccount, Investment } from '@/shared/types';
 
 export function NetWorthPage() {
   const theme = useTheme();
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['net-worth'],
     queryFn: () => apiGet<{ totalAssets: number; totalLiabilities: number; accounts: FinancialAccount[]; investments: Investment[] }>('/net-worth'),
   });
 
-  if (!data) return <ScreenWrapper header={<FeatureHeader title="Net Worth" subtitle="Your financial overview" icon="piggyBank" variant="stack" showBack />}><EmptyState title="No data" subtitle="Add accounts and investments to track your net worth" icon="piggyBank" /></ScreenWrapper>;
+  if (isLoading) return <ListSkeleton count={4} />;
+  if (!data) return null;
 
   return (
     <ScreenWrapper header={<FeatureHeader title="Net Worth" subtitle="Your financial overview" icon="piggyBank" variant="stack" showBack />}>

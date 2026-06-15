@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card } from '@/shared/components/ui/index';
+import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useExpenseDetail } from '../hooks/useExpenses';
@@ -17,7 +18,7 @@ export function ExpenseDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [notes, setNotes] = useState('');
 
-  if (isLoading || !txn) return null;
+  if (isLoading || !txn) return <DetailSkeleton />;
 
   if (editing) {
     const handleSave = (e: FormEvent) => { e.preventDefault(); updateMutation.mutate({ amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined }); };

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useIncome } from '../hooks/useIncome';
@@ -9,7 +10,9 @@ import type { Transaction } from '@/shared/types';
 export function IncomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data } = useIncome();
+  const { data, isLoading } = useIncome();
+
+  if (isLoading) return <ListSkeleton count={4} />;
   const incomeList = data ?? [];
 
   return (

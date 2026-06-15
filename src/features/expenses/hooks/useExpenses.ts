@@ -8,6 +8,7 @@ export function useExpenses() {
   return useQuery({
     queryKey: ['expenses'],
     queryFn: () => apiGet<{ transactions: Transaction[]; total: number }>('/expenses', { page: 1, limit: 50 }),
+    select: (data) => data,
   });
 }
 

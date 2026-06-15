@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, ProgressBar } from '@/shared/components/ui/index';
+import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useBudgetDetail } from '../hooks/useBudgets';
@@ -16,7 +17,7 @@ export function BudgetDetailPage() {
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
 
-  if (isLoading || !budget) return null;
+  if (isLoading || !budget) return <DetailSkeleton />;
 
   if (editing) {
     const save = () => updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });

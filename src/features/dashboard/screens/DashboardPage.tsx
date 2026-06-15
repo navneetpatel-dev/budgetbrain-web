@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, SearchField } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
 import { SummaryCard, SectionHeader, EmptyState, Card, ProgressBar } from '@/shared/components/ui/index';
+import { DashboardSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useDashboard } from '../hooks/useDashboard';
@@ -11,7 +12,7 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const { data, isLoading } = useDashboard();
 
-  if (isLoading) return <div style={{ height: '100%', backgroundColor: theme.colors.background }} />;
+  if (isLoading) return <DashboardSkeleton />;
   if (!data) return null;
   const { summary, recentTransactions, budgets, goals, categoryBreakdown } = data;
 

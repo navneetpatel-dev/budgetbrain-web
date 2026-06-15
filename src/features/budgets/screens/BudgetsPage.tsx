@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useBudgets } from '../hooks/useBudgets';
@@ -9,7 +10,9 @@ import type { Budget } from '@/shared/types';
 export function BudgetsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data } = useBudgets();
+  const { data, isLoading } = useBudgets();
+
+  if (isLoading) return <ListSkeleton count={4} />;
   const budgets = data ?? [];
 
   return (

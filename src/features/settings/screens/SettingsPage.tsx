@@ -3,6 +3,7 @@ import { useTheme, ACCENT_OPTIONS } from '@/shared/theme';
 import { FeatureHeader } from '@/shared/components/ui/feature-screen';
 import { Card } from '@/shared/components/ui/index';
 import { ListRow } from '@/shared/components/ui/lists';
+import { SettingsSkeleton } from '@/shared/components/ui/skeleton';
 import { useAppSelector, useAppDispatch } from '@/shared/store/hooks';
 import { setTheme, setAccent } from '@/shared/store/settingsSlice';
 import { useSignOut } from '@/features/auth/hooks/useAuthHooks';
@@ -14,6 +15,8 @@ export function SettingsPage() {
   const { signOut } = useSignOut();
   const user = useAppSelector((s) => s.auth.user);
   const settingsTheme = useAppSelector((s) => s.settings.theme);
+
+  if (!user) return <SettingsSkeleton />;
 
   return (
     <div style={{ flex: 1, backgroundColor: theme.colors.background, overflowY: 'auto', paddingBottom: 120 }}>

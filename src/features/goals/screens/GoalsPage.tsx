@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
+import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useGoals } from '../hooks/useGoals';
@@ -9,7 +10,9 @@ import type { Goal } from '@/shared/types';
 export function GoalsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data } = useGoals();
+  const { data, isLoading } = useGoals();
+
+  if (isLoading) return <ListSkeleton count={3} />;
   const goals = data ?? [];
 
   return (
