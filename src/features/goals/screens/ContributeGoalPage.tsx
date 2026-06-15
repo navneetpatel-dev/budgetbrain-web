@@ -12,6 +12,8 @@ export function ContributeGoalPage() {
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
 
+  const isPending = contributeMutation.isPending;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -22,10 +24,10 @@ export function ContributeGoalPage() {
   return (
     <FormStackScreen title="Contribute" eyebrow="Goal" icon="add">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
-        <Input label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
+        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Add Contribution" onPress={handleSubmit} loading={contributeMutation.isPending} size="lg" />
+        <Button title="Add Contribution" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>
     </FormStackScreen>
   );

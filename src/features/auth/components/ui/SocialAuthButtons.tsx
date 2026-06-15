@@ -32,12 +32,13 @@ function SocialAuthError({ message }: { message: string }) {
   return <AuthErrorBanner message={message} />;
 }
 
-export function SocialAuthButtons() {
+export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boolean }) {
   const theme = useTheme();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(320);
   const { loading, error, clearError, signInGoogle, reportProviderError } = useSocialAuth();
   const isGoogleLoading = loading === 'google';
+  const isBusy = formDisabled || isGoogleLoading;
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -64,10 +65,10 @@ export function SocialAuthButtons() {
     fontSize: 15,
     fontWeight: 600,
     fontFamily: 'Inter, sans-serif',
-    opacity: isGoogleLoading ? 0.6 : 1,
-    pointerEvents: googleEnabled ? ('none' as const) : undefined,
+    opacity: isBusy ? 0.6 : 1,
+    pointerEvents: googleEnabled || isBusy ? ('none' as const) : undefined,
     cursor: googleEnabled ? undefined : 'pointer',
-  }), [theme, isGoogleLoading]);
+  }), [theme, isBusy]);
 
   const onGoogleSuccess = async (response: CredentialResponse) => {
     if (!response.credential) return;
@@ -127,7 +128,14 @@ export function SocialAuthButtons() {
         {googleEnabled ? (
           <div style={shellStyle}>
             {isGoogleLoading ? (
-              <span style={{ color: theme.colors.primary, fontSize: 14 }}>Signing in…</span>
+              <>
+                <span style={{
+                  width: 18, height: 18, border: '2px solid transparent',
+                  borderTopColor: theme.colors.primary, borderRadius: '50%',
+                  animation: 'spin 0.6s linear infinite', flexShrink: 0,
+                }} />
+                <span style={{ color: theme.colors.text, fontSize: 15, fontWeight: 600 }}>Signing in…</span>
+              </>
             ) : (
               <>
                 <GoogleMark />

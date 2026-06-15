@@ -64,13 +64,41 @@ export function ResponsiveGrid({
     }}>
       {Array.isArray(children) ? children.map((child, i) => (
         <div key={i} style={{
-          flexGrow: 1, flexShrink: 1,
-          flexBasis: cols === 1 ? '100%' : cols === 2 ? '48%' : '31%',
-          minWidth: cols === 1 ? '100%' : cols === 2 ? 160 : 140,
+          flexGrow: 1,
+          flexShrink: 0,
+          flexBasis: cols === 1 ? '100%' : cols === 2 ? `calc((100% - ${gap}px) / 2)` : `calc((100% - ${gap * 2}px) / 3)`,
+          minWidth: cols === 1 ? '100%' : cols === 2 ? `calc((100% - ${gap}px) / 2)` : `calc((100% - ${gap * 2}px) / 3)`,
+          maxWidth: cols === 1 ? '100%' : cols === 2 ? `calc((100% - ${gap}px) / 2)` : `calc((100% - ${gap * 2}px) / 3)`,
         }}>
           {child}
         </div>
       )) : children}
+    </div>
+  );
+}
+
+/** Dashboard metric cards: full-width income/expense, paired goals/net-worth on phone & tablet */
+export function SummaryMetricsGrid({
+  children, gap: gapProp, style,
+}: {
+  children: ReactNode; gap?: number; style?: CSSProperties;
+}) {
+  const { isDesktop, gridGap } = useResponsive();
+  const gap = gapProp ?? gridGap;
+  const items = Array.isArray(children) ? children : [children];
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
+      gap,
+      ...style,
+    }}>
+      {items.map((child, i) => (
+        <div key={i} style={{ gridColumn: !isDesktop && i < 2 ? '1 / -1' : undefined, minWidth: 0 }}>
+          {child}
+        </div>
+      ))}
     </div>
   );
 }

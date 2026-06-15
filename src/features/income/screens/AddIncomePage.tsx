@@ -21,6 +21,8 @@ export function AddIncomePage() {
   const [newSourceName, setNewSourceName] = useState('');
   const [newSourceType, setNewSourceType] = useState('salary');
 
+  const isPending = createMutation.isPending;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -31,21 +33,21 @@ export function AddIncomePage() {
   return (
     <FormStackScreen title="Add Income" eyebrow="Income" icon="trendingUp">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
-        <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
+        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Source</label>
-        <OptionChips options={['existing', 'new'] as const} value={sourceMode} onChange={setSourceMode} getLabel={(v) => v === 'existing' ? 'Existing source' : 'New source'} />
+        <OptionChips options={['existing', 'new'] as const} value={sourceMode} onChange={setSourceMode} getLabel={(v) => v === 'existing' ? 'Existing source' : 'New source'} disabled={isPending} />
         {sourceMode === 'existing' ? (
-          <OptionChipList items={(sources ?? []).map((s) => ({ id: s.id, label: s.name }))} selectedId={selectedSource} onSelect={setSelectedSource} />
+          <OptionChipList items={(sources ?? []).map((s) => ({ id: s.id, label: s.name }))} selectedId={selectedSource} onSelect={setSelectedSource} disabled={isPending} />
         ) : (
           <>
-            <Input label="Source Name" value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} placeholder="e.g. Salary" />
-            <OptionChips options={SOURCE_TYPES.map((t) => t.id)} value={newSourceType} onChange={setNewSourceType} getLabel={(v) => SOURCE_TYPES.find((t) => t.id === v)?.label ?? v} />
+            <Input label="Source Name" value={newSourceName} onChange={(e) => setNewSourceName(e.target.value)} placeholder="e.g. Salary" disabled={isPending} />
+            <OptionChips options={SOURCE_TYPES.map((t) => t.id)} value={newSourceType} onChange={setNewSourceType} getLabel={(v) => SOURCE_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
           </>
         )}
-        <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
+        <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Save Income" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
+        <Button title="Save Income" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>
     </FormStackScreen>
   );

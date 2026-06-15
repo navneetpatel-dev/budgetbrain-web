@@ -29,7 +29,7 @@ export function RegisterPage() {
           name="name"
           rules={authFieldRules.name}
           render={({ field }) => (
-            <Input label="Full name" value={field.value} onChange={field.onChange} placeholder="Jane Doe" autoComplete="name" error={errors.name?.message} />
+            <Input label="Full name" value={field.value} onChange={field.onChange} placeholder="Jane Doe" autoComplete="name" disabled={loading} error={errors.name?.message} />
           )}
         />
         <Controller
@@ -37,7 +37,7 @@ export function RegisterPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" error={errors.email?.message} />
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
           )}
         />
         <Controller
@@ -45,7 +45,7 @@ export function RegisterPage() {
           name="password"
           rules={authFieldRules.passwordMin8}
           render={({ field }) => (
-            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" error={errors.password?.message} />
+            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
           )}
         />
         {error ? <AuthErrorBanner message={error} /> : null}

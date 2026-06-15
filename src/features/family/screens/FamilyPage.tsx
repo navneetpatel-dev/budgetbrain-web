@@ -20,16 +20,16 @@ export function FamilyPage() {
       )) : <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />}
       {showCreate && (
         <Card variant="elevated">
-          <Input label="Group Name" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Family Budget" />
+          <Input label="Group Name" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Family Budget" disabled={createMutation.isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Create" onPress={() => createMutation.mutate({ name: groupName })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); }} variant="outline" /></div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Create" onPress={() => createMutation.mutate({ name: groupName })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); }} variant="outline" disabled={createMutation.isPending} /></div>
         </Card>
       )}
       {showJoin && (
         <Card variant="elevated">
-          <Input label="Invite Code" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} placeholder="Enter invite code" />
+          <Input label="Invite Code" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} placeholder="Enter invite code" disabled={joinMutation.isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Join" onPress={() => joinMutation.mutate({ inviteCode })} loading={joinMutation.isPending} /><Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); }} variant="outline" /></div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Join" onPress={() => joinMutation.mutate({ inviteCode })} loading={joinMutation.isPending} /><Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); }} variant="outline" disabled={joinMutation.isPending} /></div>
         </Card>
       )}
       <div style={{ display: 'flex', gap: theme.spacing.sm }}>

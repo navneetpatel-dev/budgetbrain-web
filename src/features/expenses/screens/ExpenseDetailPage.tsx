@@ -21,19 +21,20 @@ export function ExpenseDetailPage() {
   if (isLoading || !txn) return <DetailSkeleton />;
 
   if (editing) {
+    const isPending = updateMutation.isPending;
     const handleSave = (e: FormEvent) => { e.preventDefault(); updateMutation.mutate({ amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined }); };
     return (
       <FormStackScreen title="Edit Expense" onBack={cancelEdit}>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" />
-          <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} placeholder="e.g. Starbucks" />
-          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
+          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" disabled={isPending} />
+          <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} placeholder="e.g. Starbucks" disabled={isPending} />
+          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
-          <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} />
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline />
+          <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
+          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <Button title="Save Changes" onPress={handleSave} loading={updateMutation.isPending} size="lg" />
-          <Button title="Cancel" onPress={cancelEdit} variant="outline" />
+          <Button title="Save Changes" onPress={handleSave} loading={isPending} size="lg" />
+          <Button title="Cancel" onPress={cancelEdit} variant="outline" disabled={isPending} />
         </form>
       </FormStackScreen>
     );

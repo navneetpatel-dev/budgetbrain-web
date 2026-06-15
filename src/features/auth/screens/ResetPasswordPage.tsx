@@ -41,7 +41,7 @@ export function ResetPasswordPage() {
             name="password"
             rules={authFieldRules.passwordMin8}
             render={({ field }) => (
-              <Input label="New password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" error={errors.password?.message} />
+              <Input label="New password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
             )}
           />
           <Controller
@@ -52,7 +52,7 @@ export function ResetPasswordPage() {
               validate: (value) => value === password || 'Passwords do not match',
             }}
             render={({ field }) => (
-              <Input label="Confirm password" value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" error={errors.confirmPassword?.message} />
+              <Input label="Confirm password" value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.confirmPassword?.message} />
             )}
           />
           {error ? <AuthErrorBanner message={error} /> : null}

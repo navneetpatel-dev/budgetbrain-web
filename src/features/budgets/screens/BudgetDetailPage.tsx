@@ -20,17 +20,18 @@ export function BudgetDetailPage() {
   if (isLoading || !budget) return <DetailSkeleton />;
 
   if (editing) {
+    const isPending = updateMutation.isPending;
     const save = () => updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });
     return (
       <FormStackScreen title="Edit Budget" onBack={() => setEditing(false)}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Budget Name" value={name} onChange={(e) => setName(e.target.value)} />
-          <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} />
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" />
-          <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} type="number" />
+          <Input label="Budget Name" value={name} onChange={(e) => setName(e.target.value)} disabled={isPending} />
+          <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
+          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" disabled={isPending} />
+          <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} type="number" disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <Button title="Save Changes" onPress={save} loading={updateMutation.isPending} size="lg" />
-          <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" />
+          <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
+          <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" disabled={isPending} />
         </form>
       </FormStackScreen>
     );

@@ -14,6 +14,8 @@ export function AddBudgetPage() {
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [alertThreshold, setAlertThreshold] = useState('80');
 
+  const isPending = createMutation.isPending;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,14 +26,14 @@ export function AddBudgetPage() {
   return (
     <FormStackScreen title="Create Budget" eyebrow="New Budget" icon="budgets">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Budget Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Groceries" />
+        <Input label="Budget Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Groceries" disabled={isPending} />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Type</label>
-        <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} />
-        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
-        <Input label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
-        <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} placeholder="80" type="number" helperText="Get notified when spending reaches this percentage" />
+        <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
+        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input label="Start Date" value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" disabled={isPending} />
+        <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} placeholder="80" type="number" helperText="Get notified when spending reaches this percentage" disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Create Budget" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
+        <Button title="Create Budget" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>
     </FormStackScreen>
   );

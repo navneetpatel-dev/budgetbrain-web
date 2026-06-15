@@ -265,15 +265,15 @@ export function SearchField({ placeholder, onPress, rightAction }: { placeholder
 /* ── OptionChips ── */
 
 export function OptionChips<T extends string>({
-  options, value, onChange, getLabel = (v) => v, getColor, error,
+  options, value, onChange, getLabel = (v) => v, getColor, error, disabled,
 }: {
   options: T[]; value: T; onChange: (v: T) => void;
-  getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string;
+  getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string; disabled?: boolean;
 }) {
   const theme = useTheme();
 
   return (
-    <div style={{ marginBottom: theme.spacing.lg }}>
+    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt) => {
           const selected = value === opt;
@@ -281,13 +281,15 @@ export function OptionChips<T extends string>({
           return (
             <button
               key={opt}
+              type="button"
+              disabled={disabled}
               onClick={() => onChange(opt)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 14px', borderRadius: theme.radii.full,
                 border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
                 backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
                 fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
                 textTransform: 'capitalize',
               }}
@@ -313,17 +315,18 @@ export function OptionChips<T extends string>({
 }
 
 export function OptionChipList({
-  items, selectedId, onSelect, error,
+  items, selectedId, onSelect, error, disabled,
 }: {
   items: { id: string; label: string; color?: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
   error?: string;
+  disabled?: boolean;
 }) {
   const theme = useTheme();
 
   return (
-    <div style={{ marginBottom: theme.spacing.lg }}>
+    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {items.map((item) => {
           const selected = selectedId === item.id;
@@ -331,13 +334,15 @@ export function OptionChipList({
           return (
             <button
               key={item.id}
+              type="button"
+              disabled={disabled}
               onClick={() => onSelect(item.id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 14px', borderRadius: theme.radii.full,
                 border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
                 backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
                 fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
                 textTransform: 'capitalize',
               }}
@@ -363,15 +368,15 @@ export function OptionChipList({
 }
 
 export function MultiOptionChips({
-  options, selected, onToggle, getLabel = (v) => v, error,
+  options, selected, onToggle, getLabel = (v) => v, error, disabled,
 }: {
   options: string[]; selected: string[]; onToggle: (v: string) => void;
-  getLabel?: (v: string) => string; error?: string;
+  getLabel?: (v: string) => string; error?: string; disabled?: boolean;
 }) {
   const theme = useTheme();
 
   return (
-    <div style={{ marginBottom: theme.spacing.lg }}>
+    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt) => {
           const isSelected = selected.includes(opt);
@@ -379,13 +384,15 @@ export function MultiOptionChips({
           return (
             <button
               key={opt}
+              type="button"
+              disabled={disabled}
               onClick={() => onToggle(opt)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 14px', borderRadius: theme.radii.full,
                 border: `1.5px solid ${isSelected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
                 backgroundColor: isSelected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
+                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
                 fontWeight: isSelected ? 700 : 600, color: isSelected ? accent : theme.colors.text,
                 textTransform: 'capitalize',
               }}
@@ -416,13 +423,14 @@ export function ActionFab({ onPress, label = 'Add' }: { onPress: () => void; lab
   const theme = useTheme();
   const { contentMaxWidth, tabBarPaddingX } = useResponsive();
   const bottomInset = useBottomInset('tab');
+  const fabBottom = typeof bottomInset === 'number' ? bottomInset - 56 : `calc(${bottomInset} - 56px)`;
 
   return (
     <button
       onClick={onPress}
       style={{
         position: 'fixed',
-        bottom: bottomInset - 56,
+        bottom: fabBottom,
         right: contentMaxWidth
           ? `max(${tabBarPaddingX}px, calc((100% - ${contentMaxWidth}px) / 2 + ${tabBarPaddingX}px))`
           : tabBarPaddingX + 14,

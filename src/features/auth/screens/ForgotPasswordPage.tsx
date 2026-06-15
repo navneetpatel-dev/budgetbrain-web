@@ -35,7 +35,7 @@ export function ForgotPasswordPage() {
             name="email"
             rules={authFieldRules.email}
             render={({ field }) => (
-              <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" error={errors.email?.message} />
+              <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
             )}
           />
           {error ? <AuthErrorBanner message={error} /> : null}

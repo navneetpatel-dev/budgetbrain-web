@@ -36,12 +36,12 @@ export function CategoriesPage() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.overlay, padding: 24 }}>
           <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.xl, padding: theme.spacing.xl, maxWidth: 420, width: '100%', boxShadow: theme.shadows.lg }}>
             <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: '0 0 16px 0' }}>New Category</h3>
-            <Input label="Name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Transport" autoFocus />
-            <div style={{ marginBottom: theme.spacing.lg }}><span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif' }}>Color</span><ColorPicker value={newColor} options={ACCENT_OPTIONS.map((o) => ({ id: o.swatch, swatch: o.swatch }))} onChange={setNewColor} /></div>
+            <Input label="Name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Transport" autoFocus disabled={createMutation.isPending} />
+            <div style={{ marginBottom: theme.spacing.lg }}><span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif' }}>Color</span><ColorPicker value={newColor} options={ACCENT_OPTIONS.map((o) => ({ id: o.swatch, swatch: o.swatch }))} onChange={setNewColor} disabled={createMutation.isPending} /></div>
             {error ? <FormErrorBanner message={error} /> : null}
             <div style={{ display: 'flex', gap: theme.spacing.sm }}>
               <Button title="Add" onPress={() => createMutation.mutate({ name: newName, color: newColor })} loading={createMutation.isPending} />
-              <Button title="Cancel" onPress={() => { setShowAdd(false); setError(null); }} variant="outline" />
+              <Button title="Cancel" onPress={() => { setShowAdd(false); setError(null); }} variant="outline" disabled={createMutation.isPending} />
             </div>
           </div>
         </div>

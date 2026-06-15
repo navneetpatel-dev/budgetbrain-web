@@ -14,6 +14,8 @@ export function AddExpensePage() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [notes, setNotes] = useState('');
 
+  const isPending = createMutation.isPending;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,14 +26,14 @@ export function AddExpensePage() {
   return (
     <FormStackScreen title="Add Expense" eyebrow="New Transaction" icon="receipt">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
-        <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} placeholder="e.g. Starbucks" />
-        <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
+        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} placeholder="e.g. Starbucks" disabled={isPending} />
+        <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
-        <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} />
-        <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
+        <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
+        <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Save Expense" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
+        <Button title="Save Expense" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>
     </FormStackScreen>
   );

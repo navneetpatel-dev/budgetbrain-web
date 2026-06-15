@@ -41,7 +41,7 @@ function CustomTabBar() {
       bottom: 0,
       display: 'flex',
       justifyContent: 'center',
-      paddingBottom: Math.max(0, tabBarBottomInset),
+      paddingBottom: `max(${tabBarBottomInset}px, env(safe-area-inset-bottom, 0px))`,
       paddingLeft: tabBarPaddingX,
       paddingRight: tabBarPaddingX,
       paddingTop: theme.spacing.xs,

@@ -20,9 +20,9 @@ export function ReportsPage() {
       <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Date Range</label>
         <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} disabled={loading} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
           <span style={{ alignSelf: 'center', color: theme.colors.textTertiary }}>to</span>
-          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
+          <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} disabled={loading} style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })} />
         </div>
       </Card>
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>

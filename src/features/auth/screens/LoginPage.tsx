@@ -24,7 +24,7 @@ export function LoginPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" error={errors.email?.message} />
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
           )}
         />
         <Controller
@@ -32,13 +32,13 @@ export function LoginPage() {
           name="password"
           rules={authFieldRules.password}
           render={({ field }) => (
-            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Your password" type="password" secureToggle autoComplete="current-password" error={errors.password?.message} />
+            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Your password" type="password" secureToggle autoComplete="current-password" disabled={loading} error={errors.password?.message} />
           )}
         />
         {error ? <AuthErrorBanner message={error} /> : null}
         <AuthLink to="/forgot-password" align="right">Forgot password?</AuthLink>
         <Button title="Sign In" onPress={handleSubmit(onSubmit)} loading={loading} size="lg" />
-        <SocialAuthButtons />
+        <SocialAuthButtons disabled={loading} />
         <AuthLink to="/otp-login" align="center">Sign in with OTP</AuthLink>
       </AuthForm>
     </AuthShell>

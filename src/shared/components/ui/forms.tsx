@@ -34,9 +34,9 @@ export function FormSection({
 }
 
 export function ImageUploadField({
-  label, value, onChange, error,
+  label, value, onChange, error, disabled,
 }: {
-  label: string; value: string | null; onChange: (url: string | null, file?: File) => void; error?: string;
+  label: string; value: string | null; onChange: (url: string | null, file?: File) => void; error?: string; disabled?: boolean;
 }) {
   const theme = useTheme();
   const [preview, setPreview] = useState<string | null>(value);
@@ -59,17 +59,23 @@ export function ImageUploadField({
           <img src={preview} alt="Preview" style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />
           <div style={{ position: 'absolute', bottom: 8, right: 8, display: 'flex', gap: 8 }}>
             <label style={{
-              padding: '8px 12px', borderRadius: theme.radii.sm, cursor: 'pointer',
+              padding: '8px 12px', borderRadius: theme.radii.sm,
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              opacity: disabled ? 0.55 : 1,
               backgroundColor: theme.colors.primary, color: theme.colors.onPrimary,
               fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
             }}>
               Replace
-              <input type="file" accept="image/*,.pdf" onChange={handleFile} style={{ display: 'none' }} />
+              <input type="file" accept="image/*,.pdf" onChange={handleFile} disabled={disabled} style={{ display: 'none' }} />
             </label>
             <button
+              type="button"
+              disabled={disabled}
               onClick={() => { setPreview(null); onChange(null); }}
               style={{
-                padding: '8px 12px', borderRadius: theme.radii.sm, border: 'none', cursor: 'pointer',
+                padding: '8px 12px', borderRadius: theme.radii.sm, border: 'none',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                opacity: disabled ? 0.55 : 1,
                 backgroundColor: theme.colors.danger, color: theme.colors.onPrimary,
                 fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
               }}
@@ -83,10 +89,11 @@ export function ImageUploadField({
   }
 
   return (
-    <div style={{ marginBottom: theme.spacing.lg }}>
+    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <label style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '32px', borderRadius: theme.radii.lg, cursor: 'pointer',
+        padding: '32px', borderRadius: theme.radii.lg,
+        cursor: disabled ? 'not-allowed' : 'pointer',
         border: `2px dashed ${theme.colors.border}`, gap: theme.spacing.sm,
       }}>
         <AppIcon name="camera" size={24} color={theme.colors.textTertiary} />
@@ -94,7 +101,7 @@ export function ImageUploadField({
           fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500,
           color: theme.colors.textSecondary,
         }}>{label}</span>
-        <input type="file" accept="image/*,.pdf" onChange={handleFile} style={{ display: 'none' }} />
+        <input type="file" accept="image/*,.pdf" onChange={handleFile} disabled={disabled} style={{ display: 'none' }} />
       </label>
       {error && (
         <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: 4, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
@@ -104,23 +111,25 @@ export function ImageUploadField({
 }
 
 export function ColorPicker({
-  value, options, onChange,
+  value, options, onChange, disabled,
 }: {
-  value: string; options: { id: string; swatch: string }[]; onChange: (id: string) => void;
+  value: string; options: { id: string; swatch: string }[]; onChange: (id: string) => void; disabled?: boolean;
 }) {
   const theme = useTheme();
 
   return (
-    <div style={{ display: 'flex', gap: 10 }}>
+    <div style={{ display: 'flex', gap: 10, opacity: disabled ? 0.55 : 1 }}>
       {options.map((opt) => (
         <button
           key={opt.id}
+          type="button"
+          disabled={disabled}
           onClick={() => onChange(opt.id)}
           style={{
             width: 32, height: 32, borderRadius: '50%',
             backgroundColor: opt.swatch,
             border: value === opt.id ? `2.5px solid ${theme.colors.text}` : '2.5px solid transparent',
-            cursor: 'pointer',
+            cursor: disabled ? 'not-allowed' : 'pointer',
           }}
           aria-label={opt.id}
         />

@@ -30,18 +30,18 @@ export function OnboardingPage() {
   return (
     <StackScrollScreen header={<StackNavHeader title="Onboarding" subtitle="Tell us about yourself" showBack={false} />}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-        <Input label="Full Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+        <Input label="Full Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" disabled={loading} />
         <div style={{ marginBottom: theme.spacing.lg }}>
           <label style={labelStyle}>Country</label>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} style={selectStyle}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select>
+          <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={loading} style={selectStyle}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select>
         </div>
         <div style={{ marginBottom: theme.spacing.lg }}>
           <label style={labelStyle}>Currency</label>
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)} style={selectStyle}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>)}</select>
+          <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={loading} style={selectStyle}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>)}</select>
         </div>
-        <div><label style={labelStyle}>Financial Goals</label><MultiOptionChips options={FINANCIAL_GOALS.map((g) => g.id)} selected={goals} onToggle={(id) => setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id])} getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id} /></div>
-        <div><label style={labelStyle}>Salary Range</label><OptionChips options={SALARY_RANGES.map((s) => s.id)} value={salaryRange} onChange={setSalaryRange} getLabel={(id) => SALARY_RANGES.find((s) => s.id === id)?.label ?? id} /></div>
-        <Input label="Monthly Savings Target" value={savingsTarget} onChange={(e) => setSavingsTarget(e.target.value)} placeholder="e.g. 5000" type="number" />
+        <div><label style={labelStyle}>Financial Goals</label><MultiOptionChips options={FINANCIAL_GOALS.map((g) => g.id)} selected={goals} onToggle={(id) => setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id])} getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id} disabled={loading} /></div>
+        <div><label style={labelStyle}>Salary Range</label><OptionChips options={SALARY_RANGES.map((s) => s.id)} value={salaryRange} onChange={setSalaryRange} getLabel={(id) => SALARY_RANGES.find((s) => s.id === id)?.label ?? id} disabled={loading} /></div>
+        <Input label="Monthly Savings Target" value={savingsTarget} onChange={(e) => setSavingsTarget(e.target.value)} placeholder="e.g. 5000" type="number" disabled={loading} />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Complete Setup" onPress={handleSubmit} loading={loading} size="lg" />
       </form>

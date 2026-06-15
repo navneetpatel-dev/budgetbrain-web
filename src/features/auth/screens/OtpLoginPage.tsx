@@ -38,7 +38,7 @@ export function OtpLoginPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" readOnly={otpSent} error={errors.email?.message} />
+            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" readOnly={otpSent} disabled={loading} error={errors.email?.message} />
           )}
         />
 
@@ -54,7 +54,7 @@ export function OtpLoginPage() {
               name="otp"
               rules={authFieldRules.otp}
               render={({ field }) => (
-                <Input label="Verification code" value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus error={errors.otp?.message} />
+                <Input label="Verification code" value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus disabled={loading} error={errors.otp?.message} />
               )}
             />
             <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />

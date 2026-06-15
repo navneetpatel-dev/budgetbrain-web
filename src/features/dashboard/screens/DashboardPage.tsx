@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
+import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
 import { SummaryCard, SectionHeader, EmptyState, Card, ProgressBar } from '@/shared/components/ui/index';
 import { DashboardSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -30,12 +30,12 @@ export function DashboardPage() {
       }
       inset="tab"
     >
-      <ResponsiveGrid>
+      <SummaryMetricsGrid>
         <SummaryCard title="Income" amount={formatCurrency(summary.totalIncome, summary.currency)} icon="trendingUp" color={theme.colors.success} />
         <SummaryCard title="Expenses" amount={formatCurrency(summary.totalExpenses, summary.currency)} icon="activity" color={theme.colors.danger} />
         <SummaryCard title="Goals" amount="Track" subtitle="Savings targets" icon="target" color={theme.colors.primary} onPress={() => navigate('/goals')} />
         <SummaryCard title="Net Worth" amount="Overview" subtitle="Assets & liabilities" icon="piggyBank" color={theme.colors.primary} onPress={() => navigate('/net-worth')} />
-      </ResponsiveGrid>
+      </SummaryMetricsGrid>
       {categoryBreakdown.length > 0 && (
         <div>
           <SectionHeader title="Spending by Category" />

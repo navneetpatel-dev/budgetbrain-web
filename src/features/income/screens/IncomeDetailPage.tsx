@@ -18,16 +18,17 @@ export function IncomeDetailPage() {
   if (isLoading || !income) return null;
 
   if (editing) {
+    const isPending = updateMutation.isPending;
     const save = () => updateMutation.mutate({ amount: Number(amount), date, notes: notes || undefined });
     return (
       <FormStackScreen title="Edit Income" onBack={() => setEditing(false)}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" />
-          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" />
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline />
+          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" disabled={isPending} />
+          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
+          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <Button title="Save Changes" onPress={save} loading={updateMutation.isPending} size="lg" />
-          <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" />
+          <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
+          <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" disabled={isPending} />
         </form>
       </FormStackScreen>
     );

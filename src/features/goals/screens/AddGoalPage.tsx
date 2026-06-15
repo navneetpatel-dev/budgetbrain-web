@@ -13,6 +13,8 @@ export function AddGoalPage() {
   const [targetAmount, setTargetAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
 
+  const isPending = createMutation.isPending;
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -23,13 +25,13 @@ export function AddGoalPage() {
   return (
     <FormStackScreen title="Create Goal" eyebrow="New Goal" icon="target">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Goal Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Vacation Fund" />
+        <Input label="Goal Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Vacation Fund" disabled={isPending} />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Type</label>
-        <OptionChips options={GOAL_TYPES.map((t) => t.id)} value={type} onChange={setType} getLabel={(v) => GOAL_TYPES.find((t) => t.id === v)?.label ?? v} />
-        <Input label="Target Amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" />
-        <Input label="Target Date (optional)" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} type="date" />
+        <OptionChips options={GOAL_TYPES.map((t) => t.id)} value={type} onChange={setType} getLabel={(v) => GOAL_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
+        <Input label="Target Amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input label="Target Date (optional)" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} type="date" disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Create Goal" onPress={handleSubmit} loading={createMutation.isPending} size="lg" />
+        <Button title="Create Goal" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>
     </FormStackScreen>
   );

@@ -30,10 +30,10 @@ export function SupportPage() {
       ListEmptyComponent={
         showForm ? (
           <Card variant="elevated">
-            <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief description" />
-            <Input label="Message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Describe your issue" multiline />
+            <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief description" disabled={createMutation.isPending} />
+            <Input label="Message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Describe your issue" multiline disabled={createMutation.isPending} />
             {error ? <FormErrorBanner message={error} /> : null}
-            <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Submit" onPress={() => createMutation.mutate({ subject, message })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => setShowForm(false)} variant="outline" /></div>
+            <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Submit" onPress={() => createMutation.mutate({ subject, message })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => setShowForm(false)} variant="outline" disabled={createMutation.isPending} /></div>
           </Card>
         ) : <EmptyState title="No tickets" subtitle="Need help? Create a support ticket" icon="helpCircle" action="New Ticket" onAction={() => setShowForm(true)} />
       }

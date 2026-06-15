@@ -5,6 +5,7 @@ import { AppIcon, type AppIconName } from './icons/AppIcon';
 import type { CSSProperties } from 'react';
 
 import { FormErrorBanner } from './FormErrorBanner';
+import { getLoadingLabel } from '@/shared/utils/buttonLoadingLabel';
 
 export const FIELD_CONTROL_HEIGHT = 48;
 const FIELD_CONTROL_BORDER = 1.5;
@@ -79,6 +80,7 @@ interface ButtonProps {
   onPress: (e: React.FormEvent) => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   loading?: boolean;
+  loadingTitle?: string;
   disabled?: boolean;
   size?: 'md' | 'lg';
   icon?: AppIconName;
@@ -86,132 +88,81 @@ interface ButtonProps {
   style?: CSSProperties;
 }
 
+function buttonVariantStyle(
+  theme: AppTheme,
+  variant: ButtonProps['variant'],
+  size: ButtonProps['size'],
+): CSSProperties {
+  const isPrimary = variant === 'primary';
+  if (variant === 'danger') {
+    return { backgroundColor: theme.colors.danger, color: theme.colors.onPrimary };
+  }
+  if (isPrimary) {
+    return {
+      background: `linear-gradient(135deg, ${theme.colors.gradientStart}, ${theme.colors.gradientEnd})`,
+      color: theme.colors.onPrimary,
+      width: size === 'lg' ? '100%' : undefined,
+    };
+  }
+  if (variant === 'secondary') {
+    return { backgroundColor: theme.colors.surfaceHover, color: theme.colors.text };
+  }
+  if (variant === 'outline') {
+    return {
+      backgroundColor: 'transparent',
+      border: `1.5px solid ${theme.colors.border}`,
+      color: theme.colors.primary,
+    };
+  }
+  if (variant === 'ghost') {
+    return { backgroundColor: theme.colors.primarySoft, color: theme.colors.primary };
+  }
+  return {};
+}
+
 export function Button({
-  title, onPress, variant = 'primary', loading, disabled, size = 'md',
+  title, onPress, variant = 'primary', loading, loadingTitle, disabled, size = 'md',
   icon, type = 'button', style,
 }: ButtonProps) {
   const theme = useTheme();
   const isDisabled = disabled || loading;
-  const isPrimary = variant === 'primary';
-  const isOutline = variant === 'outline';
-  const isGhost = variant === 'ghost';
-  const isSecondary = variant === 'secondary';
+  const busyLabel = loading ? (loadingTitle ?? getLoadingLabel(title)) : title;
+  const spinnerColor =
+    variant === 'outline' || variant === 'ghost'
+      ? theme.colors.primary
+      : variant === 'secondary'
+        ? theme.colors.text
+        : theme.colors.onPrimary;
 
-  const baseStyle: CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderRadius: size === 'lg' ? theme.radii.lg : theme.radii.md,
-    padding: size === 'lg' ? '16px 20px' : '14px 20px',
-    fontFamily: 'Inter, sans-serif',
-    fontSize: theme.typography.bodySemibold.fontSize,
-    fontWeight: Number(theme.typography.bodySemibold.fontWeight),
-    border: 'none',
-    cursor: isDisabled ? 'not-allowed' : 'pointer',
-    opacity: isDisabled ? 0.5 : 1,
-    transition: 'opacity 0.15s, transform 0.15s',
-    ...style,
-  };
-
-  if (variant === 'danger') {
-    return (
-      <button
-        type={type}
-        onClick={onPress}
-        disabled={isDisabled}
-        style={{
-          ...baseStyle,
-          backgroundColor: theme.colors.danger,
-          color: theme.colors.onPrimary,
-        }}
-      >
-        {loading ? <Spinner color={theme.colors.onPrimary} /> : null}
-        {icon && !loading && <AppIcon name={icon} size={18} color={theme.colors.onPrimary} />}
-        {title}
-      </button>
-    );
-  }
-
-  if (isPrimary) {
-    return (
-      <button
-        type={type}
-        onClick={onPress}
-        disabled={isDisabled}
-        style={{
-          ...baseStyle,
-          background: `linear-gradient(135deg, ${theme.colors.gradientStart}, ${theme.colors.gradientEnd})`,
-          color: theme.colors.onPrimary,
-          width: size === 'lg' ? '100%' : undefined,
-        }}
-      >
-        {loading ? <Spinner color={theme.colors.onPrimary} /> : null}
-        {icon && !loading && <AppIcon name={icon} size={18} color={theme.colors.onPrimary} />}
-        {title}
-      </button>
-    );
-  }
-
-  if (isSecondary) {
-    return (
-      <button
-        type={type}
-        onClick={onPress}
-        disabled={isDisabled}
-        style={{
-          ...baseStyle,
-          backgroundColor: theme.colors.surfaceHover,
-          color: theme.colors.text,
-        }}
-      >
-        {loading ? <Spinner color={theme.colors.text} /> : null}
-        {icon && !loading && <AppIcon name={icon} size={18} color={theme.colors.text} />}
-        {title}
-      </button>
-    );
-  }
-
-  if (isOutline) {
-    return (
-      <button
-        type={type}
-        onClick={onPress}
-        disabled={isDisabled}
-        style={{
-          ...baseStyle,
-          backgroundColor: 'transparent',
-          border: `1.5px solid ${theme.colors.border}`,
-          color: theme.colors.primary,
-        }}
-      >
-        {loading ? <Spinner color={theme.colors.primary} /> : null}
-        {icon && !loading && <AppIcon name={icon} size={18} color={theme.colors.primary} />}
-        {title}
-      </button>
-    );
-  }
-
-  if (isGhost) {
-    return (
-      <button
-        type={type}
-        onClick={onPress}
-        disabled={isDisabled}
-        style={{
-          ...baseStyle,
-          backgroundColor: theme.colors.primarySoft,
-          color: theme.colors.primary,
-        }}
-      >
-        {loading ? <Spinner color={theme.colors.primary} /> : null}
-        {icon && !loading && <AppIcon name={icon} size={18} color={theme.colors.primary} />}
-        {title}
-      </button>
-    );
-  }
-
-  return null;
+  return (
+    <button
+      type={type}
+      onClick={onPress}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        borderRadius: size === 'lg' ? theme.radii.lg : theme.radii.md,
+        padding: size === 'lg' ? '16px 20px' : '14px 20px',
+        fontFamily: 'Inter, sans-serif',
+        fontSize: theme.typography.bodySemibold.fontSize,
+        fontWeight: Number(theme.typography.bodySemibold.fontWeight),
+        border: 'none',
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: disabled && !loading ? 0.5 : 1,
+        transition: 'opacity 0.15s, transform 0.15s',
+        ...buttonVariantStyle(theme, variant, size),
+        ...style,
+      }}
+    >
+      {loading ? <Spinner color={spinnerColor} /> : null}
+      {!loading && icon ? <AppIcon name={icon} size={18} color={spinnerColor} /> : null}
+      {busyLabel}
+    </button>
+  );
 }
 
 /* ── Spinner ── */
@@ -270,11 +221,12 @@ export function Input({
   const wrapperStyle: CSSProperties = {
     display: 'flex',
     alignItems: multiline ? 'flex-start' : 'stretch',
-    border: `${FIELD_CONTROL_BORDER}px solid ${fieldBorderColor(theme, !!error, focused)}`,
+    border: `${FIELD_CONTROL_BORDER}px solid ${fieldBorderColor(theme, !!error, focused && !disabled)}`,
     borderRadius: theme.radii.lg,
-    backgroundColor: fieldBackground(theme, focused),
+    backgroundColor: fieldBackground(theme, focused && !disabled),
     transition: 'border-color 0.2s, background-color 0.2s',
     minHeight: multiline ? 112 : FIELD_CONTROL_HEIGHT,
+    opacity: disabled ? 0.55 : 1,
   };
 
   const sharedInputStyle: CSSProperties = {
@@ -457,17 +409,13 @@ export function SummaryCard({ title, amount, color, subtitle, icon, onPress }: S
 
   if (onPress) {
     return (
-      <button onClick={onPress} style={{ flex: 1, flexBasis: '46%', minWidth: '46%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+      <button type="button" onClick={onPress} style={{ display: 'block', width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
         <Card variant="elevated" style={{ height: '100%' }}>{content}</Card>
       </button>
     );
   }
 
-  return (
-    <div style={{ flex: 1, flexBasis: '46%', minWidth: '46%' }}>
-      <Card variant="elevated" style={{ height: '100%' }}>{content}</Card>
-    </div>
-  );
+  return <Card variant="elevated" style={{ height: '100%' }}>{content}</Card>;
 }
 
 /* ── EmptyState ── */
@@ -573,18 +521,25 @@ export function SectionHeader({
 /* ── FormActions ── */
 
 export function FormActions({
-  primaryTitle, onPrimary, primaryLoading, secondaryTitle, onSecondary, style,
+  primaryTitle, onPrimary, primaryLoading, primaryLoadingTitle, secondaryTitle, onSecondary, style,
 }: {
-  primaryTitle: string; onPrimary: () => void; primaryLoading?: boolean;
+  primaryTitle: string; onPrimary: () => void; primaryLoading?: boolean; primaryLoadingTitle?: string;
   secondaryTitle?: string; onSecondary?: () => void; style?: CSSProperties;
 }) {
   const theme = useTheme();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, marginTop: theme.spacing.sm, ...style }}>
-      <Button title={primaryTitle} onPress={onPrimary} loading={primaryLoading} size="lg" />
+      <Button
+        title={primaryTitle}
+        loadingTitle={primaryLoadingTitle}
+        onPress={onPrimary}
+        loading={primaryLoading}
+        disabled={primaryLoading}
+        size="lg"
+      />
       {secondaryTitle && onSecondary && (
-        <Button title={secondaryTitle} onPress={onSecondary} variant="outline" />
+        <Button title={secondaryTitle} onPress={onSecondary} variant="outline" disabled={primaryLoading} />
       )}
     </div>
   );
