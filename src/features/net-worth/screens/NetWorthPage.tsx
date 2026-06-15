@@ -9,26 +9,54 @@ import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/services/api';
 import type { FinancialAccount, Investment } from '@/shared/types';
 
+interface NetWorthData {
+  summary: {
+    netWorth: number;
+    totalAssets: number;
+    totalLiabilities: number;
+    bankBalance: number;
+    creditCardDebt: number;
+    investmentValue: number;
+    currency: string;
+  };
+  accounts: FinancialAccount[];
+  investments: Investment[];
+}
+
 export function NetWorthPage() {
   const theme = useTheme();
   const { data, isLoading } = useQuery({
     queryKey: ['net-worth'],
-    queryFn: () => apiGet<{ totalAssets: number; totalLiabilities: number; accounts: FinancialAccount[]; investments: Investment[] }>('/net-worth'),
+    queryFn: () => apiGet<NetWorthData>('/net-worth'),
   });
 
   if (isLoading) return <ListSkeleton count={4} />;
   if (!data) return null;
+
+  const summary = data.summary;
+  const currency = summary?.currency ?? 'INR';
   const accounts = ensureArray<FinancialAccount>(data.accounts);
+  const investments = ensureArray<Investment>(data.investments);
 
   return (
-    <ScreenWrapper header={<ProfileStackHeader screen="net-worth" subtitle="Your financial overview" />} inset="stack">
+    <ScreenWrapper
+      header={
+        <ProfileStackHeader
+          screen="net-worth"
+          subtitle={`${accounts.length} account${accounts.length !== 1 ? 's' : ''} · ${investments.length} investment${investments.length !== 1 ? 's' : ''}`}
+        />
+      }
+      inset="stack"
+    >
       <div style={{ borderRadius: theme.radii.xl, padding: theme.spacing.xl, background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, color: theme.colors.onPrimary, textAlign: 'center' }}>
         <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.8, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Net Worth</span>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), margin: '4px 0' }}>{formatCurrency(data.totalAssets - data.totalLiabilities)}</p>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), margin: '4px 0' }}>{formatCurrency(summary?.netWorth, currency)}</p>
       </div>
       <ResponsiveGrid>
-        <SummaryCard title="Assets" amount={formatCurrency(data.totalAssets)} color={theme.colors.success} icon="trendingUp" />
-        <SummaryCard title="Liabilities" amount={formatCurrency(data.totalLiabilities)} color={theme.colors.danger} icon="activity" />
+        <SummaryCard title="Assets" amount={formatCurrency(summary?.totalAssets, currency)} color={theme.colors.success} icon="trendingUp" />
+        <SummaryCard title="Liabilities" amount={formatCurrency(summary?.totalLiabilities, currency)} color={theme.colors.danger} icon="activity" />
+        <SummaryCard title="Bank Balance" amount={formatCurrency(summary?.bankBalance, currency)} icon="creditCard" />
+        <SummaryCard title="Investments" amount={formatCurrency(summary?.investmentValue, currency)} color={theme.colors.primary} icon="chart" />
       </ResponsiveGrid>
       {accounts.map((acc) => (
         <Card key={acc.id} variant="elevated">

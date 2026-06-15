@@ -2,15 +2,20 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, ProgressBar, FormErrorBanner } from '@/shared/components/ui/index';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { toSafePercent } from '@/shared/utils/number';
+import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { CONFIRM } from '@/shared/constants/confirmations';
 import { useBudgetDetail } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
 
 export function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
+  const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { budget, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation } = useBudgetDetail(id);
   const [name, setName] = useState('');
   const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
@@ -18,6 +23,10 @@ export function BudgetDetailPage() {
   const [alertThreshold, setAlertThreshold] = useState('');
 
   if (isLoading || !budget) return <DetailSkeleton />;
+
+  const handleDelete = async () => {
+    if (await confirm(CONFIRM.deleteBudget(budget.name))) deleteMutation.mutate();
+  };
 
   if (editing) {
     const isPending = updateMutation.isPending;
@@ -37,29 +46,32 @@ export function BudgetDetailPage() {
     );
   }
 
-  const spent = budget.spent ?? 0;
-  const pct = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+  const pct = toSafePercent(budget.spent, budget.amount);
+  const alertAt = budget.alertThreshold ?? 80;
 
   return (
-    <FormStackScreen title="Budget Detail" eyebrow={budget.type}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-        <Card variant="elevated">
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Spent</span>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: theme.colors.text, margin: '4px 0' }}>{formatCurrency(spent, budget.currency)}<span style={{ fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary }}> / {formatCurrency(budget.amount, budget.currency)}</span></p>
-            <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.danger : pct >= budget.alertThreshold ? theme.colors.warning : theme.colors.success} />
-            <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{pct}% used</span>
+    <>
+      <FormStackScreen title="Budget Detail" eyebrow={budget.type}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+          <Card variant="elevated">
+            <div style={{ textAlign: 'center' }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Spent</span>
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: theme.colors.text, margin: '4px 0' }}>{formatCurrency(budget.spent, budget.currency)}<span style={{ fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary }}> / {formatCurrency(budget.amount, budget.currency)}</span></p>
+              <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.danger : pct >= alertAt ? theme.colors.warning : theme.colors.success} />
+              <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{pct}% used</span>
+            </div>
+          </Card>
+          <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+            <Row t={theme} l="Name" v={budget.name} /><Row t={theme} l="Type" v={budget.type} /><Row t={theme} l="Alert" v={`${budget.alertThreshold}%`} /><Row t={theme} l="Started" v={budget.startDate} />{budget.endDate && <Row t={theme} l="Ends" v={budget.endDate} />}
+          </Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <Button title="Edit" onPress={() => { setName(budget.name); setType(budget.type); setAmount(String(budget.amount)); setAlertThreshold(String(budget.alertThreshold)); setEditing(true); }} variant="outline" size="lg" icon="edit" />
+            <Button title="Delete" onPress={() => { void handleDelete(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
           </div>
-        </Card>
-        <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-          <Row t={theme} l="Name" v={budget.name} /><Row t={theme} l="Type" v={budget.type} /><Row t={theme} l="Alert" v={`${budget.alertThreshold}%`} /><Row t={theme} l="Started" v={budget.startDate} />{budget.endDate && <Row t={theme} l="Ends" v={budget.endDate} />}
-        </Card>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          <Button title="Edit" onPress={() => { setName(budget.name); setType(budget.type); setAmount(String(budget.amount)); setAlertThreshold(String(budget.alertThreshold)); setEditing(true); }} variant="outline" size="lg" icon="edit" />
-          <Button title="Delete" onPress={() => { if (window.confirm('Delete this budget?')) deleteMutation.mutate(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
         </div>
-      </div>
-    </FormStackScreen>
+      </FormStackScreen>
+      <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+    </>
   );
 }
 

@@ -5,6 +5,7 @@ import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { toSafePercent } from '@/shared/utils/number';
 import { useGoals } from '../hooks/useGoals';
 import type { Goal } from '@/shared/types';
 
@@ -31,7 +32,7 @@ export function GoalsPage() {
       data={goals}
       keyExtractor={(g: Goal) => g.id}
       renderItem={(g) => {
-        const pct = g.targetAmount > 0 ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0;
+        const pct = toSafePercent(g.currentAmount, g.targetAmount);
         return (
           <div onClick={() => navigate(`/goal/${g.id}`)} style={{ cursor: 'pointer', backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>

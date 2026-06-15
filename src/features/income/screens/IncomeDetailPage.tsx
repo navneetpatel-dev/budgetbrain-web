@@ -2,20 +2,28 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { CONFIRM } from '@/shared/constants/confirmations';
 import { useIncomeDetail } from '../hooks/useIncome';
 
 export function IncomeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
+  const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { income, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation } = useIncomeDetail(id);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
 
   if (isLoading || !income) return null;
+
+  const handleDelete = async () => {
+    if (await confirm(CONFIRM.deleteIncome)) deleteMutation.mutate();
+  };
 
   if (editing) {
     const isPending = updateMutation.isPending;
@@ -35,22 +43,25 @@ export function IncomeDetailPage() {
   }
 
   return (
-    <FormStackScreen title="Income Detail" eyebrow="Income">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-        <div style={{ textAlign: 'center', padding: `${theme.spacing.xl}px 0` }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: theme.colors.success }}>+{formatCurrency(income.amount, income.currency)}</span>
+    <>
+      <FormStackScreen title="Income Detail" eyebrow="Income">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+          <div style={{ textAlign: 'center', padding: `${theme.spacing.xl}px 0` }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: theme.colors.success }}>+{formatCurrency(income.amount, income.currency)}</span>
+          </div>
+          <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+            <Row t={theme} l="Date" v={income.date} />
+            <Row t={theme} l="Merchant" v={income.merchant ?? '-'} />
+            {income.notes && <Row t={theme} l="Notes" v={income.notes} />}
+          </Card>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <Button title="Edit" onPress={() => { setAmount(String(income.amount)); setDate(income.date); setNotes(income.notes ?? ''); setEditing(true); }} variant="outline" size="lg" icon="edit" />
+            <Button title="Delete" onPress={() => { void handleDelete(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
+          </div>
         </div>
-        <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-          <Row t={theme} l="Date" v={income.date} />
-          <Row t={theme} l="Merchant" v={income.merchant ?? '-'} />
-          {income.notes && <Row t={theme} l="Notes" v={income.notes} />}
-        </Card>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          <Button title="Edit" onPress={() => { setAmount(String(income.amount)); setDate(income.date); setNotes(income.notes ?? ''); setEditing(true); }} variant="outline" size="lg" icon="edit" />
-          <Button title="Delete" onPress={() => { if (window.confirm('Delete this income entry?')) deleteMutation.mutate(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
-        </div>
-      </div>
-    </FormStackScreen>
+      </FormStackScreen>
+      <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+    </>
   );
 }
 

@@ -1,3 +1,5 @@
+import { toSafeNumber } from './number';
+
 const CURRENCY_SYMBOLS: Record<string, string> = {
   INR: '₹',
   USD: '$',
@@ -8,11 +10,12 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   CAD: 'C$',
 };
 
-export function formatCurrency(amount: number, currency: string = 'INR'): string {
+export function formatCurrency(amount: unknown, currency: string = 'INR'): string {
+  const safe = toSafeNumber(amount);
   const symbol = CURRENCY_SYMBOLS[currency] ?? currency;
-  const fixed = Math.abs(amount).toFixed(amount % 1 === 0 ? 0 : 2);
+  const fixed = Math.abs(safe).toFixed(safe % 1 === 0 ? 0 : 2);
   const formatted = Number(fixed).toLocaleString('en-IN');
-  const sign = amount < 0 ? '-' : '';
+  const sign = safe < 0 ? '-' : '';
   return `${sign}${symbol}${formatted}`;
 }
 

@@ -8,6 +8,7 @@ import { useAppSelector } from '@/shared/store/hooks';
 import { DashboardHero } from '../components/DashboardHero';
 import { useDashboard } from '../hooks/useDashboard';
 import { ensureArray } from '@/shared/utils/listData';
+import { toSafeNumber, toSafePercent } from '@/shared/utils/number';
 import type { Budget, Goal, Transaction } from '@/shared/types';
 
 export function DashboardPage() {
@@ -31,7 +32,7 @@ export function DashboardPage() {
           name={user?.name?.split(' ')[0] ?? 'there'}
           netSavings={formatCurrency(summary.netSavings, summary.currency)}
           currency={summary.currency}
-          savingsRate={Math.round(summary.savingsRate)}
+          savingsRate={Math.round(toSafeNumber(summary.savingsRate))}
         />
       }
       inset="tab"
@@ -47,9 +48,9 @@ export function DashboardPage() {
           <SectionHeader title="Spending by Category" />
           <Card variant="elevated">
             {categoryBreakdown.slice(0, 5).map((item) => {
-              const total = Number(item.total);
-              const maxTotal = Math.max(...categoryBreakdown.map((c) => Number(c.total)), 1);
-              const pct = Math.round((total / maxTotal) * 100);
+              const total = toSafeNumber(item.total);
+              const maxTotal = Math.max(...categoryBreakdown.map((c) => toSafeNumber(c.total)), 1);
+              const pct = toSafePercent(total, maxTotal);
               return (
                 <div key={item.categoryId} style={{ marginBottom: theme.spacing.sm }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -68,7 +69,7 @@ export function DashboardPage() {
           <SectionHeader title="Budget Progress" action="See all" onAction={() => navigate('/budgets')} />
           <Card variant="elevated">
             {budgets.slice(0, 3).map((b, i) => {
-              const pct = b.amount > 0 ? Math.round(((b.spent ?? 0) / b.amount) * 100) : 0;
+              const pct = toSafePercent(b.spent, b.amount);
               return (
                 <div key={b.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(budgets.length, 3) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -88,7 +89,7 @@ export function DashboardPage() {
           <SectionHeader title="Goal Progress" action="See all" onAction={() => navigate('/goals')} />
           <Card variant="elevated">
             {goals.slice(0, 2).map((g, i) => {
-              const pct = g.targetAmount > 0 ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0;
+              const pct = toSafePercent(g.currentAmount, g.targetAmount);
               return (
                 <div key={g.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(goals.length, 2) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>

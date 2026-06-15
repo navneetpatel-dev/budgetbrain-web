@@ -59,13 +59,9 @@ export function useExpenseDetail(id: string | undefined) {
 
   const cancelEdit = () => { setEditing(false); setError(null); };
 
-  const confirmDelete = () => {
-    if (window.confirm('Delete this expense?')) deleteMutation.mutate();
-  };
-
   return {
     txn, isLoading, editing, error, setError,
-    startEdit, cancelEdit, confirmDelete,
+    startEdit, cancelEdit,
     updateMutation, deleteMutation, duplicateMutation,
   };
 }

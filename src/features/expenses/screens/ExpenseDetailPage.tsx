@@ -2,16 +2,20 @@ import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { CONFIRM } from '@/shared/constants/confirmations';
 import { useExpenseDetail } from '../hooks/useExpenses';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 
 export function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
-  const { txn, isLoading, editing, error, setError, startEdit, cancelEdit, confirmDelete, updateMutation, deleteMutation, duplicateMutation } = useExpenseDetail(id);
+  const { confirm, accept, cancel, copy, open } = useConfirmDialog();
+  const { txn, isLoading, editing, error, setError, startEdit, cancelEdit, updateMutation, deleteMutation, duplicateMutation } = useExpenseDetail(id);
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState('');
@@ -19,6 +23,10 @@ export function ExpenseDetailPage() {
   const [notes, setNotes] = useState('');
 
   if (isLoading || !txn) return <DetailSkeleton />;
+
+  const handleDelete = async () => {
+    if (await confirm(CONFIRM.deleteExpense)) deleteMutation.mutate();
+  };
 
   if (editing) {
     const isPending = updateMutation.isPending;
@@ -41,6 +49,7 @@ export function ExpenseDetailPage() {
   }
 
   return (
+    <>
     <FormStackScreen title="Expense Detail" eyebrow={txn.type}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
         <div style={{ textAlign: 'center', padding: `${theme.spacing.xl}px 0` }}>
@@ -56,10 +65,12 @@ export function ExpenseDetailPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           <Button title="Edit" onPress={() => { startEdit(); setAmount(String(txn.amount)); setMerchant(txn.merchant ?? ''); setDate(txn.date); setPaymentMethod(txn.paymentMethod ?? 'cash'); setNotes(txn.notes ?? ''); }} variant="outline" size="lg" icon="edit" />
           <Button title="Duplicate" onPress={() => duplicateMutation.mutate()} variant="secondary" size="lg" loading={duplicateMutation.isPending} />
-          <Button title="Delete" onPress={confirmDelete} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
+          <Button title="Delete" onPress={() => { void handleDelete(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
         </div>
       </div>
     </FormStackScreen>
+    <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+    </>
   );
 }
 

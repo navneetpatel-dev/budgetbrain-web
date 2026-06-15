@@ -4,6 +4,7 @@ import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { toSafePercent } from '@/shared/utils/number';
 import { useBudgets } from '../hooks/useBudgets';
 import type { Budget } from '@/shared/types';
 
@@ -30,7 +31,7 @@ export function BudgetsPage() {
       data={budgets}
       keyExtractor={(b: Budget) => b.id}
       renderItem={(b) => {
-        const pct = b.amount > 0 ? Math.round(((b.spent ?? 0) / b.amount) * 100) : 0;
+        const pct = toSafePercent(b.spent, b.amount);
         return (
           <div onClick={() => navigate(`/budget/${b.id}`)} style={{ cursor: 'pointer', backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>

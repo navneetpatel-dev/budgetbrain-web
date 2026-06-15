@@ -2,19 +2,28 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { useTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
 import { ACCENT_OPTIONS } from '@/shared/theme';
 import { useCategories } from '@/features/shared/hooks/useFeatures';
+import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { CONFIRM } from '@/shared/constants/confirmations';
 
 export function CategoriesPage() {
   const theme = useTheme();
   const { categories, createMutation, archiveMutation, error, setError } = useCategories();
+  const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState('#6366F1');
 
+  const handleArchive = async (id: string, name: string) => {
+    if (await confirm(CONFIRM.archiveCategory(name))) archiveMutation.mutate(id);
+  };
+
   return (
+  <>
     <div style={{ height: '100%', position: 'relative' }}>
       <StickyHeaderFlatScreen
         header={<ProfileStackHeader screen="categories" subtitle="Manage your categories" />}
@@ -27,7 +36,7 @@ export function CategoriesPage() {
               <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: (cat.color || theme.colors.primary) + '22', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${(cat.color || theme.colors.primary)}44` }}><div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: cat.color || theme.colors.primary }} /></div>
               <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.text }}>{cat.name}</span>
             </div>
-            <button onClick={() => archiveMutation.mutate(cat.id)} style={{ fontSize: 12, fontWeight: 600, color: theme.colors.danger, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Archive</button>
+            <button onClick={() => { void handleArchive(cat.id, cat.name); }} style={{ fontSize: 12, fontWeight: 600, color: theme.colors.danger, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Archive</button>
           </div>
         )}
         ListEmptyComponent={<EmptyState title="No categories" subtitle="Add categories to organize your expenses" icon="category" />}
@@ -48,5 +57,7 @@ export function CategoriesPage() {
       )}
       <ActionFab onPress={() => setShowAdd(true)} label="Add Category" />
     </div>
+    <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+  </>
   );
 }
