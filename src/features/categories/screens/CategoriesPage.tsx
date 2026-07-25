@@ -123,12 +123,13 @@ export function CategoriesPage() {
               <Controller
                 control={control}
                 name="name"
-                rules={{ required: 'Name is required' }}
+                rules={{ required: 'Name is required', maxLength: { value: 100, message: 'Name must be at most 100 characters' } }}
                 render={({ field: { onChange, value } }) => (
                   <Input
                     label="Category name"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
+                    maxLength={100}
                     error={errors.name?.message}
                     placeholder="e.g. Food, Travel"
                     disabled={loading}

@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthForm, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
+import { maxLen } from '@/shared/validation/fieldLimits';
 import { useRegister } from '../hooks/useAuthHooks';
 import type { RegisterCredentials } from '../types/auth.types';
 
@@ -29,7 +30,7 @@ export function RegisterPage() {
           name="name"
           rules={authFieldRules.name}
           render={({ field }) => (
-            <Input label="Full name" value={field.value} onChange={field.onChange} placeholder="Jane Doe" autoComplete="name" disabled={loading} error={errors.name?.message} />
+            <Input label="Full name" maxLength={maxLen("name")} value={field.value} onChange={field.onChange} placeholder="Jane Doe" autoComplete="name" disabled={loading} error={errors.name?.message} />
           )}
         />
         <Controller
@@ -37,7 +38,7 @@ export function RegisterPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
+            <Input label="Email" maxLength={maxLen("email")} value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
           )}
         />
         <Controller
@@ -45,7 +46,7 @@ export function RegisterPage() {
           name="password"
           rules={authFieldRules.passwordMin8}
           render={({ field }) => (
-            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
+            <Input label="Password" maxLength={maxLen("password")} value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
           )}
         />
         {error ? <AuthErrorBanner message={error} /> : null}

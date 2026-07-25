@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthLink, AuthForm, AuthErrorBanner, SocialAuthButtons } from '../components';
 import { authFieldRules } from '../utils/authValidation';
+import { maxLen } from '@/shared/validation/fieldLimits';
 import { useLogin } from '../hooks/useAuthHooks';
 import type { LoginCredentials } from '../types/auth.types';
 
@@ -24,7 +25,7 @@ export function LoginPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
+            <Input label="Email" maxLength={maxLen("email")} value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
           )}
         />
         <Controller
@@ -32,7 +33,7 @@ export function LoginPage() {
           name="password"
           rules={authFieldRules.password}
           render={({ field }) => (
-            <Input label="Password" value={field.value} onChange={field.onChange} placeholder="Your password" type="password" secureToggle autoComplete="current-password" disabled={loading} error={errors.password?.message} />
+            <Input label="Password" maxLength={maxLen("password")} value={field.value} onChange={field.onChange} placeholder="Your password" type="password" secureToggle autoComplete="current-password" disabled={loading} error={errors.password?.message} />
           )}
         />
         {error ? <AuthErrorBanner message={error} /> : null}

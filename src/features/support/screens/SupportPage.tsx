@@ -5,6 +5,7 @@ import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/compo
 import { SupportSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
+import { FieldLimits, maxLen } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { subject?: string; message?: string };
 
@@ -20,9 +21,17 @@ export function SupportPage() {
     setError(null);
     const next: FieldErrors = {};
     if (!subject.trim()) next.subject = 'Subject is required';
-    else if (subject.trim().length < 3) next.subject = 'At least 3 characters';
+    else if (subject.trim().length < FieldLimits.subject.min) {
+      next.subject = `At least ${FieldLimits.subject.min} characters`;
+    } else if (subject.trim().length > FieldLimits.subject.max) {
+      next.subject = `At most ${FieldLimits.subject.max} characters`;
+    }
     if (!message.trim()) next.message = 'Message is required';
-    else if (message.trim().length < 10) next.message = 'At least 10 characters';
+    else if (message.trim().length < FieldLimits.message.min) {
+      next.message = `At least ${FieldLimits.message.min} characters`;
+    } else if (message.trim().length > FieldLimits.message.max) {
+      next.message = `At most ${FieldLimits.message.max} characters`;
+    }
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({ subject, message });
@@ -53,6 +62,7 @@ export function SupportPage() {
               value={subject}
               onChange={(e) => { setSubject(e.target.value); setFieldErrors((f) => ({ ...f, subject: undefined })); }}
               placeholder="Brief description"
+              maxLength={maxLen('subject')}
               disabled={createMutation.isPending}
               error={fieldErrors.subject}
             />
@@ -62,9 +72,10 @@ export function SupportPage() {
               onChange={(e) => { setMessage(e.target.value); setFieldErrors((f) => ({ ...f, message: undefined })); }}
               placeholder="Describe your issue"
               multiline
+              maxLength={maxLen('message')}
               disabled={createMutation.isPending}
               error={fieldErrors.message}
-              helperText="Minimum 10 characters"
+              helperText={`${FieldLimits.message.min}–${FieldLimits.message.max} characters`}
             />
             {error ? <FormErrorBanner message={error} /> : null}
             <div style={{ display: 'flex', gap: theme.spacing.sm }}>

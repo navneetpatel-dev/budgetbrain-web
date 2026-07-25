@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
+import { maxLen } from '@/shared/validation/fieldLimits';
 import { useForgotPassword } from '../hooks/useAuthHooks';
 
 interface ForgotForm {
@@ -35,7 +36,7 @@ export function ForgotPasswordPage() {
             name="email"
             rules={authFieldRules.email}
             render={({ field }) => (
-              <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
+              <Input label="Email" maxLength={maxLen("email")} value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" disabled={loading} error={errors.email?.message} />
             )}
           />
           {error ? <AuthErrorBanner message={error} /> : null}

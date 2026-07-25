@@ -202,13 +202,14 @@ interface InputProps {
   autoComplete?: string;
   readOnly?: boolean;
   disabled?: boolean;
+  maxLength?: number;
   onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export function Input({
   label, error, helperText, secureToggle, leftIcon,
   variant = 'default', value, onChange, placeholder, type: inputType,
-  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, onKeyDown,
+  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, maxLength, onKeyDown,
 }: InputProps) {
   const theme = useTheme();
   const [hidden, setHidden] = useState(inputType === 'password');
@@ -284,6 +285,7 @@ export function Input({
             autoComplete={autoComplete}
             readOnly={readOnly}
             disabled={disabled}
+            maxLength={maxLength}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
@@ -300,6 +302,7 @@ export function Input({
             autoComplete={autoComplete}
             readOnly={readOnly}
             disabled={disabled}
+            maxLength={maxLength}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}
@@ -484,34 +487,64 @@ export function EmptyState({
 /* ── SectionHeader ── */
 
 export function SectionHeader({
-  title, action, onAction,
+  title, subtitle, action, onAction,
 }: {
-  title: string; action?: string; onAction?: () => void;
+  title: string; subtitle?: string; action?: string; onAction?: () => void;
 }) {
   const theme = useTheme();
 
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      marginBottom: theme.spacing.sm,
+      gap: theme.spacing.md,
+      marginBottom: theme.spacing.md,
+      minHeight: 36,
     }}>
-      <h3 style={{
-        fontFamily: 'Inter, sans-serif',
-        fontSize: theme.typography.titleSm.fontSize,
-        fontWeight: Number(theme.typography.titleSm.fontWeight),
-        color: theme.colors.text,
-        margin: 0,
-      }}>{title}</h3>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <h3 style={{
+          fontFamily: 'Inter, sans-serif',
+          fontSize: 18,
+          fontWeight: 700,
+          letterSpacing: -0.3,
+          color: theme.colors.text,
+          margin: 0,
+          lineHeight: '24px',
+        }}>{title}</h3>
+        {subtitle ? (
+          <span style={{
+            display: 'block',
+            marginTop: 2,
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 12,
+            fontWeight: 500,
+            color: theme.colors.textTertiary,
+            lineHeight: '16px',
+          }}>{subtitle}</span>
+        ) : null}
+      </div>
       {action && onAction && (
         <button
+          type="button"
           onClick={onAction}
           style={{
-            background: 'none', border: 'none', cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            flexShrink: 0,
+            padding: '7px 12px 7px 14px',
+            borderRadius: theme.radii.full,
+            border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
+            cursor: 'pointer',
             fontFamily: 'Inter, sans-serif',
-            fontSize: 14, fontWeight: 600, color: theme.colors.primary,
+            fontSize: 13,
+            fontWeight: 600,
+            color: theme.colors.primary,
+            boxShadow: theme.shadows.sm,
           }}
         >
           {action}
+          <AppIcon name="chevronRight" size={14} color={theme.colors.primary} />
         </button>
       )}
     </div>

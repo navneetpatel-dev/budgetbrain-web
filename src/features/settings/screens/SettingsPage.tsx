@@ -157,17 +157,17 @@ export function SettingsPage() {
               <Controller
                 control={control}
                 name="name"
-                rules={{ required: 'Name is required' }}
+                rules={{ required: 'Name is required', maxLength: { value: 255, message: 'Name must be at most 255 characters' } }}
                 render={({ field: { onChange, value } }) => (
-                  <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} error={errors.name?.message} leftIcon="personFill" disabled={profileLoading} />
+                  <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} maxLength={255} error={errors.name?.message} leftIcon="personFill" disabled={profileLoading} />
                 )}
               />
               <Controller
                 control={control}
                 name="country"
-                rules={{ required: 'Country is required' }}
+                rules={{ required: 'Country is required', maxLength: { value: 100, message: 'Country must be at most 100 characters' } }}
                 render={({ field: { onChange, value } }) => (
-                  <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} error={errors.country?.message} disabled={profileLoading} />
+                  <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} maxLength={100} error={errors.country?.message} disabled={profileLoading} />
                 )}
               />
               <FormFieldLabel>Currency</FormFieldLabel>

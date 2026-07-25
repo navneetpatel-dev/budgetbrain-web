@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
-import { SummaryCard, SectionHeader, EmptyState, Card, ProgressBar } from '@/shared/components/ui/index';
+import { SummaryCard, SectionHeader, Card, ProgressBar } from '@/shared/components/ui/index';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { DashboardContentSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -110,19 +111,133 @@ export function DashboardPage() {
               </Card>
             </div>
           )}
-          <div>
-            <SectionHeader title="Recent Activity" action="See all" onAction={() => navigate('/expenses')} />
+          <div style={{ marginTop: theme.spacing.sm }}>
+            <SectionHeader
+              title="Recent Activity"
+              subtitle={
+                recentTransactions.length === 0
+                  ? 'Your latest transactions will show up here'
+                  : `${recentTransactions.length} recent transaction${recentTransactions.length !== 1 ? 's' : ''}`
+              }
+              action="See all"
+              onAction={() => navigate('/expenses')}
+            />
             {recentTransactions.length === 0 ? (
-              <EmptyState title="No transactions yet" subtitle="Tap + on the tab bar to log your first expense" icon="receipt" action="Add Expense" onAction={() => navigate('/expense/add')} />
+              <Card
+                variant="elevated"
+                style={{
+                  padding: `${theme.spacing.xl}px ${theme.spacing.lg}px`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: theme.spacing.md,
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: theme.colors.primarySoft,
+                    border: `1px solid ${theme.colors.primary}28`,
+                  }}
+                >
+                  <AppIcon name="receipt" size={22} color={theme.colors.primary} />
+                </div>
+                <div>
+                  <span style={{
+                    display: 'block',
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: theme.colors.text,
+                    marginBottom: 4,
+                  }}>No activity yet</span>
+                  <span style={{
+                    display: 'block',
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: theme.colors.textSecondary,
+                    lineHeight: '18px',
+                    maxWidth: 260,
+                  }}>Log an expense or income to start tracking your spending.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/expense/add')}
+                  style={{
+                    marginTop: 4,
+                    padding: '10px 16px',
+                    borderRadius: theme.radii.full,
+                    border: 'none',
+                    backgroundColor: theme.colors.primary,
+                    color: theme.colors.onPrimary,
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Add expense
+                </button>
+              </Card>
             ) : (
-              <Card variant="elevated" style={{ padding: 0 }}>
+              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
                 {recentTransactions.map((txn, i) => (
-                  <div key={txn.id} onClick={() => navigate(`/expense/${txn.id}`)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: `${theme.spacing.md}px ${theme.spacing.lg}px`, borderBottom: i < recentTransactions.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none', cursor: 'pointer' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: txn.category?.color ? txn.category.color + '18' : theme.colors.primarySoft }}><span style={{ fontSize: 14, fontWeight: 700, color: txn.category?.color ?? theme.colors.primary }}>{(txn.category?.name ?? txn.merchant ?? 'T')[0].toUpperCase()}</span></div>
-                      <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.text }}>{txn.merchant || txn.category?.name || 'Transaction'}</span><span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{txn.date}</span></div>
+                  <div
+                    key={txn.id}
+                    onClick={() => navigate(`/expense/${txn.id}`)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                      borderBottom: i < recentTransactions.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, minWidth: 0 }}>
+                      <div style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        backgroundColor: txn.category?.color ? txn.category.color + '18' : theme.colors.primarySoft,
+                      }}>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: txn.category?.color ?? theme.colors.primary }}>
+                          {(txn.category?.name ?? txn.merchant ?? 'T')[0].toUpperCase()}
+                        </span>
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{
+                          display: 'block',
+                          fontFamily: 'Inter, sans-serif',
+                          fontSize: 15,
+                          fontWeight: 600,
+                          color: theme.colors.text,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}>{txn.merchant || txn.category?.name || 'Transaction'}</span>
+                        <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{txn.date}</span>
+                      </div>
                     </div>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
+                    <span style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: 15,
+                      fontWeight: 700,
+                      flexShrink: 0,
+                      marginLeft: theme.spacing.md,
+                      color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success,
+                    }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
                   </div>
                 ))}
               </Card>

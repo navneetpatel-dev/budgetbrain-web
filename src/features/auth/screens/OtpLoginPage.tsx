@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthForm, AuthInfoBanner, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
+import { maxLen } from '@/shared/validation/fieldLimits';
 import { useOtpLogin } from '../hooks/useAuthHooks';
 
 interface OtpForm {
@@ -38,7 +39,7 @@ export function OtpLoginPage() {
           name="email"
           rules={authFieldRules.email}
           render={({ field }) => (
-            <Input label="Email" value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" readOnly={otpSent} disabled={loading} error={errors.email?.message} />
+            <Input label="Email" maxLength={maxLen("email")} value={field.value} onChange={field.onChange} placeholder="you@example.com" type="email" autoComplete="email" readOnly={otpSent} disabled={loading} error={errors.email?.message} />
           )}
         />
 
@@ -54,7 +55,7 @@ export function OtpLoginPage() {
               name="otp"
               rules={authFieldRules.otp}
               render={({ field }) => (
-                <Input label="Verification code" value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus disabled={loading} error={errors.otp?.message} />
+                <Input label="Verification code" maxLength={maxLen("otp")} value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus disabled={loading} error={errors.otp?.message} />
               )}
             />
             <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />

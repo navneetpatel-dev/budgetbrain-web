@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
+import { maxLen } from '@/shared/validation/fieldLimits';
 import { useResetPassword } from '../hooks/useAuthHooks';
 
 interface ResetForm {
@@ -41,7 +42,7 @@ export function ResetPasswordPage() {
             name="password"
             rules={authFieldRules.passwordMin8}
             render={({ field }) => (
-              <Input label="New password" value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
+              <Input label="New password" maxLength={maxLen("password")} value={field.value} onChange={field.onChange} placeholder="Min. 8 characters" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.password?.message} />
             )}
           />
           <Controller
@@ -52,7 +53,7 @@ export function ResetPasswordPage() {
               validate: (value) => value === password || 'Passwords do not match',
             }}
             render={({ field }) => (
-              <Input label="Confirm password" value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.confirmPassword?.message} />
+              <Input label="Confirm password" maxLength={maxLen("password")} value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.confirmPassword?.message} />
             )}
           />
           {error ? <AuthErrorBanner message={error} /> : null}
