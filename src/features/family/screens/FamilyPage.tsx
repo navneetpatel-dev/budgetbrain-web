@@ -57,7 +57,7 @@ export function FamilyPage() {
             value={groupName}
             onChange={(e) => { setGroupName(e.target.value); setGroupNameError(undefined); }}
             placeholder="e.g. Family Budget"
-            maxLength={255}
+            maxLength={maxLen('entityName')}
             disabled={createMutation.isPending}
             error={groupNameError}
           />
@@ -75,7 +75,7 @@ export function FamilyPage() {
             value={inviteCode}
             onChange={(e) => { setInviteCode(e.target.value); setInviteCodeError(undefined); }}
             placeholder="Enter invite code"
-            maxLength={20}
+            maxLength={maxLen('inviteCode')}
             disabled={joinMutation.isPending}
             error={inviteCodeError}
           />

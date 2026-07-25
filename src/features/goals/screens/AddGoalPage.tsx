@@ -4,7 +4,7 @@ import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateGoal } from '../hooks/useGoals';
 import { GOAL_TYPES } from '@/shared/constants/config';
-import { validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
+import { maxLen, validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; targetAmount?: string; targetDate?: string };
 
@@ -39,6 +39,7 @@ export function AddGoalPage() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
         <Input
           label="Goal Name"
+          maxLength={maxLen('entityName')}
           value={name}
           onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }}
           placeholder="e.g. Vacation Fund"

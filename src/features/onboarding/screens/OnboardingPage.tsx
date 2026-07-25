@@ -46,7 +46,7 @@ export function OnboardingPage() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
         <Input
           label="Full Name"
-          maxLength={255}
+          maxLength={maxLen('name')}
           value={name}
           onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }}
           placeholder="Your name"

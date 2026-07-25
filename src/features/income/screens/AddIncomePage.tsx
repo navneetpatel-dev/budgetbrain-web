@@ -108,6 +108,7 @@ export function AddIncomePage() {
           <>
             <Input
               label="Source Name"
+              maxLength={maxLen('entityName')}
               value={newSourceName}
               onChange={(e) => { setNewSourceName(e.target.value); setFieldErrors((f) => ({ ...f, newSourceName: undefined })); }}
               placeholder="e.g. Salary"

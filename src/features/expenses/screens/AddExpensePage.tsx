@@ -3,6 +3,7 @@ import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateExpense } from '../hooks/useExpenses';
+import { useCategories } from '@/features/categories/hooks/useCategories';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -10,17 +11,26 @@ import {
   validateDate,
   validateOptionalText,
   validateText,
+  ValidationMessages,
 } from '@/shared/validation/fieldLimits';
 
-type FieldErrors = { amount?: string; merchant?: string; date?: string; notes?: string };
+type FieldErrors = {
+  amount?: string;
+  merchant?: string;
+  date?: string;
+  notes?: string;
+  categoryId?: string;
+};
 
 export function AddExpensePage() {
   const theme = useTheme();
   const { createMutation, error, setError } = useCreateExpense();
+  const { categories } = useCategories();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
@@ -38,9 +48,18 @@ export function AddExpensePage() {
     if (merchantErr) next.merchant = merchantErr;
     if (dateErr) next.date = dateErr;
     if (notesErr) next.notes = notesErr;
+    if (!categoryId) next.categoryId = ValidationMessages.categoryRequired;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
-    createMutation.mutate({ type: 'expense', amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined });
+    createMutation.mutate({
+      type: 'expense',
+      amount: Number(amount),
+      merchant,
+      date,
+      paymentMethod,
+      categoryId,
+      notes: notes || undefined,
+    });
   };
 
   return (
@@ -56,7 +75,7 @@ export function AddExpensePage() {
           disabled={isPending}
           error={fieldErrors.amount}
         />
-          <Input
+        <Input
           label="Merchant"
           value={merchant}
           onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }}
@@ -75,7 +94,24 @@ export function AddExpensePage() {
         />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
         <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
-        <Input label="Notes" maxLength={maxLen('notes')} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} error={fieldErrors.notes} />
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
+        <OptionChipList
+          items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}
+          selectedId={categoryId}
+          onSelect={(id) => { setCategoryId(id); setFieldErrors((f) => ({ ...f, categoryId: undefined })); }}
+          disabled={isPending}
+          error={fieldErrors.categoryId}
+        />
+        <Input
+          label="Notes"
+          maxLength={maxLen('notes')}
+          value={notes}
+          onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }}
+          placeholder="Optional note"
+          multiline
+          disabled={isPending}
+          error={fieldErrors.notes}
+        />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Save Expense" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

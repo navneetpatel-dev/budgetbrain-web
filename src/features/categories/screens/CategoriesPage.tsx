@@ -130,7 +130,7 @@ export function CategoriesPage() {
                     label="Category name"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
-                    maxLength={100}
+                    maxLength={maxLen('categoryName')}
                     error={errors.name?.message}
                     placeholder="e.g. Food, Travel"
                     disabled={loading}
