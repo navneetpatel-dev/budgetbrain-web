@@ -160,6 +160,7 @@ export function AiCoachPage() {
             onKeyDown={onKeyDown}
             placeholder="Ask about your finances..."
             rows={1}
+            maxLength={4000}
             disabled={isPending}
             aria-label="Chat message"
             style={inputStyle}

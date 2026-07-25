@@ -5,6 +5,7 @@ import { Card, Button, Input, EmptyState, FormErrorBanner } from '@/shared/compo
 import { FamilySkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useFamily } from '@/features/shared/hooks/useFeatures';
+import { validateInviteCode, validateText } from '@/shared/validation/fieldLimits';
 
 export function FamilyPage() {
   const theme = useTheme();
@@ -18,8 +19,9 @@ export function FamilyPage() {
 
   const handleCreate = () => {
     setError(null);
-    if (!groupName.trim()) {
-      setGroupNameError('Name is required');
+    const nameErr = validateText('entityName', groupName);
+    if (nameErr) {
+      setGroupNameError(nameErr);
       return;
     }
     setGroupNameError(undefined);
@@ -28,8 +30,9 @@ export function FamilyPage() {
 
   const handleJoin = () => {
     setError(null);
-    if (!inviteCode.trim()) {
-      setInviteCodeError('Invite code is required');
+    const codeErr = validateInviteCode(inviteCode);
+    if (codeErr) {
+      setInviteCodeError(codeErr);
       return;
     }
     setInviteCodeError(undefined);
@@ -54,6 +57,7 @@ export function FamilyPage() {
             value={groupName}
             onChange={(e) => { setGroupName(e.target.value); setGroupNameError(undefined); }}
             placeholder="e.g. Family Budget"
+            maxLength={255}
             disabled={createMutation.isPending}
             error={groupNameError}
           />
@@ -71,6 +75,7 @@ export function FamilyPage() {
             value={inviteCode}
             onChange={(e) => { setInviteCode(e.target.value); setInviteCodeError(undefined); }}
             placeholder="Enter invite code"
+            maxLength={20}
             disabled={joinMutation.isPending}
             error={inviteCodeError}
           />

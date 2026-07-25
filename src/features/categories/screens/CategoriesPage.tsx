@@ -10,6 +10,7 @@ import { ColorPicker } from '@/shared/components/ui/forms';
 import { useCategories, COLORS_PRESET } from '@/features/categories/hooks/useCategories';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
+import { maxLen, textRules } from '@/shared/validation/fieldLimits';
 
 export function CategoriesPage() {
   const theme = useTheme();
@@ -123,7 +124,7 @@ export function CategoriesPage() {
               <Controller
                 control={control}
                 name="name"
-                rules={{ required: 'Name is required', maxLength: { value: 100, message: 'Name must be at most 100 characters' } }}
+                rules={textRules('categoryName')}
                 render={({ field: { onChange, value } }) => (
                   <Input
                     label="Category name"

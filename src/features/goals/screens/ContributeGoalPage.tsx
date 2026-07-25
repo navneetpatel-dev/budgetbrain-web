@@ -4,6 +4,7 @@ import { FormStackScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useContributeGoal } from '../hooks/useGoals';
+import { validateAmount } from '@/shared/validation/fieldLimits';
 
 export function ContributeGoalPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,8 +19,9 @@ export function ContributeGoalPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!amount.trim()) {
-      setAmountError('Amount is required');
+    const amountErr = validateAmount(amount);
+    if (amountErr) {
+      setAmountError(amountErr);
       return;
     }
     setAmountError(undefined);

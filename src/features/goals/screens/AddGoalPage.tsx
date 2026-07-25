@@ -4,8 +4,9 @@ import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateGoal } from '../hooks/useGoals';
 import { GOAL_TYPES } from '@/shared/constants/config';
+import { validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
 
-type FieldErrors = { name?: string; targetAmount?: string };
+type FieldErrors = { name?: string; targetAmount?: string; targetDate?: string };
 
 export function AddGoalPage() {
   const theme = useTheme();
@@ -22,8 +23,12 @@ export function AddGoalPage() {
     e.preventDefault();
     setError(null);
     const next: FieldErrors = {};
-    if (!name.trim()) next.name = 'Name is required';
-    if (!targetAmount.trim()) next.targetAmount = 'Target amount is required';
+    const nameErr = validateText('entityName', name);
+    const amountErr = validateAmount(targetAmount);
+    const dateErr = targetDate ? validateDate(targetDate) : undefined;
+    if (nameErr) next.name = nameErr;
+    if (amountErr) next.targetAmount = amountErr;
+    if (dateErr) next.targetDate = dateErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({ name, type, targetAmount: Number(targetAmount), targetDate: targetDate || undefined });
@@ -52,7 +57,14 @@ export function AddGoalPage() {
           disabled={isPending}
           error={fieldErrors.targetAmount}
         />
-        <Input label="Target Date (optional)" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} type="date" disabled={isPending} />
+        <Input
+          label="Target Date (optional)"
+          value={targetDate}
+          onChange={(e) => { setTargetDate(e.target.value); setFieldErrors((f) => ({ ...f, targetDate: undefined })); }}
+          type="date"
+          disabled={isPending}
+          error={fieldErrors.targetDate}
+        />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Create Goal" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

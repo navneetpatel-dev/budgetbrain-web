@@ -4,6 +4,7 @@ import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
+import { validateAmount, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; salaryRange?: string; savingsTarget?: string };
 
@@ -22,9 +23,12 @@ export function OnboardingPage() {
     e.preventDefault();
     clearError();
     const next: FieldErrors = {};
-    if (!name.trim()) next.name = 'Name is required';
-    if (!salaryRange) next.salaryRange = 'Select salary range';
-    if (!savingsTarget.trim()) next.savingsTarget = 'Savings target is required';
+    const nameErr = validateText('name', name);
+    const salaryErr = validateText('salaryRange', salaryRange);
+    const savingsErr = validateAmount(savingsTarget);
+    if (nameErr) next.name = nameErr;
+    if (salaryErr) next.salaryRange = salaryErr;
+    if (savingsErr) next.savingsTarget = savingsErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
@@ -38,6 +42,7 @@ export function OnboardingPage() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
         <Input
           label="Full Name"
+          maxLength={255}
           value={name}
           onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }}
           placeholder="Your name"

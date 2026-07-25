@@ -10,6 +10,13 @@ import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useExpenseDetail } from '../hooks/useExpenses';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
+import {
+  maxLen,
+  validateAmount,
+  validateDate,
+  validateOptionalText,
+  validateText,
+} from '@/shared/validation/fieldLimits';
 
 export function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +28,7 @@ export function ExpenseDetailPage() {
   const [date, setDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [notes, setNotes] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; merchant?: string; date?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; merchant?: string; date?: string; notes?: string }>({});
 
   if (isLoading || !txn) return <DetailSkeleton />;
 
@@ -35,9 +42,14 @@ export function ExpenseDetailPage() {
       e.preventDefault();
       setError(null);
       const next: typeof fieldErrors = {};
-      if (!amount.trim()) next.amount = 'Amount is required';
-      if (!merchant.trim()) next.merchant = 'Merchant is required';
-      if (!date) next.date = 'Date is required';
+      const amountErr = validateAmount(amount);
+      const merchantErr = validateText('merchant', merchant);
+      const dateErr = validateDate(date);
+      const notesErr = validateOptionalText('notes', notes);
+      if (amountErr) next.amount = amountErr;
+      if (merchantErr) next.merchant = merchantErr;
+      if (dateErr) next.date = dateErr;
+      if (notesErr) next.notes = notesErr;
       setFieldErrors(next);
       if (Object.keys(next).length) return;
       updateMutation.mutate({ amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined });
@@ -46,11 +58,11 @@ export function ExpenseDetailPage() {
       <FormStackScreen title="Edit Expense" onBack={cancelEdit}>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
-          <Input label="Merchant" value={merchant} onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }} placeholder="e.g. Starbucks" disabled={isPending} error={fieldErrors.merchant} />
+          <Input label="Merchant" maxLength={255} value={merchant} onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }} placeholder="e.g. Starbucks" disabled={isPending} error={fieldErrors.merchant} />
           <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
           <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline disabled={isPending} />
+          <Input label="Notes" maxLength={maxLen('notes')} value={notes} onChange={(e) => setNotes(e.target.value)} multiline disabled={isPending} error={fieldErrors.notes} />
           {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={handleSave} loading={isPending} size="lg" />
           <Button title="Cancel" onPress={cancelEdit} variant="outline" disabled={isPending} />
@@ -67,11 +79,11 @@ export function ExpenseDetailPage() {
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
         </div>
         <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-          <DetailRow theme={theme} label="Merchant" value={txn.merchant ?? '-'} />
+          <DetailRow theme={theme} label="Merchant" maxLength={255} value={txn.merchant ?? '-'} />
           <DetailRow theme={theme} label="Category" value={txn.category?.name ?? '-'} />
           <DetailRow theme={theme} label="Date" value={txn.date} />
           <DetailRow theme={theme} label="Payment" value={txn.paymentMethod ? txn.paymentMethod.replace('_', ' ') : '-'} />
-          {txn.notes && <DetailRow theme={theme} label="Notes" value={txn.notes} />}
+          {txn.notes && <DetailRow theme={theme} label="Notes" maxLength={2000} value={txn.notes} />}
         </Card>
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
           <Button title="Edit" onPress={() => { startEdit(); setAmount(String(txn.amount)); setMerchant(txn.merchant ?? ''); setDate(txn.date); setPaymentMethod(txn.paymentMethod ?? 'cash'); setNotes(txn.notes ?? ''); }} variant="outline" size="lg" icon="edit" />

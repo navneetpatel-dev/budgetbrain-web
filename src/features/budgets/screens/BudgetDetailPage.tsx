@@ -11,6 +11,7 @@ import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useBudgetDetail } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
+import { validateAmount, validateText } from '@/shared/validation/fieldLimits';
 
 export function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,8 +35,11 @@ export function BudgetDetailPage() {
     const save = () => {
       setError(null);
       const next: typeof fieldErrors = {};
-      if (!name.trim()) next.name = 'Name is required';
-      if (!amount.trim()) next.amount = 'Amount is required';
+      const nameErr = validateText('entityName', name);
+      const amountErr = validateAmount(amount);
+      if (nameErr) next.name = nameErr;
+      if (amountErr) next.amount = amountErr;
+
       setFieldErrors(next);
       if (Object.keys(next).length) return;
       updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });

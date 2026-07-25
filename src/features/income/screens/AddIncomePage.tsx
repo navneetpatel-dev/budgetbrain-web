@@ -3,13 +3,14 @@ import { FormStackScreen, OptionChips, OptionChipList } from '@/shared/component
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateIncome, useIncomeSources } from '../hooks/useIncome';
+import { validateAmount, validateDate, validateOptionalText, validateText } from '@/shared/validation/fieldLimits';
 
 const SOURCE_TYPES = [
   { id: 'salary', label: 'Salary' }, { id: 'freelancing', label: 'Freelancing' },
   { id: 'investments', label: 'Investments' }, { id: 'rental', label: 'Rental' }, { id: 'other', label: 'Other' },
 ];
 
-type FieldErrors = { amount?: string; date?: string; selectedSource?: string; newSourceName?: string };
+type FieldErrors = { amount?: string; date?: string; notes?: string; selectedSource?: string; newSourceName?: string };
 
 export function AddIncomePage() {
   const theme = useTheme();
@@ -30,10 +31,17 @@ export function AddIncomePage() {
     e.preventDefault();
     setError(null);
     const next: FieldErrors = {};
-    if (!amount.trim()) next.amount = 'Amount is required';
-    if (!date) next.date = 'Date is required';
+    const amountErr = validateAmount(amount);
+    const dateErr = validateDate(date);
+    const notesErr = validateOptionalText('notes', notes);
+    if (amountErr) next.amount = amountErr;
+    if (dateErr) next.date = dateErr;
+    if (notesErr) next.notes = notesErr;
     if (sourceMode === 'existing' && !selectedSource) next.selectedSource = 'Select an income source';
-    if (sourceMode === 'new' && !newSourceName.trim()) next.newSourceName = 'Source name is required';
+    if (sourceMode === 'new') {
+      const sourceErr = validateText('entityName', newSourceName);
+      if (sourceErr) next.newSourceName = sourceErr;
+    }
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({

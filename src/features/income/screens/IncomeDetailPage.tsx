@@ -9,6 +9,7 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useIncomeDetail } from '../hooks/useIncome';
+import { validateAmount, validateDate } from '@/shared/validation/fieldLimits';
 
 export function IncomeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -32,8 +33,11 @@ export function IncomeDetailPage() {
     const save = () => {
       setError(null);
       const next: typeof fieldErrors = {};
-      if (!amount.trim()) next.amount = 'Amount is required';
-      if (!date) next.date = 'Date is required';
+      const amountErr = validateAmount(amount);
+      const dateErr = validateDate(date);
+      if (amountErr) next.amount = amountErr;
+      if (dateErr) next.date = dateErr;
+
       setFieldErrors(next);
       if (Object.keys(next).length) return;
       updateMutation.mutate({ amount: Number(amount), date, notes: notes || undefined });

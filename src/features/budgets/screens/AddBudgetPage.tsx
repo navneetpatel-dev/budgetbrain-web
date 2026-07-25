@@ -4,6 +4,7 @@ import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateBudget } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
+import { validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; amount?: string; startDate?: string };
 
@@ -23,9 +24,12 @@ export function AddBudgetPage() {
     e.preventDefault();
     setError(null);
     const next: FieldErrors = {};
-    if (!name.trim()) next.name = 'Name is required';
-    if (!amount.trim()) next.amount = 'Amount is required';
-    if (!startDate) next.startDate = 'Start date is required';
+    const nameErr = validateText('entityName', name);
+    const amountErr = validateAmount(amount);
+    const dateErr = validateDate(startDate);
+    if (nameErr) next.name = nameErr;
+    if (amountErr) next.amount = amountErr;
+    if (dateErr) next.startDate = dateErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({ name, type, amount: Number(amount), startDate, alertThreshold: Number(alertThreshold) });

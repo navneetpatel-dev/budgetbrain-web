@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
-import { authFieldRules } from '../utils/authValidation';
+import { authFieldRules, confirmPasswordRule } from '../utils/authValidation';
 import { maxLen } from '@/shared/validation/fieldLimits';
 import { useResetPassword } from '../hooks/useAuthHooks';
 
@@ -48,10 +48,7 @@ export function ResetPasswordPage() {
           <Controller
             control={control}
             name="confirmPassword"
-            rules={{
-              required: 'Confirm your password',
-              validate: (value) => value === password || 'Passwords do not match',
-            }}
+            rules={confirmPasswordRule(password)}
             render={({ field }) => (
               <Input label="Confirm password" maxLength={maxLen("password")} value={field.value} onChange={field.onChange} placeholder="Re-enter password" type="password" secureToggle autoComplete="new-password" disabled={loading} error={errors.confirmPassword?.message} />
             )}

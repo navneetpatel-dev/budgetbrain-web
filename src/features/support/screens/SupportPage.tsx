@@ -5,7 +5,7 @@ import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/compo
 import { SupportSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
-import { FieldLimits, maxLen } from '@/shared/validation/fieldLimits';
+import { maxLen, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { subject?: string; message?: string };
 
@@ -20,18 +20,10 @@ export function SupportPage() {
   const handleSubmit = () => {
     setError(null);
     const next: FieldErrors = {};
-    if (!subject.trim()) next.subject = 'Subject is required';
-    else if (subject.trim().length < FieldLimits.subject.min) {
-      next.subject = `At least ${FieldLimits.subject.min} characters`;
-    } else if (subject.trim().length > FieldLimits.subject.max) {
-      next.subject = `At most ${FieldLimits.subject.max} characters`;
-    }
-    if (!message.trim()) next.message = 'Message is required';
-    else if (message.trim().length < FieldLimits.message.min) {
-      next.message = `At least ${FieldLimits.message.min} characters`;
-    } else if (message.trim().length > FieldLimits.message.max) {
-      next.message = `At most ${FieldLimits.message.max} characters`;
-    }
+    const subjectErr = validateText('subject', subject);
+    const messageErr = validateText('message', message);
+    if (subjectErr) next.subject = subjectErr;
+    if (messageErr) next.message = messageErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({ subject, message });

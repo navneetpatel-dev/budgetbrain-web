@@ -133,10 +133,16 @@ export interface PaginatedTransactions extends PaginationMeta {
 
 export type PaginatedList<K extends string, T> = PaginationMeta & Record<K, T[]>;
 
+export interface ApiErrorDetail {
+  message?: string;
+  path?: Array<string | number>;
+  code?: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
-  error?: { message: string; code?: string };
+  error?: { message: string; code?: string; details?: ApiErrorDetail[] };
 }
 
 export interface AiChatMessage {
