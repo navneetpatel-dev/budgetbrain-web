@@ -402,6 +402,9 @@ export function OptionChipList({
   const selected = safeItems.find((i) => i.id === selectedId);
 
   if (useSelect) {
+    const borderColor = error
+      ? theme.colors.danger
+      : (theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle);
     return (
       <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
         <select
@@ -411,13 +414,16 @@ export function OptionChipList({
           style={{
             width: '100%', boxSizing: 'border-box', height: 48, padding: '0 12px',
             borderRadius: theme.radii.lg,
-            border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle}`,
+            border: `1.5px solid ${borderColor}`,
             backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBg,
-            color: theme.colors.text,
+            color: selected ? theme.colors.text : theme.colors.textTertiary,
             fontFamily: theme.typography.bodyMedium.fontFamily ?? 'Inter',
             fontSize: 15, fontWeight: 600,
           }}
         >
+          <option value="" disabled>
+            Please select a category
+          </option>
           {safeItems.map((item) => (
             <option key={item.id} value={item.id}>{item.label}</option>
           ))}
