@@ -95,7 +95,7 @@ export function AccountsPage() {
             <label style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Type</label>
             <OptionChips options={ACCOUNT_TYPES.map((t) => t.id)} value={type} onChange={setType} getLabel={(v) => ACCOUNT_TYPES.find((t) => t.id === v)?.label ?? v} disabled={createMutation.isPending} />
             <Input label="Institution" value={institution} onChange={(e) => setInstitution(e.target.value)} maxLength={maxLen('institution')} error={fieldErrors.institution} disabled={createMutation.isPending} />
-            <Input label="Last 4 digits" value={last4} onChange={(e) => setLast4(e.target.value)} maxLength={4} error={fieldErrors.accountNumberLast4} disabled={createMutation.isPending} />
+            <Input label="Last 4 digits" value={last4} onChange={(e) => setLast4(e.target.value)} maxLength={maxLen('accountNumberLast4')} error={fieldErrors.accountNumberLast4} disabled={createMutation.isPending} />
             <Input label="Balance" value={balance} onChange={(e) => setBalance(e.target.value)} type="number" error={fieldErrors.balance} disabled={createMutation.isPending} />
             <Button title="Save Account" onPress={handleSubmit} loading={createMutation.isPending} />
             <Button title="Cancel" onPress={() => { setShowForm(false); setError(null); }} variant="outline" disabled={createMutation.isPending} />

@@ -5,7 +5,7 @@ import { Card, Button, Input, EmptyState, FormErrorBanner } from '@/shared/compo
 import { FamilySkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useFamily } from '@/features/shared/hooks/useFeatures';
-import { validateInviteCode, validateText } from '@/shared/validation/fieldLimits';
+import { maxLen, validateInviteCode, validateText } from '@/shared/validation/fieldLimits';
 
 export function FamilyPage() {
   const theme = useTheme();

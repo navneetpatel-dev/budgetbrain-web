@@ -4,7 +4,7 @@ import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
-import { validateAmount, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
+import { maxLen, validateAmount, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; country?: string; salaryRange?: string; savingsTarget?: string; goals?: string };
 
