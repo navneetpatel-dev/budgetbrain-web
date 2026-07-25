@@ -374,12 +374,12 @@ export function SummaryCard({ title, amount, color, subtitle, icon, onPress }: S
   const tint = color ?? theme.colors.text;
 
   const content = (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: theme.spacing.sm }}>
         {icon && (
           <div style={{
             width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: tint + '18',
+            backgroundColor: tint + '18', flexShrink: 0,
           }}>
             <AppIcon name={icon} size={16} color={tint} />
           </div>
@@ -398,29 +398,40 @@ export function SummaryCard({ title, amount, color, subtitle, icon, onPress }: S
         fontWeight: Number(theme.typography.amount.fontWeight),
         letterSpacing: theme.typography.amount.letterSpacing,
         color: tint,
+        lineHeight: 1.2,
       }}>{amount}</span>
-      {subtitle && (
-        <p style={{
-          fontFamily: 'Inter, sans-serif',
-          fontSize: theme.typography.caption.fontSize,
-          fontWeight: Number(theme.typography.caption.fontWeight),
-          color: theme.colors.textTertiary,
-          marginTop: 4,
-          margin: 0,
-        }}>{subtitle}</p>
-      )}
-    </>
+      {/* Always reserve subtitle space so metric cards share one height in a row. */}
+      <p style={{
+        fontFamily: 'Inter, sans-serif',
+        fontSize: theme.typography.caption.fontSize,
+        fontWeight: Number(theme.typography.caption.fontWeight),
+        color: theme.colors.textTertiary,
+        margin: '4px 0 0',
+        minHeight: 18,
+        lineHeight: '18px',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}>{subtitle ?? '\u00A0'}</p>
+    </div>
   );
 
   if (onPress) {
     return (
-      <button type="button" onClick={onPress} style={{ display: 'block', width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
-        <Card variant="elevated" style={{ height: '100%' }}>{content}</Card>
+      <button
+        type="button"
+        onClick={onPress}
+        style={{
+          display: 'flex', width: '100%', height: '100%', background: 'none', border: 'none',
+          padding: 0, cursor: 'pointer', textAlign: 'left',
+        }}
+      >
+        <Card variant="elevated" style={{ height: '100%', width: '100%', boxSizing: 'border-box' }}>{content}</Card>
       </button>
     );
   }
 
-  return <Card variant="elevated" style={{ height: '100%' }}>{content}</Card>;
+  return <Card variant="elevated" style={{ height: '100%', boxSizing: 'border-box' }}>{content}</Card>;
 }
 
 /* ── EmptyState ── */

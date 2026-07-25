@@ -2,7 +2,7 @@ import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useBottomInset, useFloatingBlockGap } from '@/shared/hooks/useTabBarInset';
-import type { CSSProperties, ReactNode } from 'react';
+import { Children, type CSSProperties, type ReactNode } from 'react';
 import { ScreenSkeleton as ContentScreenSkeleton } from './skeleton';
 
 export { ScreenSkeleton } from './skeleton';
@@ -82,7 +82,7 @@ export function ResponsiveGrid({
   );
 }
 
-/** Dashboard metric cards: full-width income/expense, paired goals/net-worth on phone & tablet */
+/** Dashboard metric cards — equal-height cells in a 2×2 (phone) or 4-col (desktop) grid. */
 export function SummaryMetricsGrid({
   children, gap: gapProp, style,
 }: {
@@ -90,17 +90,18 @@ export function SummaryMetricsGrid({
 }) {
   const { isDesktop, gridGap } = useResponsive();
   const gap = gapProp ?? gridGap;
-  const items = Array.isArray(children) ? children : [children];
+  const items = Children.toArray(children);
 
   return (
     <div style={{
       display: 'grid',
       gridTemplateColumns: isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
       gap,
+      alignItems: 'stretch',
       ...style,
     }}>
       {items.map((child, i) => (
-        <div key={i} style={{ gridColumn: !isDesktop && i < 2 ? '1 / -1' : undefined, minWidth: 0 }}>
+        <div key={i} style={{ minWidth: 0, display: 'flex', height: '100%' }}>
           {child}
         </div>
       ))}
