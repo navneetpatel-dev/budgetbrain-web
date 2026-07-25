@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
@@ -11,7 +11,8 @@ import type {
 
 const AI_CHAT_TIMEOUT_MS = 60000;
 
-function visibleMessages(messages: AiChatMessage[]): AiChatMessage[] {
+function visibleMessages(messages: AiChatMessage[] | null | undefined): AiChatMessage[] {
+  if (!Array.isArray(messages)) return [];
   return messages.filter((m) => m.role === 'user' || m.role === 'assistant');
 }
 
@@ -20,11 +21,15 @@ export function useAiChat() {
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const seededFromId = useRef<string | null>(null);
   const user = useAppSelector((s) => s.auth.user);
   const isPremium = user?.role === 'premium' || user?.role === 'lifetime' || user?.role === 'admin';
 
-  const { data: conversationSummaries, isLoading: conversationsLoading } = useQuery({
+  const {
+    data: conversationSummaries,
+    isLoading: conversationsLoading,
+    isFetched: conversationsFetched,
+  } = useQuery({
     queryKey: ['ai-conversations'],
     queryFn: () => apiGet<AiConversationSummary[]>('/ai/conversations'),
     enabled: isPremium,
@@ -33,40 +38,40 @@ export function useAiChat() {
 
   const latestConversationId = conversationSummaries?.[0]?.id;
 
-  const { data: latestConversation, isLoading: conversationLoading } = useQuery({
+  const {
+    data: latestConversation,
+    isLoading: conversationLoading,
+    isFetched: conversationFetched,
+    isError: conversationError,
+  } = useQuery({
     queryKey: ['ai-conversation', latestConversationId],
     queryFn: () => apiGet<AiConversation>(`/ai/conversations/${latestConversationId}`),
-    enabled: isPremium && !!latestConversationId && !historyLoaded,
+    enabled: isPremium && !!latestConversationId,
     retry: false,
   });
 
-  useEffect(() => {
-    if (!isPremium || conversationsLoading) return;
-    if (!latestConversationId) {
-      setHistoryLoaded(true);
-    }
-  }, [isPremium, conversationsLoading, latestConversationId]);
-
-  useEffect(() => {
-    if (!latestConversationId || historyLoaded) return;
-    if (latestConversation) {
-      setConversationId(latestConversation.id);
-      setMessages(visibleMessages(latestConversation.messages));
-      setHistoryLoaded(true);
-      return;
-    }
-    if (!conversationLoading) {
-      setHistoryLoaded(true);
-    }
-  }, [latestConversationId, latestConversation, conversationLoading, historyLoaded]);
-
+  // Seed chat from the latest saved conversation once per conversation id
   useEffect(() => {
     if (!isPremium) {
-      setHistoryLoaded(false);
+      seededFromId.current = null;
       setConversationId(undefined);
       setMessages([]);
+      return;
     }
-  }, [isPremium]);
+    if (!latestConversation?.id) return;
+    if (seededFromId.current === latestConversation.id) return;
+
+    seededFromId.current = latestConversation.id;
+    setConversationId(latestConversation.id);
+    setMessages(visibleMessages(latestConversation.messages));
+  }, [isPremium, latestConversation]);
+
+  const historyLoading =
+    isPremium &&
+    (!conversationsFetched ||
+      conversationsLoading ||
+      (!!latestConversationId && !conversationFetched && conversationLoading) ||
+      (!!latestConversationId && !conversationFetched && !conversationError && !latestConversation));
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -90,8 +95,8 @@ export function useAiChat() {
         { timeout: AI_CHAT_TIMEOUT_MS }
       );
       setConversationId(data.conversationId);
+      seededFromId.current = data.conversationId;
       setMessages(visibleMessages(data.messages));
-      setHistoryLoaded(true);
     } catch (err) {
       setMessages((prev) => prev.slice(0, -1));
       setError(getApiErrorMessage(err, 'Could not send message'));
@@ -100,6 +105,13 @@ export function useAiChat() {
     }
   }, [conversationId, isPending]);
 
+  const startNewConversation = useCallback(() => {
+    seededFromId.current = null;
+    setConversationId(undefined);
+    setMessages([]);
+    setError(null);
+  }, []);
+
   return {
     messages,
     send,
@@ -107,6 +119,7 @@ export function useAiChat() {
     isPremium,
     error,
     clearError,
-    historyLoading: isPremium && !historyLoaded,
+    historyLoading,
+    startNewConversation,
   };
 }

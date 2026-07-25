@@ -1,20 +1,47 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
-import { Card, Button, fieldControlStyle, FormErrorBanner } from '@/shared/components/ui/index';
+import { Card, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
+
+const SEND_SIZE = 36;
 
 export function AiCoachPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { frame } = useScreenInsets();
-  const { messages, send, isPending, isPremium, error, clearError, historyLoading } = useAiChat();
+  const {
+    messages,
+    send,
+    isPending,
+    isPremium,
+    error,
+    clearError,
+    historyLoading,
+    startNewConversation,
+  } = useAiChat();
   const [input, setInput] = useState('');
+  const [focused, setFocused] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const canSend = input.trim().length > 0 && !isPending;
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const submit = () => {
+    if (!canSend) return;
+    const value = input;
+    setInput('');
+    void send(value);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
 
   if (!isPremium) {
     return (
@@ -32,9 +59,63 @@ export function AiCoachPage() {
     );
   }
 
+  const composerStyle: CSSProperties = {
+    display: 'flex',
+    alignItems: 'flex-end',
+    gap: 8,
+    minHeight: 48,
+    padding: '6px 6px 6px 16px',
+    borderRadius: 24,
+    border: `1px solid ${focused ? theme.colors.primary + '66' : theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.border}`,
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.inputBg,
+    boxSizing: 'border-box',
+    transition: 'border-color 0.2s, background-color 0.2s',
+  };
+
+  const inputStyle: CSSProperties = {
+    flex: 1,
+    minWidth: 0,
+    border: 'none',
+    outline: 'none',
+    resize: 'none',
+    background: 'transparent',
+    color: theme.colors.text,
+    fontSize: 14,
+    lineHeight: '22px',
+    fontFamily: 'Inter, sans-serif',
+    padding: '8px 0',
+    maxHeight: 120,
+    minHeight: 22,
+  };
+
+  const sendBtnStyle: CSSProperties = {
+    width: SEND_SIZE,
+    height: SEND_SIZE,
+    flexShrink: 0,
+    borderRadius: SEND_SIZE / 2,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: canSend ? 'none' : `1px solid ${theme.isDark ? 'rgba(255,255,255,0.14)' : theme.colors.borderSubtle}`,
+    background: canSend
+      ? `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`
+      : theme.isDark
+        ? 'rgba(255,255,255,0.12)'
+        : theme.colors.surfaceHover,
+    cursor: canSend ? 'pointer' : 'default',
+    opacity: isPending ? 0.7 : 1,
+    padding: 0,
+  };
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.colors.background }}>
-      <ProfileStackHeader screen="ai" subtitle="Your personal finance assistant" />
+      <ProfileStackHeader
+        screen="ai"
+        subtitle="Your personal finance assistant"
+        actionIcon={messages.length > 0 ? 'add' : undefined}
+        actionLabel="New conversation"
+        onAction={messages.length > 0 ? startNewConversation : undefined}
+      />
       <div style={{ flex: 1, overflowY: 'auto', ...frame, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {historyLoading && (
           <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
@@ -65,9 +146,36 @@ export function AiCoachPage() {
             <FormErrorBanner message={error} />
           </div>
         ) : null}
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input value={input} onChange={(e) => { clearError(); setInput(e.target.value); }} onKeyDown={(e) => { if (e.key === 'Enter') { send(input); setInput(''); } }} placeholder="Ask about your finances..." style={fieldControlStyle(theme, { flex: 1, fontSize: 14 })} />
-          <button onClick={() => { send(input); setInput(''); }} disabled={!input.trim() || isPending} style={{ width: 44, height: 44, borderRadius: theme.radii.lg, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, border: 'none', cursor: 'pointer', opacity: input.trim() ? 1 : 0.5 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.colors.onPrimary} strokeWidth="2"><path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" /></svg></button>
+        <div style={composerStyle}>
+          <textarea
+            value={input}
+            onChange={(e) => {
+              clearError();
+              setInput(e.target.value);
+              e.currentTarget.style.height = '22px';
+              e.currentTarget.style.height = `${Math.min(e.currentTarget.scrollHeight, 120)}px`;
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={onKeyDown}
+            placeholder="Ask about your finances..."
+            rows={1}
+            disabled={isPending}
+            aria-label="Chat message"
+            style={inputStyle}
+          />
+          <button
+            type="button"
+            onClick={submit}
+            disabled={!canSend}
+            aria-label="Send message"
+            style={sendBtnStyle}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={canSend ? theme.colors.onPrimary : theme.colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 2L11 13" />
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
