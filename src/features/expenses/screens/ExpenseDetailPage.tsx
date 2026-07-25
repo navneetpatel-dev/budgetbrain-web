@@ -147,5 +147,5 @@ export function ExpenseDetailPage() {
 }
 
 function DetailRow({ theme, label, value }: { theme: ReturnType<typeof useTheme>; label: string; value: string }) {
-  return <div><span style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{label}</span><span style={{ display: 'block', fontSize: 15, fontWeight: 500, color: theme.colors.text, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{value}</span></div>;
+  return <div><span style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{label}</span><span style={{ display: 'block', fontSize: 15, fontWeight: 500, color: theme.colors.text, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{value}</span></div>;
 }

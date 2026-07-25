@@ -9,7 +9,7 @@ export const spacing: ThemeSpacing = {
   lg: 16,
   xl: 24,
   xxl: 32,
-  section: 16,
+  section: 24,
 };
 
 export const radii: ThemeRadii = {
@@ -28,7 +28,7 @@ export const typography: ThemeTypography = {
   bodyMedium: { fontSize: 15, fontWeight: '500', fontFamily: 'Inter' },
   bodySemibold: { fontSize: 15, fontWeight: '600', fontFamily: 'Inter' },
   caption: { fontSize: 13, fontWeight: '500', fontFamily: 'Inter' },
-  label: { fontSize: 11, fontWeight: '600', letterSpacing: 0.8, textTransform: 'uppercase' as const, fontFamily: 'Inter' },
+  label: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2, textTransform: 'none' as const, fontFamily: 'Inter' },
   amount: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, fontFamily: 'Inter' },
   amountLg: { fontSize: 32, fontWeight: '800', letterSpacing: -1, fontFamily: 'Inter' },
 };

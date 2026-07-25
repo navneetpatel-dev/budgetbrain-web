@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
 import { SummaryCard, SectionHeader, Card, ProgressBar } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
@@ -6,22 +7,37 @@ import { DashboardContentSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useAppSelector } from '@/shared/store/hooks';
+import { apiGet } from '@/shared/services/api';
 import { DashboardHero } from '../components/DashboardHero';
 import { useDashboard } from '../hooks/useDashboard';
 import { ensureArray } from '@/shared/utils/listData';
 import { toSafeNumber, toSafePercent } from '@/shared/utils/number';
 import type { Budget, Goal, Transaction } from '@/shared/types';
 
+interface NetWorthSummary {
+  summary: { netWorth: number; currency: string };
+}
+
 export function DashboardPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
   const { data, isLoading } = useDashboard();
+  const { data: netWorthData } = useQuery({
+    queryKey: ['net-worth'],
+    queryFn: () => apiGet<NetWorthSummary>('/net-worth'),
+  });
 
   const summary = data?.summary;
   const recentTransactions = ensureArray<Transaction>(data?.recentTransactions);
   const budgets = ensureArray<Budget>(data?.budgets);
   const goals = ensureArray<Goal>(data?.goals);
+  const goalsProgress = goals.length
+    ? Math.round(goals.reduce((sum, g) => sum + toSafePercent(g.currentAmount, g.targetAmount), 0) / goals.length)
+    : null;
+  const netWorthAmount = netWorthData?.summary
+    ? formatCurrency(netWorthData.summary.netWorth, netWorthData.summary.currency || summary?.currency || 'INR')
+    : '—';
   const categoryBreakdown = ensureArray<{
     categoryId: string;
     total: string;
@@ -63,15 +79,15 @@ export function DashboardPage() {
             />
             <SummaryCard
               title="Goals"
-              amount={goals.length > 0 ? String(goals.length) : 'Start'}
-              subtitle={goals.length > 0 ? `active goal${goals.length !== 1 ? 's' : ''}` : 'Set a savings target'}
+              amount={goalsProgress != null ? `${goalsProgress}%` : '—'}
+              subtitle={goals.length > 0 ? `${goals.length} active goal${goals.length !== 1 ? 's' : ''}` : 'Set a savings target'}
               icon="target"
               color={theme.colors.primary}
               onPress={() => navigate('/goals')}
             />
             <SummaryCard
               title="Net Worth"
-              amount="View"
+              amount={netWorthAmount}
               subtitle="Assets & liabilities"
               icon="piggyBank"
               color={theme.colors.primary}

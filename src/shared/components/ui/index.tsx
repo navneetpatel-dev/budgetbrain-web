@@ -696,10 +696,9 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
         <span style={{
           display: 'block',
           fontFamily: 'Inter, sans-serif',
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: 0.9,
-          textTransform: 'uppercase',
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: 0.2,
           color: theme.colors.textTertiary,
           marginBottom: theme.spacing.sm,
           marginLeft: theme.spacing.xs,

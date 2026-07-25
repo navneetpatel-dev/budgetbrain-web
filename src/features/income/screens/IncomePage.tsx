@@ -20,7 +20,7 @@ export function IncomePage() {
         <FeatureHeader
           showBack
           onBack={goBack}
-          eyebrow="EARN"
+          eyebrow="Earn"
           title="Income"
           subtitle={isLoading ? 'Loading…' : `${incomeList.length} record${incomeList.length !== 1 ? 's' : ''}`}
           actionIcon="add"

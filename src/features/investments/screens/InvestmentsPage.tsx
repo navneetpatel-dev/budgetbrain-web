@@ -121,7 +121,7 @@ export function InvestmentsPage() {
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{inv.name}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{inv.type.replace('_', ' ')}</span>
+            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{inv.type.replace('_', ' ')}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>

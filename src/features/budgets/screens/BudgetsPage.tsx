@@ -21,7 +21,7 @@ export function BudgetsPage() {
         <FeatureHeader
           showBack
           onBack={goBack}
-          eyebrow="PLAN"
+          eyebrow="Plan"
           title="Budgets"
           subtitle={isLoading ? 'Loading…' : `${budgets.length} active`}
           actionIcon="add"
@@ -36,7 +36,7 @@ export function BudgetsPage() {
         return (
           <Card onClick={() => navigate(`/budget/${b.id}`)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
-              <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{b.name}</span><span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{b.type}{b.category?.name ? ` · ${b.category.name}` : ''}</span></div>
+              <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{b.name}</span><span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{b.type}{b.category?.name ? ` · ${b.category.name}` : ''}</span></div>
               <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>{formatCurrency(b.spent ?? 0, b.currency)}<span style={{ fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary }}> / {formatCurrency(b.amount, b.currency)}</span></span>
             </div>
             <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.success} />

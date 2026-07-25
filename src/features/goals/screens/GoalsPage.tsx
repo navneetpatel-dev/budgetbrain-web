@@ -21,7 +21,7 @@ export function GoalsPage() {
         <FeatureHeader
           showBack
           onBack={goBack}
-          eyebrow="SAVE"
+          eyebrow="Save"
           title="Goals"
           subtitle={isLoading ? 'Loading…' : `${goals.length} active goal${goals.length !== 1 ? 's' : ''}`}
           actionIcon="add"
@@ -37,7 +37,7 @@ export function GoalsPage() {
         return (
           <Card onClick={() => navigate(`/goal/${g.id}`)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
-              <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{g.name}</span><span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{g.type.replace(/_/g, ' ')}{g.targetDate ? ` · by ${g.targetDate}` : ''}</span></div>
+              <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{g.name}</span><span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{g.type.replace(/_/g, ' ')}{g.targetDate ? ` · by ${g.targetDate}` : ''}</span></div>
               {pct >= 100 && <span style={{ padding: '2px 10px', borderRadius: theme.radii.full, fontSize: 11, fontWeight: 700, backgroundColor: theme.colors.successSoft, color: theme.colors.success, fontFamily: 'Inter, sans-serif' }}>Done</span>}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAppSelector } from '@/shared/store/hooks';
 import { buildTheme } from './buildTheme';
-import { resolveAccent, resolveThemeMode } from './palettes';
+import { DEFAULT_ACCENT, resolveAccent, resolveThemeMode } from './palettes';
 import type { AppTheme } from './types';
 
 const ThemeContext = createContext<AppTheme | null>(null);
@@ -53,7 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme(): AppTheme {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
-    return buildTheme('light', 'indigo');
+    return buildTheme('light', DEFAULT_ACCENT);
   }
   return ctx;
 }

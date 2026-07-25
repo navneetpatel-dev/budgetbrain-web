@@ -67,8 +67,8 @@ export function DashboardHero({
 
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
         <div style={{ flex: 1, minWidth: 0, paddingRight: theme.spacing.sm }}>
-          <span style={{ display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: 1.2, color: 'rgba(255,255,255,0.65)', fontFamily: 'Inter, sans-serif' }}>
-            GOOD {getGreeting().toUpperCase()}
+          <span style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: 0.2, color: 'rgba(255,255,255,0.7)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>
+            Good {getGreeting()}
           </span>
           <span style={{ display: 'block', color: '#fff', fontSize: 22, fontWeight: 800, letterSpacing: -0.4, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>
             {name}

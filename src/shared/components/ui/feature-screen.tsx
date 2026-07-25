@@ -82,9 +82,9 @@ export function StackNavHeader({
           <div style={{ flex: 1, minWidth: 0 }}>
             {eyebrow && (
               <span style={{
-                display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '1.1px',
+                display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px',
                 color: theme.colors.textTertiary, marginBottom: 2, fontFamily: 'Inter, sans-serif',
-                textTransform: 'uppercase',
+                textTransform: 'capitalize',
               }}>{eyebrow}</span>
             )}
             <span style={{
@@ -172,8 +172,9 @@ export function FeatureHeader({
         <div style={{ flex: 1, minWidth: 0 }}>
           {eyebrow && (
             <span style={{
-              display: 'block', fontSize: 10, fontWeight: 700, letterSpacing: '1.1px',
+              display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px',
               color: theme.colors.textTertiary, marginBottom: 3, fontFamily: 'Inter, sans-serif',
+              textTransform: 'capitalize',
             }}>{eyebrow}</span>
           )}
           <span style={{

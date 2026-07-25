@@ -22,7 +22,7 @@ export function ExpensesPage() {
         <FeatureHeader
           showBack
           onBack={goBack}
-          eyebrow="TRACK"
+          eyebrow="Track"
           title="Activity"
           subtitle={isLoading ? 'Loading…' : `${total} transaction${total !== 1 ? 's' : ''}`}
           actionIcon="add"

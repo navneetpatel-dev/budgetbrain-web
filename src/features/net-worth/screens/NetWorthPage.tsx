@@ -65,7 +65,7 @@ export function NetWorthPage() {
             color: theme.colors.onPrimary,
             textAlign: 'center',
           }}>
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.8, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Net Worth</span>
+            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', opacity: 0.85, fontFamily: 'Inter, sans-serif' }}>Net worth</span>
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), margin: '4px 0' }}>
               {formatCurrency(summary.netWorth, currency)}
             </p>

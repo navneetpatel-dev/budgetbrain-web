@@ -72,14 +72,14 @@ export function DesktopSidebar() {
       </button>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>MAIN</span>
+        <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>Main</span>
         {MAIN_NAV.map((item) => (
           <SidebarLink key={item.route} item={item} isActive={currentPath === item.route} onPress={() => navigate(item.route)} />
         ))}
       </nav>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 20 }}>
-        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '1px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>MORE</span>
+        <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>More</span>
         {SECONDARY_NAV.map((item) => (
           <SidebarLink key={item.route} item={item} isActive={currentPath === item.route} onPress={() => navigate(item.route)} />
         ))}

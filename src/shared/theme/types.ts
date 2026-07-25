@@ -37,7 +37,7 @@ export interface ThemeTypography {
   bodyMedium: { fontSize: number; fontWeight: string; fontFamily?: string };
   bodySemibold: { fontSize: number; fontWeight: string; fontFamily?: string };
   caption: { fontSize: number; fontWeight: string; fontFamily?: string };
-  label: { fontSize: number; fontWeight: string; letterSpacing: number; textTransform: 'uppercase'; fontFamily?: string };
+  label: { fontSize: number; fontWeight: string; letterSpacing: number; textTransform: 'none' | 'uppercase'; fontFamily?: string };
   amount: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string };
   amountLg: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string };
 }

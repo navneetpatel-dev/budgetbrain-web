@@ -12,8 +12,8 @@ function PanelEyebrow({ children }: { children: string }) {
   return (
     <span style={{
       display: 'block',
-      fontSize: 11, fontWeight: 600, letterSpacing: 0.8,
-      color: theme.colors.primary, textTransform: 'uppercase',
+      fontSize: 12, fontWeight: 600, letterSpacing: 0.2,
+      color: theme.colors.primary, textTransform: 'capitalize',
       marginBottom: theme.spacing.lg,
       fontFamily: 'Inter, sans-serif',
     }}>{children}</span>
