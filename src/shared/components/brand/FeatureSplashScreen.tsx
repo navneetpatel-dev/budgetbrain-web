@@ -74,7 +74,7 @@ export function FeatureSplashScreen() {
           fontFamily: 'Inter, sans-serif', fontSize: 28, fontWeight: 800,
           color: theme.colors.text, margin: '0 0 8px 0', letterSpacing: -0.5,
           animation: 'splash-fade-in 0.6s ease-out',
-        }}>BudgetBrain</h1>
+        }}>budgetbrain</h1>
         <p style={{
           fontFamily: 'Inter, sans-serif', fontSize: 15, color: theme.colors.textSecondary,
           margin: '0 0 32px 0', textAlign: 'center', maxWidth: 280, lineHeight: 1.5,

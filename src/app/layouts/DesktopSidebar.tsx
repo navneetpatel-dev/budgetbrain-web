@@ -53,7 +53,7 @@ export function DesktopSidebar() {
           <BrandMark size={20} color={theme.colors.onPrimary} strokeWidth={2} />
         </div>
         <div>
-          <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 800, color: theme.colors.text, letterSpacing: -0.3 }}>BudgetBrain</span>
+          <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 800, color: theme.colors.text, letterSpacing: -0.3 }}>budgetbrain</span>
           <span style={{ fontSize: 11, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{user?.name ?? 'Finance'}</span>
         </div>
       </div>
