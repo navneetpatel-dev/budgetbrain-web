@@ -25,7 +25,7 @@ export function GoalsPage() {
   const { data, isLoading, isError, refetch } = useGoals();
   const goals = data ?? [];
 
-  const goToEdit = (id: string) => navigate(`/goal/${id}?edit=1`);
+  const openGoal = (id: string) => navigate(`/goal/${id}`);
 
   const handleDelete = async (goal: Goal) => {
     if (!(await confirm(CONFIRM.deleteGoal))) return;
@@ -75,7 +75,7 @@ export function GoalsPage() {
                   backgroundColor: theme.colors.successSoft,
                 }}>Done</span>
               ) : undefined}
-              onEdit={() => goToEdit(g.id)}
+              onEdit={() => openGoal(g.id)}
               onDelete={() => { void handleDelete(g); }}
             />
           );
