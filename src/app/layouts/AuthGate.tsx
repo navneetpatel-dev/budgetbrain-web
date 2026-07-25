@@ -1,13 +1,13 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '@/shared/store/hooks';
-import { FeatureSplashScreen } from '@/shared/components/brand/FeatureSplashScreen';
+import { ColdStartSkeleton } from '@/shared/components/ui/skeleton';
 
 export function AuthGate() {
   const { isAuthenticated, isLoading, user } = useAppSelector((s) => s.auth);
   const location = useLocation();
   const pathname = location.pathname.split('/').filter(Boolean)[0];
 
-  if (isLoading) return <FeatureSplashScreen />;
+  if (isLoading) return <ColdStartSkeleton />;
 
   // Allow auth routes and public routes
   const publicPaths = ['login', 'register', 'forgot-password', 'reset-password', 'otp-login', 'verify-email', 'privacy', 'terms'];

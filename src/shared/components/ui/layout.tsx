@@ -3,6 +3,9 @@ import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useBottomInset, useFloatingBlockGap } from '@/shared/hooks/useTabBarInset';
 import type { CSSProperties, ReactNode } from 'react';
+import { ScreenSkeleton as ContentScreenSkeleton } from './skeleton';
+
+export { ScreenSkeleton } from './skeleton';
 
 type ScreenInset = 'tab' | 'stack' | 'none';
 
@@ -107,46 +110,7 @@ export function SummaryMetricsGrid({
 
 /* ── ScreenLoader ── */
 
+/** @deprecated Prefer content skeletons (ListSkeleton, DashboardSkeleton, etc.). */
 export function ScreenLoader() {
-  const theme = useTheme();
-
-  return (
-    <div style={{
-      display: 'flex', justifyContent: 'center', alignItems: 'center',
-      height: '100%', backgroundColor: theme.colors.background,
-    }}>
-      <div style={{
-        width: 40, height: 40,
-        borderRadius: '50%',
-        border: `3px solid ${theme.colors.primarySoft}`,
-        borderTopColor: theme.colors.primary,
-        animation: 'spin 0.6s linear infinite',
-      }} />
-    </div>
-  );
-}
-
-/* ── ScreenSkeleton ── */
-
-export function ScreenSkeleton({ rows = 4 }: { rows?: number }) {
-  const theme = useTheme();
-  const { frame } = useScreenInsets();
-
-  return (
-    <div style={{
-      backgroundColor: theme.colors.background, paddingTop: theme.spacing.lg,
-      display: 'flex', flexDirection: 'column', gap: theme.spacing.md,
-      ...frame,
-    }}>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            height: 72, borderRadius: theme.radii.lg,
-            backgroundColor: theme.colors.surfaceHover, opacity: 0.7,
-          }}
-        />
-      ))}
-    </div>
-  );
+  return <ContentScreenSkeleton rows={5} />;
 }

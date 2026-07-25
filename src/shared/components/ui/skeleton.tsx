@@ -294,6 +294,25 @@ function rowForVariant(variant: ListSkeletonVariant) {
 
 /* ── Screen skeletons ── */
 
+/** Inline list-row placeholders (pagination footers, nested sections). */
+export function ListRowsSkeleton({
+  count = 2,
+  variant = 'generic',
+}: {
+  count?: number;
+  variant?: ListSkeletonVariant;
+}) {
+  const theme = useTheme();
+  const Row = rowForVariant(variant);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, padding: `${theme.spacing.md}px 0` }}>
+      {Array.from({ length: count }).map((_, i) => (
+        <Row key={i} />
+      ))}
+    </div>
+  );
+}
+
 export function ListSkeleton({
   count = 4,
   variant = 'generic',
@@ -628,5 +647,34 @@ export function ColdStartSkeleton() {
         <SkeletonBlock width="100%" height={52} radius={14} />
       </div>
     </div>
+  );
+}
+
+export function AiChatSkeleton() {
+  const theme = useTheme();
+  return (
+    <SkeletonScreen>
+      <SkeletonHeaderBar withAction />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.sm }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <SkeletonBlock width="68%" height={52} radius={theme.radii.lg} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <SkeletonBlock width="78%" height={72} radius={theme.radii.lg} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <SkeletonBlock width="54%" height={44} radius={theme.radii.lg} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+          <SkeletonBlock width="72%" height={88} radius={theme.radii.lg} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <SkeletonBlock width="60%" height={48} radius={theme.radii.lg} />
+        </div>
+      </div>
+      <div style={{ marginTop: 'auto', paddingTop: theme.spacing.xl }}>
+        <SkeletonBlock width="100%" height={52} radius={theme.radii.lg} />
+      </div>
+    </SkeletonScreen>
   );
 }

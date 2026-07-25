@@ -6,7 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { store, persistor } from '@/shared/store';
 import { queryClient } from '@/shared/services/queryClient';
 import { ThemeProvider } from '@/shared/theme';
-import { FeatureSplashScreen } from '@/shared/components/brand/FeatureSplashScreen';
+import { ColdStartSkeleton } from '@/shared/components/ui/skeleton';
 import { PreferencesHydrator } from '@/features/settings/components/PreferencesHydrator';
 import { AuthGate } from '@/app/layouts/AuthGate';
 import { AuthBootstrap } from '@/app/layouts/AuthBootstrap';
@@ -61,7 +61,7 @@ function AppProviders({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Provider store={store}>
-      <PersistGate loading={<FeatureSplashScreen />} persistor={persistor}>
+      <PersistGate loading={<ColdStartSkeleton />} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <PreferencesHydrator />
