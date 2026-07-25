@@ -9,6 +9,7 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { useAppSelector } from '@/shared/store/hooks';
 import { apiGet } from '@/shared/services/api';
 import { DashboardHero } from '../components/DashboardHero';
+import { CategoryChart } from '../components/CategoryChart';
 import { useDashboard } from '../hooks/useDashboard';
 import { ensureArray } from '@/shared/utils/listData';
 import { toSafeNumber, toSafePercent } from '@/shared/utils/number';
@@ -49,7 +50,7 @@ export function DashboardPage() {
       header={
         <DashboardHero
           name={user?.name?.split(' ')[0] ?? 'there'}
-          netSavings={summary ? formatCurrency(summary.netSavings, summary.currency) : '—'}
+          amount={summary ? toSafeNumber(summary.netSavings) : 0}
           currency={summary?.currency ?? 'INR'}
           savingsRate={summary ? Math.round(toSafeNumber(summary.savingsRate)) : undefined}
         />
@@ -98,20 +99,7 @@ export function DashboardPage() {
             <div>
               <SectionHeader title="Spending by Category" />
               <Card variant="elevated">
-                {categoryBreakdown.slice(0, 5).map((item) => {
-                  const total = toSafeNumber(item.total);
-                  const maxTotal = Math.max(...categoryBreakdown.map((c) => toSafeNumber(c.total)), 1);
-                  const pct = toSafePercent(total, maxTotal);
-                  return (
-                    <div key={item.categoryId} style={{ marginBottom: theme.spacing.sm }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>{item.category?.name ?? 'Unknown'}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{formatCurrency(total, summary.currency)}</span>
-                      </div>
-                      <ProgressBar progress={pct} color={item.category?.color ?? theme.colors.primary} height={6} />
-                    </div>
-                  );
-                })}
+                <CategoryChart data={categoryBreakdown} currency={summary.currency} />
               </Card>
             </div>
           )}

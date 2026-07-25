@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { Card, EmptyState, ProgressBar } from '@/shared/components/ui/index';
+import { EmptyState } from '@/shared/components/ui/index';
+import { ProgressEntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -33,19 +34,20 @@ export function BudgetsPage() {
       keyExtractor={(b: Budget) => b.id}
       renderItem={(b) => {
         const pct = toSafePercent(b.spent, b.amount);
+        const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.success;
+        const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : undefined;
         return (
-          <Card onClick={() => navigate(`/budget/${b.id}`)}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
-              <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{b.name}</span><span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{b.type}{b.category?.name ? ` · ${b.category.name}` : ''}</span></div>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>{formatCurrency(b.spent ?? 0, b.currency)}<span style={{ fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary }}> / {formatCurrency(b.amount, b.currency)}</span></span>
-            </div>
-            <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.success} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{pct}% used</span>
-              {pct >= (b.alertThreshold ?? 80) && pct < 100 && <span style={{ fontSize: 12, fontWeight: 600, color: theme.colors.warning, fontFamily: 'Inter, sans-serif' }}>Near limit</span>}
-              {pct >= 100 && <span style={{ fontSize: 12, fontWeight: 600, color: theme.colors.danger, fontFamily: 'Inter, sans-serif' }}>Over budget</span>}
-            </div>
-          </Card>
+          <ProgressEntityRow
+            title={b.name}
+            subtitle={`${b.type}${b.category?.name ? ` · ${b.category.name}` : ''}`}
+            value={formatCurrency(b.spent ?? 0, b.currency)}
+            secondaryValue={`/ ${formatCurrency(b.amount, b.currency)}`}
+            progress={pct}
+            progressColor={color}
+            footerLeft={`${pct}% used`}
+            footerRight={status}
+            onPress={() => navigate(`/budget/${b.id}`)}
+          />
         );
       }}
       ListEmptyComponent={

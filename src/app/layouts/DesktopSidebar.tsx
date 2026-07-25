@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
+import { ActionSheet } from '@/shared/components/ui/ActionSheet';
 import { BrandMark } from '@/shared/components/brand/BrandMark';
 import { useTheme } from '@/shared/theme';
+import { caption, textStyle } from '@/shared/theme/textStyles';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useAppSelector } from '@/shared/store/hooks';
 
@@ -30,6 +33,7 @@ export function DesktopSidebar() {
   const location = useLocation();
   const { sidebarWidth } = useResponsive();
   const user = useAppSelector((s) => s.auth.user);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const currentPath = '/' + location.pathname.split('/').filter(Boolean)[0];
 
@@ -53,13 +57,13 @@ export function DesktopSidebar() {
           <BrandMark size={20} color={theme.colors.onPrimary} strokeWidth={2} />
         </div>
         <div>
-          <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 800, color: theme.colors.text, letterSpacing: -0.3 }}>budgetbrain</span>
-          <span style={{ fontSize: 11, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{user?.name ?? 'Finance'}</span>
+          <span style={textStyle(theme, 'bodySemibold', { color: theme.colors.text, fontWeight: 800, fontSize: 16, letterSpacing: -0.3, display: 'block' })}>budgetbrain</span>
+          <span style={{ ...caption(theme), fontSize: 11, fontWeight: 500 }}>{user?.name ?? 'Finance'}</span>
         </div>
       </div>
 
       <button
-        onClick={() => navigate('/expense/add')}
+        onClick={() => setSheetOpen(true)}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           margin: '0 8px 20px', padding: '12px 16px', borderRadius: theme.radii.lg,
@@ -68,18 +72,18 @@ export function DesktopSidebar() {
         }}
       >
         <AppIcon name="add" size={18} color={theme.colors.onPrimary} />
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: theme.colors.onPrimary }}>Add Expense</span>
+        <span style={textStyle(theme, 'bodyMedium', { fontSize: 14, fontWeight: 700, color: theme.colors.onPrimary })}>Create</span>
       </button>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>Main</span>
+        <span style={{ ...caption(theme), fontWeight: 600, letterSpacing: 0.2, padding: '0 12px 8px' }}>Main</span>
         {MAIN_NAV.map((item) => (
           <SidebarLink key={item.route} item={item} isActive={currentPath === item.route} onPress={() => navigate(item.route)} />
         ))}
       </nav>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 20 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, padding: '0 12px 8px', fontFamily: 'Inter, sans-serif' }}>More</span>
+        <span style={{ ...caption(theme), fontWeight: 600, letterSpacing: 0.2, padding: '0 12px 8px' }}>More</span>
         {SECONDARY_NAV.map((item) => (
           <SidebarLink key={item.route} item={item} isActive={currentPath === item.route} onPress={() => navigate(item.route)} />
         ))}
@@ -87,13 +91,25 @@ export function DesktopSidebar() {
 
       <div style={{ flex: 1 }} />
 
+      <ActionSheet
+        visible={sheetOpen}
+        title="Create"
+        onClose={() => setSheetOpen(false)}
+        items={[
+          { id: 'expense', label: 'Expense', subtitle: 'Log a purchase or bill', icon: 'receipt', onPress: () => navigate('/expense/add') },
+          { id: 'income', label: 'Income', subtitle: 'Record money in', icon: 'income', onPress: () => navigate('/income/add') },
+          { id: 'budget', label: 'Budget', subtitle: 'Set a spending limit', icon: 'budgets', onPress: () => navigate('/budget/add') },
+          { id: 'goal', label: 'Goal', subtitle: 'Start a savings target', icon: 'target', onPress: () => navigate('/goal/add') },
+        ]}
+      />
+
       <div style={{
         margin: '0 8px', padding: '12px', borderRadius: theme.radii.lg,
         backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
         border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
       }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Quick tip</span>
-        <p style={{ fontSize: 12, color: theme.colors.textTertiary, marginTop: 4, lineHeight: '18px', fontFamily: 'Inter, sans-serif' }}>Use keyboard shortcuts: press <kbd style={{ padding: '1px 5px', borderRadius: 4, backgroundColor: theme.colors.primarySoft, fontSize: 11 }}>N</kbd> to add expense.</p>
+        <span style={{ ...caption(theme, theme.colors.textSecondary), fontSize: 11, fontWeight: 600 }}>Quick tip</span>
+        <p style={{ ...caption(theme), marginTop: 4, lineHeight: '18px' }}>Use keyboard shortcuts: press <kbd style={{ padding: '1px 5px', borderRadius: 4, backgroundColor: theme.colors.primarySoft, fontSize: 11 }}>N</kbd> to add expense.</p>
       </div>
     </aside>
   );
@@ -114,14 +130,14 @@ function SidebarLink({ item, isActive, onPress }: { item: NavItem; isActive: boo
       }}
     >
       <AppIcon name={item.icon} size={20} color={isActive ? theme.colors.primary : theme.colors.textTertiary} />
-      <span style={{
-        fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: isActive ? 700 : 500,
+      <span style={textStyle(theme, 'bodyMedium', {
+        fontSize: 14, fontWeight: isActive ? 700 : 500,
         color: isActive ? theme.colors.primary : theme.colors.textSecondary,
-      }}>{item.label}</span>
+      })}>{item.label}</span>
       {isActive && (
         <div style={{
           marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%',
-          background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
+          backgroundColor: theme.colors.primary,
         }} />
       )}
     </button>

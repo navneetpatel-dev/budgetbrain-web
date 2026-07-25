@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
+import { caption, textStyle } from '@/shared/theme/textStyles';
 import { ensureArray } from '@/shared/utils/listData';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useBottomInset } from '@/shared/hooks/useTabBarInset';
@@ -82,19 +83,17 @@ export function StackNavHeader({
           <div style={{ flex: 1, minWidth: 0 }}>
             {eyebrow && (
               <span style={{
-                display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px',
-                color: theme.colors.textTertiary, marginBottom: 2, fontFamily: 'Inter, sans-serif',
-                textTransform: 'capitalize',
+                display: 'block', ...caption(theme), fontWeight: 600, letterSpacing: 0.2,
+                marginBottom: 2, textTransform: 'capitalize',
               }}>{eyebrow}</span>
             )}
-            <span style={{
-              fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
-              color: theme.colors.text, letterSpacing: -0.2,
-            }}>{title}</span>
+            <span style={textStyle(theme, 'titleSm', { color: theme.colors.text, fontWeight: 700, letterSpacing: -0.2 })}>
+              {title}
+            </span>
             {subtitle && (
               <span style={{
-                display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textSecondary,
-                marginTop: 1, lineHeight: '16px', fontFamily: 'Inter, sans-serif',
+                display: 'block', ...caption(theme, theme.colors.textSecondary),
+                fontWeight: 500, marginTop: 1, lineHeight: '16px',
               }}>{subtitle}</span>
             )}
           </div>
@@ -172,20 +171,17 @@ export function FeatureHeader({
         <div style={{ flex: 1, minWidth: 0 }}>
           {eyebrow && (
             <span style={{
-              display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px',
-              color: theme.colors.textTertiary, marginBottom: 3, fontFamily: 'Inter, sans-serif',
-              textTransform: 'capitalize',
+              display: 'block', ...caption(theme), fontWeight: 600, letterSpacing: 0.2,
+              marginBottom: 3, textTransform: 'capitalize',
             }}>{eyebrow}</span>
           )}
-          <span style={{
-            fontFamily: 'Inter, sans-serif', fontSize: 22, fontWeight: 800,
-            color: theme.colors.text, letterSpacing: -0.3,
-          }}>{title}</span>
+          <span style={textStyle(theme, 'title', { color: theme.colors.text, fontWeight: 800, fontSize: 22, letterSpacing: -0.3 })}>
+            {title}
+          </span>
           {subtitle && (
             <span style={{
-              display: 'block', fontSize: theme.typography.caption.fontSize,
-              fontWeight: 500, color: theme.colors.textSecondary,
-              marginTop: 3, lineHeight: '18px', fontFamily: 'Inter, sans-serif',
+              display: 'block', ...caption(theme, theme.colors.textSecondary),
+              fontWeight: 500, marginTop: 3, lineHeight: '18px',
             }}>{subtitle}</span>
           )}
         </div>
@@ -256,9 +252,7 @@ export function SearchField({ placeholder, onPress, rightAction }: { placeholder
         }}
       >
         <AppIcon name="search" size={17} color={theme.colors.textTertiary} />
-        <span style={{
-          fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 500, color: theme.colors.textTertiary,
-        }}>{placeholder}</span>
+        <span style={textStyle(theme, 'bodyMedium', { color: theme.colors.textTertiary })}>{placeholder}</span>
       </button>
       {rightAction}
     </div>
@@ -274,11 +268,49 @@ export function OptionChips<T extends string>({
   getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string; disabled?: boolean;
 }) {
   const theme = useTheme();
+  const useSelect = options.length > 4;
+
+  if (useSelect) {
+    return (
+      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
+        <select
+          value={value}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.value as T)}
+          style={{
+            width: '100%',
+            boxSizing: 'border-box',
+            height: 48,
+            padding: '0 12px',
+            borderRadius: theme.radii.lg,
+            border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg,
+            color: theme.colors.text,
+            ...textStyle(theme, 'bodyMedium', { fontWeight: 600 }),
+            textTransform: 'capitalize',
+          }}
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt}>{getLabel(opt)}</option>
+          ))}
+        </select>
+        {error && (
+          <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        {options.map((opt) => {
+      <div style={{
+        display: 'flex',
+        borderRadius: theme.radii.lg,
+        border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+        overflow: 'hidden',
+        backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
+      }}>
+        {options.map((opt, i) => {
           const selected = value === opt;
           const accent = getColor?.(opt) ?? theme.colors.primary;
           return (
@@ -288,30 +320,28 @@ export function OptionChips<T extends string>({
               disabled={disabled}
               onClick={() => onChange(opt)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 14px', borderRadius: theme.radii.full,
-                border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
-                backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
-                fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
+                flex: 1,
+                padding: '11px 6px',
+                border: 'none',
+                borderRight: i < options.length - 1
+                  ? `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`
+                  : 'none',
+                backgroundColor: selected ? accent + '22' : 'transparent',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                ...textStyle(theme, 'caption', {
+                  fontWeight: selected ? 700 : 600,
+                  color: selected ? accent : theme.colors.text,
+                }),
                 textTransform: 'capitalize',
               }}
             >
-              {selected && (
-                <span style={{
-                  width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: accent,
-                }}>
-                  <AppIcon name="checkmark" size={10} color={theme.colors.onPrimary} />
-                </span>
-              )}
               {getLabel(opt)}
             </button>
           );
         })}
       </div>
       {error && (
-        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+        <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
       )}
     </div>
   );
@@ -327,14 +357,51 @@ export function OptionChipList({
   disabled?: boolean;
 }) {
   const theme = useTheme();
-
   const safeItems = ensureArray<{ id: string; label: string; color?: string }>(items);
+  const useSelect = safeItems.length > 8;
+  const selected = safeItems.find((i) => i.id === selectedId);
+
+  if (useSelect) {
+    return (
+      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
+        <select
+          value={selectedId}
+          disabled={disabled}
+          onChange={(e) => onSelect(e.target.value)}
+          style={{
+            width: '100%', boxSizing: 'border-box', height: 48, padding: '0 12px',
+            borderRadius: theme.radii.lg,
+            border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle}`,
+            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBg,
+            color: theme.colors.text,
+            fontFamily: theme.typography.bodyMedium.fontFamily ?? 'Inter',
+            fontSize: 15, fontWeight: 600,
+          }}
+        >
+          {safeItems.map((item) => (
+            <option key={item.id} value={item.id}>{item.label}</option>
+          ))}
+        </select>
+        {selected?.color ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
+            <div style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: selected.color }} />
+            <span style={{ fontSize: 12, color: theme.colors.textTertiary, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>
+              {selected.label}
+            </span>
+          </div>
+        ) : null}
+        {error && (
+          <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>{error}</p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {safeItems.map((item) => {
-          const selected = selectedId === item.id;
+          const isSelected = selectedId === item.id;
           const accent = item.color ?? theme.colors.primary;
           return (
             <button
@@ -343,30 +410,25 @@ export function OptionChipList({
               disabled={disabled}
               onClick={() => onSelect(item.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 14px', borderRadius: theme.radii.full,
-                border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
-                backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
-                fontWeight: selected ? 700 : 600, color: selected ? accent : theme.colors.text,
-                textTransform: 'capitalize',
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '9px 12px', borderRadius: theme.radii.lg,
+                border: `1.5px solid ${isSelected ? accent : (theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle)}`,
+                backgroundColor: isSelected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surface),
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                fontFamily: theme.typography.bodyMedium.fontFamily ?? 'Inter',
+                fontSize: 13,
+                fontWeight: isSelected ? 700 : 600,
+                color: isSelected ? accent : theme.colors.text,
               }}
             >
-              {selected && (
-                <span style={{
-                  width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  backgroundColor: accent,
-                }}>
-                  <AppIcon name="checkmark" size={10} color={theme.colors.onPrimary} />
-                </span>
-              )}
+              <span style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: accent, flexShrink: 0 }} />
               {item.label}
             </button>
           );
         })}
       </div>
       {error && (
-        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>{error}</p>
       )}
     </div>
   );
@@ -394,11 +456,14 @@ export function MultiOptionChips({
               onClick={() => onToggle(opt)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 14px', borderRadius: theme.radii.full,
+                padding: '9px 14px', borderRadius: theme.radii.lg,
                 border: `1.5px solid ${isSelected ? accent : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
                 backgroundColor: isSelected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface),
-                cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', fontSize: 13,
-                fontWeight: isSelected ? 700 : 600, color: isSelected ? accent : theme.colors.text,
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                ...textStyle(theme, 'caption', {
+                  fontWeight: isSelected ? 700 : 600,
+                  color: isSelected ? accent : theme.colors.text,
+                }),
                 textTransform: 'capitalize',
               }}
             >
@@ -416,7 +481,7 @@ export function MultiOptionChips({
         })}
       </div>
       {error && (
-        <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>{error}</p>
+        <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
       )}
     </div>
   );

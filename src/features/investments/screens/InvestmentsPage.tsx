@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { OptionChips, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Card, EmptyState, Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { EmptyState, Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -118,25 +119,16 @@ export function InvestmentsPage() {
         ) : null
       }
       renderItem={(inv) => (
-        <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{inv.name}</span>
-            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{inv.type.replace('_', ' ')}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>
-              {formatCurrency(inv.currentValue ?? (inv.quantity * inv.currentPrice), inv.currency)}
-            </span>
-            {(inv.gainLoss !== undefined) && (
-              <span style={{
-                fontSize: 13, fontWeight: 600, fontFamily: 'Inter, sans-serif',
-                color: inv.gainLoss >= 0 ? theme.colors.success : theme.colors.danger,
-              }}>
-                {inv.gainLoss >= 0 ? '+' : ''}{formatCurrency(inv.gainLoss, inv.currency)}
-              </span>
-            )}
-          </div>
-        </Card>
+        <EntityRow
+          title={inv.name}
+          subtitle={[
+            inv.type.replace('_', ' '),
+            inv.gainLoss !== undefined
+              ? `${inv.gainLoss >= 0 ? '+' : ''}${formatCurrency(inv.gainLoss, inv.currency)}`
+              : null,
+          ].filter(Boolean).join(' · ')}
+          value={formatCurrency(inv.currentValue ?? (inv.quantity * inv.currentPrice), inv.currency)}
+        />
       )}
       ListEmptyComponent={
         isLoading ? (

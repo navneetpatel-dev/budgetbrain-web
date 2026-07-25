@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Card, EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
+import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
+import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -99,15 +100,13 @@ export function IntegrationsPage() {
         </div>
       }
       renderItem={(item) => (
-        <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{item.parsedMerchant ?? 'Unknown'}</span>
-            <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.2px', color: theme.colors.textTertiary, textTransform: 'capitalize', fontFamily: 'Inter, sans-serif' }}>{item.source}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 17, fontWeight: 700, color: theme.colors.danger, fontFamily: 'Inter, sans-serif' }}>
-              {formatCurrency(Number(item.parsedAmount) || 0)}
-            </span>
+        <EntityRow
+          title={item.parsedMerchant ?? 'Unknown'}
+          subtitle={item.source}
+          value={formatCurrency(Number(item.parsedAmount) || 0)}
+          valueColor={theme.colors.danger}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: theme.spacing.md }}>
             <select
               value={categoryById[item.id] ?? ''}
               onChange={(e) => setCategoryById((prev) => ({ ...prev, [item.id]: e.target.value }))}
@@ -118,7 +117,7 @@ export function IntegrationsPage() {
                 border: `1px solid ${theme.colors.borderSubtle}`,
                 backgroundColor: theme.colors.background,
                 color: theme.colors.text,
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: theme.typography.caption.fontFamily ?? 'Inter',
                 fontSize: 12,
               }}
             >
@@ -127,33 +126,31 @@ export function IntegrationsPage() {
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={() => {
-                  const categoryId = categoryById[item.id];
-                  if (!categoryId) {
-                    setError(ValidationMessages.categoryRequired);
-                    return;
-                  }
-                  setError(null);
-                  confirmMutation.mutate({ id: item.id, categoryId });
-                }}
-                style={{ padding: '6px 14px', borderRadius: theme.radii.full, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
-              >
-                Confirm
-              </button>
-              <button
-                onClick={() => {
-                  setError(null);
-                  rejectMutation.mutate(item.id);
-                }}
-                style={{ padding: '6px 14px', borderRadius: theme.radii.full, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
-              >
-                Reject
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                const categoryId = categoryById[item.id];
+                if (!categoryId) {
+                  setError(ValidationMessages.categoryRequired);
+                  return;
+                }
+                setError(null);
+                confirmMutation.mutate({ id: item.id, categoryId });
+              }}
+              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+            >
+              Confirm
+            </button>
+            <button
+              onClick={() => {
+                setError(null);
+                rejectMutation.mutate(item.id);
+              }}
+              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+            >
+              Reject
+            </button>
           </div>
-        </Card>
+        </EntityRow>
       )}
       ListEmptyComponent={
         isLoading ? (

@@ -29,8 +29,8 @@ export const typography: ThemeTypography = {
   bodySemibold: { fontSize: 15, fontWeight: '600', fontFamily: 'Inter' },
   caption: { fontSize: 13, fontWeight: '500', fontFamily: 'Inter' },
   label: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2, textTransform: 'none' as const, fontFamily: 'Inter' },
-  amount: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, fontFamily: 'Inter' },
-  amountLg: { fontSize: 32, fontWeight: '800', letterSpacing: -1, fontFamily: 'Inter' },
+  amount: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, fontFamily: 'Inter', fontVariantNumeric: 'tabular-nums' },
+  amountLg: { fontSize: 32, fontWeight: '700', letterSpacing: -1, fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums' },
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {

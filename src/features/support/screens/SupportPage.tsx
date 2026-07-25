@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { EntityRow } from '@/shared/components/ui/list-rows';
 import { SupportSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
@@ -86,13 +87,12 @@ export function SupportPage() {
       keyExtractor={(item) => item.id}
       ListHeaderComponent={showForm && !isLoading ? ticketForm : null}
       renderItem={(t) => (
-        <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{t.subject}</span>
-            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', textTransform: 'capitalize', fontFamily: 'Inter, sans-serif', color: t.status === 'open' ? theme.colors.warning : theme.colors.success }}>{t.status}</span>
-          </div>
-          <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{new Date(t.createdAt).toLocaleDateString()}</span>
-        </Card>
+        <EntityRow
+          title={t.subject}
+          subtitle={new Date(t.createdAt).toLocaleDateString()}
+          value={t.status.replace('_', ' ')}
+          valueColor={t.status === 'open' ? theme.colors.warning : theme.colors.success}
+        />
       )}
       ListEmptyComponent={
         isLoading ? (

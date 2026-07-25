@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StackNavHeader, useStackBack, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Card, Input, EmptyState } from '@/shared/components/ui/index';
+import { Input, EmptyState } from '@/shared/components/ui/index';
+import { TransactionRow } from '@/shared/components/ui/list-rows';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
-import { formatCurrency } from '@/shared/utils/currency';
 import { ensureArray } from '@/shared/utils/listData';
 import { useSearch } from '@/features/shared/hooks/useFeatures';
 import type { Transaction } from '@/shared/types';
@@ -53,13 +53,7 @@ export function SearchPage() {
         ) : null
       }
       renderItem={(txn) => (
-        <Card
-          onClick={() => navigate(`/expense/${txn.id}`)}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{txn.merchant || txn.category?.name || 'Transaction'}</span><span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{txn.date}{txn.notes ? ` · ${txn.notes}` : ''}</span></div>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
-        </Card>
+        <TransactionRow transaction={txn} onPress={() => navigate(`/expense/${txn.id}`)} />
       )}
       ListEmptyComponent={enabled && !searching ? <EmptyState title="No results" subtitle="Try a different search term" icon="search" /> : null}
     />

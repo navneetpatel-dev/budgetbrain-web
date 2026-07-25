@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
+import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
+import { useCountUp } from '@/shared/hooks/useCountUp';
+import { formatCurrency } from '@/shared/utils/currency';
 
 type QuickAction = { label: string; icon: AppIconName; href: string };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: 'Expense', icon: 'receipt', href: '/expenses' },
-  { label: 'Income', icon: 'income', href: '/income' },
-  { label: 'Budget', icon: 'budgets', href: '/budgets' },
-  { label: 'AI', icon: 'ai', href: '/ai' },
+  { label: 'Expense', icon: 'receipt', href: '/expense/add' },
+  { label: 'Income', icon: 'income', href: '/income/add' },
 ];
 
 function getGreeting() {
@@ -22,25 +23,27 @@ function getGreeting() {
 
 export function DashboardHero({
   name,
-  netSavings,
+  amount,
   currency,
   savingsRate,
 }: {
   name: string;
-  netSavings: string;
+  amount: number;
   currency: string;
   savingsRate?: number;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const { tabBarPaddingX, inlineGap, contentMaxWidth, isDesktop } = useResponsive();
+  const reducedMotion = useReducedMotion();
+  const animatedAmount = useCountUp(amount);
   const initial = name[0]?.toUpperCase() ?? '?';
 
   const heroStyle = useMemo(() => ({
     position: 'relative' as const,
     overflow: 'hidden',
     paddingTop: isDesktop ? 28 : 16,
-    paddingBottom: theme.spacing.md,
+    paddingBottom: theme.spacing.lg,
     paddingLeft: tabBarPaddingX,
     paddingRight: tabBarPaddingX,
     borderBottomLeftRadius: theme.radii.xl,
@@ -62,10 +65,8 @@ export function DashboardHero({
         background: 'linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 65%)',
         pointerEvents: 'none',
       }} />
-      <div style={{ position: 'absolute', width: 130, height: 130, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.06)', top: -35, right: -45, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', width: 80, height: 80, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.06)', bottom: 20, left: -25, pointerEvents: 'none' }} />
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.sm }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.md }}>
         <div style={{ flex: 1, minWidth: 0, paddingRight: theme.spacing.sm }}>
           <span style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: 0.2, color: 'rgba(255,255,255,0.7)', fontFamily: 'Inter, sans-serif', textTransform: 'capitalize' }}>
             Good {getGreeting()}
@@ -77,60 +78,55 @@ export function DashboardHero({
         <button
           onClick={() => navigate('/settings')}
           style={{
-            borderRadius: 999, padding: 2, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.45), rgba(255,255,255,0.1))',
+            width: 40, height: 40, borderRadius: 20, border: '1px solid rgba(255,255,255,0.28)',
+            backgroundColor: 'rgba(255,255,255,0.16)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
           aria-label="Open profile"
         >
-          <div style={{
-            width: 40, height: 40, borderRadius: 20,
-            backgroundColor: 'rgba(255,255,255,0.16)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <span style={{ color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'Inter, sans-serif' }}>{initial}</span>
-          </div>
+          <span style={{ color: '#fff', fontSize: 16, fontWeight: 800, fontFamily: 'Inter, sans-serif' }}>{initial}</span>
         </button>
       </div>
 
-      <div style={{
-        position: 'relative',
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: theme.radii.lg,
-        padding: `${theme.spacing.sm + 2}px ${theme.spacing.md}px`,
-        border: '1px solid rgba(255,255,255,0.14)',
-        marginBottom: theme.spacing.sm,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
-          <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: 11, fontWeight: 600, letterSpacing: 0.2, fontFamily: 'Inter, sans-serif' }}>Net savings</span>
-          {savingsRate !== undefined && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, backgroundColor: 'rgba(255,255,255,0.12)', padding: '3px 8px', borderRadius: theme.radii.full }}>
-              <AppIcon name="chart" size={10} color="rgba(255,255,255,0.9)" />
-              <span style={{ color: 'rgba(255,255,255,0.88)', fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>{savingsRate}% saved</span>
-            </div>
-          )}
-        </div>
+      <div
+        style={{
+          position: 'relative',
+          animation: reducedMotion ? undefined : 'bb-fade-up 0.38s ease both',
+        }}
+      >
+        <span style={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontSize: 12, fontWeight: 600, letterSpacing: 0.2, fontFamily: 'Inter, sans-serif', marginBottom: 4 }}>
+          Net savings
+        </span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing.sm }}>
-          <span style={{ color: '#fff', fontSize: 28, fontWeight: 800, letterSpacing: -0.8, fontFamily: 'Inter, sans-serif' }}>{netSavings}</span>
+          <span style={{
+            color: '#fff', fontSize: 34, fontWeight: 700, letterSpacing: -1,
+            fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums',
+          }}>{formatCurrency(animatedAmount, currency)}</span>
           <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>{currency}</span>
         </div>
+        {savingsRate !== undefined ? (
+          <span style={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontSize: 12, fontWeight: 600, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
+            {Math.round(savingsRate)}% saved this month
+          </span>
+        ) : null}
       </div>
 
-      <div style={{ position: 'relative', display: 'flex', gap: inlineGap }}>
+      <div style={{ position: 'relative', display: 'flex', gap: inlineGap, marginTop: theme.spacing.md }}>
         {QUICK_ACTIONS.map((action) => (
           <button
             key={action.label}
             onClick={() => navigate(action.href)}
             style={{
-              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-              padding: '9px 4px', borderRadius: theme.radii.md, cursor: 'pointer',
-              backgroundColor: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '11px 8px', borderRadius: theme.radii.md, cursor: 'pointer',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              border: '1px solid rgba(255,255,255,0.14)',
             }}
           >
             <AppIcon name={action.icon} size={15} color="rgba(255,255,255,0.95)" />
             <span style={{
-              fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-              color: 'rgba(255,255,255,0.92)',
+              fontSize: 13, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              color: 'rgba(255,255,255,0.95)',
             }}>{action.label}</span>
           </button>
         ))}

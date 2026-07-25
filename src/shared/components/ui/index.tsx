@@ -400,10 +400,11 @@ export function SummaryCard({ title, amount, color, subtitle, icon, onPress }: S
         }}>{title}</span>
       </div>
       <span style={{
-        fontFamily: 'Inter, sans-serif',
+        fontFamily: theme.typography.amount.fontFamily ?? 'Inter, sans-serif',
         fontSize: theme.typography.amount.fontSize,
         fontWeight: Number(theme.typography.amount.fontWeight),
         letterSpacing: theme.typography.amount.letterSpacing,
+        fontVariantNumeric: theme.typography.amount.fontVariantNumeric ?? 'tabular-nums',
         color: tint,
         lineHeight: 1.2,
       }}>{amount}</span>
@@ -604,13 +605,15 @@ export function ProgressBar({ progress, color, height = 8 }: { progress: number;
   const theme = useTheme();
   const barColor = color ?? theme.colors.primary;
   const clamped = Math.min(100, Math.max(0, progress));
+  const reducedMotion = typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
     <div style={{ height, borderRadius: height / 2, backgroundColor: theme.colors.borderSubtle, overflow: 'hidden', width: '100%' }}>
       <div style={{
         height: '100%', width: `${clamped}%`, borderRadius: height / 2,
         background: `linear-gradient(135deg, ${barColor}, ${barColor}dd)`,
-        transition: 'width 0.5s ease',
+        transition: reducedMotion ? undefined : 'width 0.5s ease',
       }} />
     </div>
   );
@@ -691,7 +694,7 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
   const theme = useTheme();
 
   return (
-    <div style={{ marginBottom: theme.spacing.section, ...style }}>
+    <div style={{ marginBottom: 0, ...style }}>
       {title && (
         <span style={{
           display: 'block',
@@ -712,3 +715,6 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
 }
 
 export { FormErrorBanner };
+export { ActionSheet } from './ActionSheet';
+export type { ActionSheetItem } from './ActionSheet';
+export { TransactionRow, EntityRow, ProgressEntityRow, NotificationRow } from './list-rows';

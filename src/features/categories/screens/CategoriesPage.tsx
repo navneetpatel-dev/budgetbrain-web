@@ -2,7 +2,8 @@ import type { CSSProperties } from 'react';
 import { Controller } from 'react-hook-form';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Card, Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
+import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
+import { EntityRow } from '@/shared/components/ui/list-rows';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
@@ -59,35 +60,28 @@ export function CategoriesPage() {
           keyExtractor={(item) => item.id}
           ListHeaderComponent={listError ? <FormErrorBanner message={listError} /> : undefined}
           renderItem={(cat, index) => (
-            <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, flex: 1, minWidth: 0 }}>
-                <div style={{
-                  width: 12, height: 12, borderRadius: '50%',
-                  backgroundColor: cat.color || theme.colors.primary,
-                  flexShrink: 0,
-                }} />
-                <span style={{
-                  fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600,
-                  color: theme.colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>{cat.name}</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                <button type="button" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
-                  <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
-                </button>
-                <button type="button" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
-                  <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
-                </button>
-                <button type="button" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
-                  <AppIcon name="edit" size={16} color={theme.colors.primary} />
-                </button>
-                {!cat.isDefault && (
-                  <button type="button" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
-                    <AppIcon name="trash" size={16} color={theme.colors.danger} />
+            <EntityRow
+              title={cat.name}
+              accentColor={cat.color || theme.colors.primary}
+              trailing={
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <button type="button" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
+                    <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
                   </button>
-                )}
-              </div>
-            </Card>
+                  <button type="button" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
+                    <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
+                  </button>
+                  <button type="button" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
+                    <AppIcon name="edit" size={16} color={theme.colors.primary} />
+                  </button>
+                  {!cat.isDefault && (
+                    <button type="button" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
+                      <AppIcon name="trash" size={16} color={theme.colors.danger} />
+                    </button>
+                  )}
+                </div>
+              }
+            />
           )}
           ListEmptyComponent={
             isLoading ? (
