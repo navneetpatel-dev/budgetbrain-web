@@ -268,7 +268,9 @@ export function OptionChips<T extends string>({
   getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string; disabled?: boolean;
 }) {
   const theme = useTheme();
-  const useSelect = options.length > 4;
+  /** Shared rule with mobile: ≤4 segmented, 5–8 chips, >8 select. */
+  const useSelect = options.length > 8;
+  const useSegmented = options.length <= 4;
 
   if (useSelect) {
     return (
@@ -301,16 +303,57 @@ export function OptionChips<T extends string>({
     );
   }
 
+  if (useSegmented) {
+    return (
+      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
+        <div style={{
+          display: 'flex',
+          borderRadius: theme.radii.lg,
+          border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+          overflow: 'hidden',
+          backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
+        }}>
+          {options.map((opt, i) => {
+            const selected = value === opt;
+            const accent = getColor?.(opt) ?? theme.colors.primary;
+            return (
+              <button
+                key={opt}
+                type="button"
+                disabled={disabled}
+                onClick={() => onChange(opt)}
+                style={{
+                  flex: 1,
+                  padding: '11px 6px',
+                  border: 'none',
+                  borderRight: i < options.length - 1
+                    ? `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`
+                    : 'none',
+                  backgroundColor: selected ? accent + '22' : 'transparent',
+                  cursor: disabled ? 'not-allowed' : 'pointer',
+                  ...textStyle(theme, 'caption', {
+                    fontWeight: selected ? 700 : 600,
+                    color: selected ? accent : theme.colors.text,
+                  }),
+                  textTransform: 'capitalize',
+                }}
+              >
+                {getLabel(opt)}
+              </button>
+            );
+          })}
+        </div>
+        {error && (
+          <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
-      <div style={{
-        display: 'flex',
-        borderRadius: theme.radii.lg,
-        border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
-        overflow: 'hidden',
-        backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.surface,
-      }}>
-        {options.map((opt, i) => {
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {options.map((opt) => {
           const selected = value === opt;
           const accent = getColor?.(opt) ?? theme.colors.primary;
           return (
@@ -320,13 +363,10 @@ export function OptionChips<T extends string>({
               disabled={disabled}
               onClick={() => onChange(opt)}
               style={{
-                flex: 1,
-                padding: '11px 6px',
-                border: 'none',
-                borderRight: i < options.length - 1
-                  ? `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`
-                  : 'none',
-                backgroundColor: selected ? accent + '22' : 'transparent',
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 12px', borderRadius: theme.radii.lg,
+                border: `1.5px solid ${selected ? accent : (theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle)}`,
+                backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surface),
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 ...textStyle(theme, 'caption', {
                   fontWeight: selected ? 700 : 600,

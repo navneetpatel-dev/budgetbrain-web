@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
+import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateExpense } from '../hooks/useExpenses';
@@ -93,7 +93,13 @@ export function AddExpensePage() {
           error={fieldErrors.date}
         />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
-        <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
+        <OptionChips
+          options={PAYMENT_METHODS.map((p) => p.id)}
+          value={paymentMethod}
+          onChange={setPaymentMethod}
+          getLabel={(v) => PAYMENT_METHODS.find((p) => p.id === v)?.label ?? v}
+          disabled={isPending}
+        />
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
         <OptionChipList
           items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}

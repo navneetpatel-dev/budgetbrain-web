@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { FormStackScreen, OptionChipList } from '@/shared/components/ui/feature-screen';
+import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
 import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
@@ -87,7 +87,13 @@ export function ExpenseDetailPage() {
           <Input label="Merchant" maxLength={maxLen('merchant')} value={merchant} onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }} placeholder="e.g. Starbucks" disabled={isPending} error={fieldErrors.merchant} />
           <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
-          <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
+          <OptionChips
+            options={PAYMENT_METHODS.map((p) => p.id)}
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            getLabel={(v) => PAYMENT_METHODS.find((p) => p.id === v)?.label ?? v}
+            disabled={isPending}
+          />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
           <OptionChipList
             items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}
