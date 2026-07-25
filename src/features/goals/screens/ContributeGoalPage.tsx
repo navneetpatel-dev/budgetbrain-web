@@ -11,20 +11,34 @@ export function ContributeGoalPage() {
   const { contributeMutation, error, setError } = useContributeGoal(id);
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
+  const [amountError, setAmountError] = useState<string>();
 
   const isPending = contributeMutation.isPending;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!amount) { setError('Enter an amount'); return; }
+    if (!amount.trim()) {
+      setAmountError('Amount is required');
+      return;
+    }
+    setAmountError(undefined);
     contributeMutation.mutate({ amount: Number(amount), notes: notes || undefined });
   };
 
   return (
     <FormStackScreen title="Contribute" eyebrow="Goal" icon="add">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-        <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" leftIcon="dollar" disabled={isPending} />
+        <Input
+          label="Amount"
+          value={amount}
+          onChange={(e) => { setAmount(e.target.value); setAmountError(undefined); }}
+          placeholder="0.00"
+          type="number"
+          leftIcon="dollar"
+          disabled={isPending}
+          error={amountError}
+        />
         <Input label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Add Contribution" onPress={handleSubmit} loading={isPending} size="lg" />

@@ -36,7 +36,7 @@ export function SettingsPage() {
   const user = useAppSelector((s) => s.auth.user);
   const { theme: themeMode, accent, setThemeMode, setAccentPalette } = useSyncedPreferences();
 
-  const { control, handleSubmit, reset } = useForm<ProfileForm>({
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<ProfileForm>({
     defaultValues: { name: user?.name ?? '', country: user?.country ?? '', currency: user?.currency ?? 'INR' },
   });
 
@@ -154,12 +154,22 @@ export function SettingsPage() {
           ) : (
             <FormSection title="Edit profile" style={{ margin: theme.spacing.lg, marginTop: 0 }}>
               {profileError ? <FormErrorBanner message={profileError} /> : null}
-              <Controller control={control} name="name" render={({ field: { onChange, value } }) => (
-                <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} leftIcon="personFill" disabled={profileLoading} />
-              )} />
-              <Controller control={control} name="country" render={({ field: { onChange, value } }) => (
-                <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} disabled={profileLoading} />
-              )} />
+              <Controller
+                control={control}
+                name="name"
+                rules={{ required: 'Name is required' }}
+                render={({ field: { onChange, value } }) => (
+                  <Input label="Name" value={value} onChange={(e) => onChange(e.target.value)} error={errors.name?.message} leftIcon="personFill" disabled={profileLoading} />
+                )}
+              />
+              <Controller
+                control={control}
+                name="country"
+                rules={{ required: 'Country is required' }}
+                render={({ field: { onChange, value } }) => (
+                  <Input label="Country" value={value} onChange={(e) => onChange(e.target.value)} error={errors.country?.message} disabled={profileLoading} />
+                )}
+              />
               <FormFieldLabel>Currency</FormFieldLabel>
               <Controller control={control} name="currency" render={({ field: { onChange, value } }) => (
                 <OptionChips

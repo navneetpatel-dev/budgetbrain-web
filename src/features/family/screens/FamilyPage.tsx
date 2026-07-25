@@ -13,8 +13,30 @@ export function FamilyPage() {
   const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
+  const [groupNameError, setGroupNameError] = useState<string>();
+  const [inviteCodeError, setInviteCodeError] = useState<string>();
 
   if (isLoading) return <FamilySkeleton />;
+
+  const handleCreate = () => {
+    setError(null);
+    if (!groupName.trim()) {
+      setGroupNameError('Name is required');
+      return;
+    }
+    setGroupNameError(undefined);
+    createMutation.mutate({ name: groupName });
+  };
+
+  const handleJoin = () => {
+    setError(null);
+    if (!inviteCode.trim()) {
+      setInviteCodeError('Invite code is required');
+      return;
+    }
+    setInviteCodeError(undefined);
+    joinMutation.mutate({ inviteCode });
+  };
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="family" subtitle="Manage expenses together" />} inset="stack">
@@ -23,16 +45,36 @@ export function FamilyPage() {
       )) : <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />}
       {showCreate && (
         <Card variant="elevated">
-          <Input label="Group Name" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="e.g. Family Budget" disabled={createMutation.isPending} />
+          <Input
+            label="Group Name"
+            value={groupName}
+            onChange={(e) => { setGroupName(e.target.value); setGroupNameError(undefined); }}
+            placeholder="e.g. Family Budget"
+            disabled={createMutation.isPending}
+            error={groupNameError}
+          />
           {error ? <FormErrorBanner message={error} /> : null}
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Create" onPress={() => createMutation.mutate({ name: groupName })} loading={createMutation.isPending} /><Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); }} variant="outline" disabled={createMutation.isPending} /></div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            <Button title="Create" onPress={handleCreate} loading={createMutation.isPending} />
+            <Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); setGroupNameError(undefined); }} variant="outline" disabled={createMutation.isPending} />
+          </div>
         </Card>
       )}
       {showJoin && (
         <Card variant="elevated">
-          <Input label="Invite Code" value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} placeholder="Enter invite code" disabled={joinMutation.isPending} />
+          <Input
+            label="Invite Code"
+            value={inviteCode}
+            onChange={(e) => { setInviteCode(e.target.value); setInviteCodeError(undefined); }}
+            placeholder="Enter invite code"
+            disabled={joinMutation.isPending}
+            error={inviteCodeError}
+          />
           {error ? <FormErrorBanner message={error} /> : null}
-          <div style={{ display: 'flex', gap: theme.spacing.sm }}><Button title="Join" onPress={() => joinMutation.mutate({ inviteCode })} loading={joinMutation.isPending} /><Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); }} variant="outline" disabled={joinMutation.isPending} /></div>
+          <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+            <Button title="Join" onPress={handleJoin} loading={joinMutation.isPending} />
+            <Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); setInviteCodeError(undefined); }} variant="outline" disabled={joinMutation.isPending} />
+          </div>
         </Card>
       )}
       <div style={{ display: 'flex', gap: theme.spacing.sm }}>

@@ -21,6 +21,7 @@ export function BudgetDetailPage() {
   const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string }>({});
 
   if (isLoading || !budget) return <DetailSkeleton />;
 
@@ -30,13 +31,21 @@ export function BudgetDetailPage() {
 
   if (editing) {
     const isPending = updateMutation.isPending;
-    const save = () => updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });
+    const save = () => {
+      setError(null);
+      const next: typeof fieldErrors = {};
+      if (!name.trim()) next.name = 'Name is required';
+      if (!amount.trim()) next.amount = 'Amount is required';
+      setFieldErrors(next);
+      if (Object.keys(next).length) return;
+      updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });
+    };
     return (
       <FormStackScreen title="Edit Budget" onBack={() => setEditing(false)}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Budget Name" value={name} onChange={(e) => setName(e.target.value)} disabled={isPending} />
+          <Input label="Budget Name" value={name} onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }} disabled={isPending} error={fieldErrors.name} />
           <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" disabled={isPending} />
+          <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" disabled={isPending} error={fieldErrors.amount} />
           <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} type="number" disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />

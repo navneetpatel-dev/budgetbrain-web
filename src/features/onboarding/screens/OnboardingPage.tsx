@@ -5,22 +5,28 @@ import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
 
+type FieldErrors = { name?: string; salaryRange?: string; savingsTarget?: string };
+
 export function OnboardingPage() {
   const theme = useTheme();
-  const { submit, loading, error, clearError, setError } = useOnboarding();
+  const { submit, loading, error, clearError } = useOnboarding();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('IN');
   const [currency, setCurrency] = useState('INR');
   const [goals, setGoals] = useState<string[]>([]);
   const [salaryRange, setSalaryRange] = useState('');
   const [savingsTarget, setSavingsTarget] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     clearError();
-    if (!name) { setError('Please enter your name'); return; }
-    if (!salaryRange) { setError('Select your salary range'); return; }
-    if (!savingsTarget) { setError('Enter your monthly savings target'); return; }
+    const next: FieldErrors = {};
+    if (!name.trim()) next.name = 'Name is required';
+    if (!salaryRange) next.salaryRange = 'Select salary range';
+    if (!savingsTarget.trim()) next.savingsTarget = 'Savings target is required';
+    setFieldErrors(next);
+    if (Object.keys(next).length) return;
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
   };
 
@@ -30,7 +36,14 @@ export function OnboardingPage() {
   return (
     <StackScrollScreen header={<StackNavHeader title="Onboarding" subtitle="Tell us about yourself" showBack={false} />}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-        <Input label="Full Name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" disabled={loading} />
+        <Input
+          label="Full Name"
+          value={name}
+          onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }}
+          placeholder="Your name"
+          disabled={loading}
+          error={fieldErrors.name}
+        />
         <div style={{ marginBottom: theme.spacing.lg }}>
           <label style={labelStyle}>Country</label>
           <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={loading} style={selectStyle}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select>
@@ -40,8 +53,26 @@ export function OnboardingPage() {
           <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={loading} style={selectStyle}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>)}</select>
         </div>
         <div><label style={labelStyle}>Financial Goals</label><MultiOptionChips options={FINANCIAL_GOALS.map((g) => g.id)} selected={goals} onToggle={(id) => setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id])} getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id} disabled={loading} /></div>
-        <div><label style={labelStyle}>Salary Range</label><OptionChips options={SALARY_RANGES.map((s) => s.id)} value={salaryRange} onChange={setSalaryRange} getLabel={(id) => SALARY_RANGES.find((s) => s.id === id)?.label ?? id} disabled={loading} /></div>
-        <Input label="Monthly Savings Target" value={savingsTarget} onChange={(e) => setSavingsTarget(e.target.value)} placeholder="e.g. 5000" type="number" disabled={loading} />
+        <div>
+          <label style={labelStyle}>Salary Range</label>
+          <OptionChips
+            options={SALARY_RANGES.map((s) => s.id)}
+            value={salaryRange}
+            onChange={(id) => { setSalaryRange(id); setFieldErrors((f) => ({ ...f, salaryRange: undefined })); }}
+            getLabel={(id) => SALARY_RANGES.find((s) => s.id === id)?.label ?? id}
+            error={fieldErrors.salaryRange}
+            disabled={loading}
+          />
+        </div>
+        <Input
+          label="Monthly Savings Target"
+          value={savingsTarget}
+          onChange={(e) => { setSavingsTarget(e.target.value); setFieldErrors((f) => ({ ...f, savingsTarget: undefined })); }}
+          placeholder="e.g. 5000"
+          type="number"
+          disabled={loading}
+          error={fieldErrors.savingsTarget}
+        />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Complete Setup" onPress={handleSubmit} loading={loading} size="lg" />
       </form>

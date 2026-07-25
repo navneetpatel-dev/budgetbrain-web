@@ -21,6 +21,7 @@ export function ExpenseDetailPage() {
   const [date, setDate] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [notes, setNotes] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; merchant?: string; date?: string }>({});
 
   if (isLoading || !txn) return <DetailSkeleton />;
 
@@ -30,13 +31,23 @@ export function ExpenseDetailPage() {
 
   if (editing) {
     const isPending = updateMutation.isPending;
-    const handleSave = (e: FormEvent) => { e.preventDefault(); updateMutation.mutate({ amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined }); };
+    const handleSave = (e: FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      const next: typeof fieldErrors = {};
+      if (!amount.trim()) next.amount = 'Amount is required';
+      if (!merchant.trim()) next.merchant = 'Merchant is required';
+      if (!date) next.date = 'Date is required';
+      setFieldErrors(next);
+      if (Object.keys(next).length) return;
+      updateMutation.mutate({ amount: Number(amount), merchant, date, paymentMethod, notes: notes || undefined });
+    };
     return (
       <FormStackScreen title="Edit Expense" onBack={cancelEdit}>
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" disabled={isPending} />
-          <Input label="Merchant" value={merchant} onChange={(e) => setMerchant(e.target.value)} placeholder="e.g. Starbucks" disabled={isPending} />
-          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
+          <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
+          <Input label="Merchant" value={merchant} onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }} placeholder="e.g. Starbucks" disabled={isPending} error={fieldErrors.merchant} />
+          <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
           <OptionChipList items={PAYMENT_METHODS.map((p) => ({ id: p.id, label: p.label }))} selectedId={paymentMethod} onSelect={setPaymentMethod} disabled={isPending} />
           <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} multiline disabled={isPending} />

@@ -18,6 +18,7 @@ export function IncomeDetailPage() {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string }>({});
 
   if (isLoading) return <DetailSkeleton />;
   if (!income) return null;
@@ -28,12 +29,20 @@ export function IncomeDetailPage() {
 
   if (editing) {
     const isPending = updateMutation.isPending;
-    const save = () => updateMutation.mutate({ amount: Number(amount), date, notes: notes || undefined });
+    const save = () => {
+      setError(null);
+      const next: typeof fieldErrors = {};
+      if (!amount.trim()) next.amount = 'Amount is required';
+      if (!date) next.date = 'Date is required';
+      setFieldErrors(next);
+      if (Object.keys(next).length) return;
+      updateMutation.mutate({ amount: Number(amount), date, notes: notes || undefined });
+    };
     return (
       <FormStackScreen title="Edit Income" onBack={() => setEditing(false)}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-          <Input label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} type="number" leftIcon="dollar" disabled={isPending} />
-          <Input label="Date" value={date} onChange={(e) => setDate(e.target.value)} type="date" disabled={isPending} />
+          <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
+          <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
           <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
