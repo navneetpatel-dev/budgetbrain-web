@@ -6,6 +6,7 @@ import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useReducedMotion } from '@/shared/hooks/useReducedMotion';
 import { useCountUp } from '@/shared/hooks/useCountUp';
 import { formatCurrency } from '@/shared/utils/currency';
+import { SkeletonBlock } from '@/shared/components/ui/skeleton';
 
 type QuickAction = { label: string; icon: AppIconName; href: string };
 
@@ -26,11 +27,13 @@ export function DashboardHero({
   amount,
   currency,
   savingsRate,
+  loading = false,
 }: {
   name: string;
   amount: number;
   currency: string;
   savingsRate?: number;
+  loading?: boolean;
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -97,14 +100,23 @@ export function DashboardHero({
         <span style={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontSize: 12, fontWeight: 600, letterSpacing: 0.2, fontFamily: 'Inter, sans-serif', marginBottom: 4 }}>
           Net savings
         </span>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing.sm }}>
-          <span style={{
-            color: '#fff', fontSize: 34, fontWeight: 700, letterSpacing: -1,
-            fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums',
-          }}>{formatCurrency(animatedAmount, currency)}</span>
-          <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>{currency}</span>
-        </div>
-        {savingsRate !== undefined ? (
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: theme.spacing.sm, minHeight: 40 }}>
+            <SkeletonBlock width={148} height={34} radius={10} tone="onBrand" />
+            <SkeletonBlock width={36} height={14} radius={6} tone="onBrand" style={{ marginBottom: 4 }} />
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: theme.spacing.sm }}>
+            <span style={{
+              color: '#fff', fontSize: 34, fontWeight: 700, letterSpacing: -1,
+              fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums',
+            }}>{formatCurrency(animatedAmount, currency)}</span>
+            <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: 700, fontFamily: 'Inter, sans-serif' }}>{currency}</span>
+          </div>
+        )}
+        {loading ? (
+          <SkeletonBlock width={140} height={12} radius={6} tone="onBrand" style={{ marginTop: 8 }} />
+        ) : savingsRate !== undefined ? (
           <span style={{ display: 'block', color: 'rgba(255,255,255,0.72)', fontSize: 12, fontWeight: 600, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
             {Math.round(savingsRate)}% saved this month
           </span>

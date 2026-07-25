@@ -37,14 +37,18 @@ export function SkeletonBlock({
   width = '100%',
   height = 16,
   radius,
+  tone = 'default',
   style,
 }: {
   width?: number | string;
   height?: number;
   radius?: number;
+  /** Use onBrand for skeletons sitting on primary/gradient hero surfaces. */
+  tone?: 'default' | 'onBrand';
   style?: CSSProperties;
 }) {
   const theme = useTheme();
+  const onBrand = tone === 'onBrand';
   useEffect(() => {
     ensureShimmerStyles();
   }, []);
@@ -55,7 +59,7 @@ export function SkeletonBlock({
         width,
         height,
         borderRadius: radius ?? theme.radii.sm,
-        backgroundColor: theme.colors.surfaceHover,
+        backgroundColor: onBrand ? 'rgba(255,255,255,0.22)' : theme.colors.surfaceHover,
         position: 'relative',
         overflow: 'hidden',
         ...style,
@@ -66,7 +70,9 @@ export function SkeletonBlock({
         style={{
           position: 'absolute',
           inset: 0,
-          background: `linear-gradient(105deg, transparent 30%, ${theme.colors.primarySoft} 50%, transparent 70%)`,
+          background: onBrand
+            ? 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%)'
+            : `linear-gradient(105deg, transparent 30%, ${theme.colors.primarySoft} 50%, transparent 70%)`,
           animation: 'skeleton-shimmer 1.4s ease-in-out infinite',
         }}
       />

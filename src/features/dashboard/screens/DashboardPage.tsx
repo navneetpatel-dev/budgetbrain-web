@@ -53,6 +53,7 @@ export function DashboardPage() {
           amount={summary ? toSafeNumber(summary.netSavings) : 0}
           currency={summary?.currency ?? 'INR'}
           savingsRate={summary ? Math.round(toSafeNumber(summary.savingsRate)) : undefined}
+          loading={isLoading || !summary}
         />
       }
       inset="tab"
