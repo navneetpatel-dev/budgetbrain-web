@@ -26,6 +26,7 @@ export function IntegrationsPage() {
   } = useIntegrations();
   const { categories } = useCategories();
   const [categoryById, setCategoryById] = useState<Record<string, string>>({});
+  const [categoryErrorById, setCategoryErrorById] = useState<Record<string, string | undefined>>({});
   const [smsContent, setSmsContent] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
@@ -106,49 +107,63 @@ export function IntegrationsPage() {
           value={formatCurrency(Number(item.parsedAmount) || 0)}
           valueColor={theme.colors.danger}
         >
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: theme.spacing.md }}>
-            <select
-              value={categoryById[item.id] ?? ''}
-              onChange={(e) => setCategoryById((prev) => ({ ...prev, [item.id]: e.target.value }))}
-              style={{
-                minWidth: 140,
-                padding: '6px 10px',
-                borderRadius: theme.radii.md,
-                border: `1px solid ${theme.colors.borderSubtle}`,
-                backgroundColor: theme.colors.background,
-                color: theme.colors.text,
-                fontFamily: theme.typography.caption.fontFamily ?? 'Inter',
-                fontSize: 12,
-              }}
-            >
-              <option value="">Select category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-            <button
-              onClick={() => {
-                const categoryId = categoryById[item.id];
-                if (!categoryId) {
-                  setError(ValidationMessages.categoryRequired);
-                  return;
-                }
-                setError(null);
-                confirmMutation.mutate({ id: item.id, categoryId });
-              }}
-              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
-            >
-              Confirm
-            </button>
-            <button
-              onClick={() => {
-                setError(null);
-                rejectMutation.mutate(item.id);
-              }}
-              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
-            >
-              Reject
-            </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, marginTop: theme.spacing.md }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <select
+                value={categoryById[item.id] ?? ''}
+                onChange={(e) => {
+                  setCategoryById((prev) => ({ ...prev, [item.id]: e.target.value }));
+                  setCategoryErrorById((prev) => ({ ...prev, [item.id]: undefined }));
+                }}
+                style={{
+                  minWidth: 140,
+                  padding: '6px 10px',
+                  borderRadius: theme.radii.md,
+                  border: `1px solid ${categoryErrorById[item.id] ? theme.colors.danger : theme.colors.borderSubtle}`,
+                  backgroundColor: theme.colors.background,
+                  color: categoryById[item.id] ? theme.colors.text : theme.colors.textTertiary,
+                  fontFamily: theme.typography.caption.fontFamily ?? 'Inter',
+                  fontSize: 12,
+                }}
+              >
+                <option value="" disabled>
+                  Choose
+                </option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => {
+                  const categoryId = categoryById[item.id];
+                  if (!categoryId) {
+                    setCategoryErrorById((prev) => ({ ...prev, [item.id]: ValidationMessages.categoryRequired }));
+                    return;
+                  }
+                  setCategoryErrorById((prev) => ({ ...prev, [item.id]: undefined }));
+                  setError(null);
+                  confirmMutation.mutate({ id: item.id, categoryId });
+                }}
+                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => {
+                  setError(null);
+                  setCategoryErrorById((prev) => ({ ...prev, [item.id]: undefined }));
+                  rejectMutation.mutate(item.id);
+                }}
+                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+              >
+                Reject
+              </button>
+            </div>
+            {categoryErrorById[item.id] ? (
+              <p style={{ color: theme.colors.danger, fontSize: 12, margin: 0, fontWeight: 500, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>
+                {categoryErrorById[item.id]}
+              </p>
+            ) : null}
           </div>
         </EntityRow>
       )}

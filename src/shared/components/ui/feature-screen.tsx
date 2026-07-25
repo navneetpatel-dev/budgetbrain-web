@@ -273,25 +273,34 @@ export function OptionChips<T extends string>({
   const useSegmented = options.length <= 4;
 
   if (useSelect) {
+    const hasValue = options.includes(value);
+    const borderColor = error
+      ? theme.colors.danger
+      : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle);
     return (
       <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
         <select
-          value={value}
+          value={hasValue ? value : ''}
           disabled={disabled}
-          onChange={(e) => onChange(e.target.value as T)}
+          onChange={(e) => {
+            if (e.target.value) onChange(e.target.value as T);
+          }}
           style={{
             width: '100%',
             boxSizing: 'border-box',
             height: 48,
             padding: '0 12px',
             borderRadius: theme.radii.lg,
-            border: `1.5px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
+            border: `1.5px solid ${borderColor}`,
             backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg,
-            color: theme.colors.text,
+            color: hasValue ? theme.colors.text : theme.colors.textTertiary,
             ...textStyle(theme, 'bodyMedium', { fontWeight: 600 }),
             textTransform: 'capitalize',
           }}
         >
+          <option value="" disabled>
+            Choose
+          </option>
           {options.map((opt) => (
             <option key={opt} value={opt}>{getLabel(opt)}</option>
           ))}
@@ -422,7 +431,7 @@ export function OptionChipList({
           }}
         >
           <option value="" disabled>
-            Please select a category
+            Choose
           </option>
           {safeItems.map((item) => (
             <option key={item.id} value={item.id}>{item.label}</option>

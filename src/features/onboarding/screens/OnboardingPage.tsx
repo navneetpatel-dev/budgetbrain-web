@@ -25,11 +25,10 @@ export function OnboardingPage() {
     const next: FieldErrors = {};
     const nameErr = validateText('name', name);
     const countryErr = validateText('country', country);
-    const salaryErr = validateText('salaryRange', salaryRange);
     const savingsErr = validateAmount(savingsTarget);
     if (nameErr) next.name = nameErr;
     if (countryErr) next.country = countryErr;
-    if (salaryErr) next.salaryRange = salaryErr;
+    if (!salaryRange) next.salaryRange = 'Please select a salary range';
     if (savingsErr) next.savingsTarget = savingsErr;
     if (goals.length === 0) next.goals = ValidationMessages.financialGoalsMin;
     else if (goals.length > 20) next.goals = ValidationMessages.financialGoalsMax;
