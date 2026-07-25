@@ -1,7 +1,12 @@
 import { StackNavHeader, useProfileBack } from '@/shared/components/ui/feature-screen';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button } from '@/shared/components/ui/index';
+import { SUBSCRIPTION_PLANS } from '@/shared/constants/config';
 import { useTheme } from '@/shared/theme';
+import { formatCurrency } from '@/shared/utils/currency';
+
+/** Backend billing currency for plan catalog prices. */
+const BILLING_CURRENCY = 'INR';
 
 export function SubscriptionPage() {
   const theme = useTheme();
@@ -10,14 +15,14 @@ export function SubscriptionPage() {
   const plans = [
     {
       name: 'Monthly',
-      price: '₹199',
+      price: formatCurrency(SUBSCRIPTION_PLANS.monthly.price, BILLING_CURRENCY),
       period: 'per month',
       id: 'monthly',
       features: ['AI Coach', 'Family sharing', 'Advanced reports'],
     },
     {
       name: 'Yearly',
-      price: '₹1,499',
+      price: formatCurrency(SUBSCRIPTION_PLANS.yearly.price, BILLING_CURRENCY),
       period: 'per year',
       id: 'yearly',
       popular: true,
@@ -25,7 +30,7 @@ export function SubscriptionPage() {
     },
     {
       name: 'Lifetime',
-      price: '₹3,999',
+      price: formatCurrency(SUBSCRIPTION_PLANS.lifetime.price, BILLING_CURRENCY),
       period: 'one-time',
       id: 'lifetime',
       features: ['All Premium features', 'Lifetime updates', 'Best value'],
@@ -89,7 +94,7 @@ export function SubscriptionPage() {
         fontFamily: 'Inter, sans-serif',
         marginTop: theme.spacing.sm,
       }}>
-        Cancel anytime. Prices shown in INR.
+        Cancel anytime. Prices shown in {BILLING_CURRENCY}.
       </p>
     </ScreenWrapper>
   );

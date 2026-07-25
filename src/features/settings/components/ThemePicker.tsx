@@ -87,7 +87,7 @@ export function ThemePicker({
                 {active && (
                   <div style={{
                     width: 10, height: 10, borderRadius: 5,
-                    backgroundColor: '#fff', border: '2px solid rgba(0,0,0,0.15)',
+                    backgroundColor: theme.colors.onPrimary, border: '2px solid rgba(0,0,0,0.15)',
                   }} />
                 )}
               </div>

@@ -35,11 +35,11 @@ export const GOAL_TYPES = [
 ];
 
 export const SALARY_RANGES = [
-  { id: 'below_5l', label: 'Below ₹5L' },
-  { id: '5l_10l', label: '₹5L - ₹10L' },
-  { id: '10l_20l', label: '₹10L - ₹20L' },
-  { id: '20l_50l', label: '₹20L - ₹50L' },
-  { id: 'above_50l', label: 'Above ₹50L' },
+  { id: 'below_5l', label: 'Below 5L' },
+  { id: '5l_10l', label: '5L - 10L' },
+  { id: '10l_20l', label: '10L - 20L' },
+  { id: '20l_50l', label: '20L - 50L' },
+  { id: 'above_50l', label: 'Above 50L' },
 ];
 
 export const FINANCIAL_GOALS = [

@@ -77,6 +77,6 @@ select {
 
 input::placeholder,
 textarea::placeholder {
-  color: #94A3B8;
+  color: var(--bb-text-tertiary, #94A3B8);
   opacity: 1;
 }

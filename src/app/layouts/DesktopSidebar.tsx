@@ -109,9 +109,7 @@ function SidebarLink({ item, isActive, onPress }: { item: NavItem; isActive: boo
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '10px 12px', borderRadius: theme.radii.md,
         border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left',
-        backgroundColor: isActive
-          ? (theme.isDark ? 'rgba(99,102,241,0.15)' : theme.colors.primarySoft)
-          : 'transparent',
+        backgroundColor: isActive ? theme.colors.primarySoft : 'transparent',
         transition: 'background-color 0.15s',
       }}
     >

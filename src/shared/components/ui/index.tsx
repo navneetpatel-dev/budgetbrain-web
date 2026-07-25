@@ -167,14 +167,16 @@ export function Button({
 
 /* ── Spinner ── */
 
-function Spinner({ color = '#fff', size = 18 }: { color?: string; size?: number }) {
+function Spinner({ color, size = 18 }: { color?: string; size?: number }) {
+  const theme = useTheme();
+  const resolved = color ?? theme.colors.onPrimary;
   return (
     <div
       style={{
         width: size,
         height: size,
         border: `2px solid transparent`,
-        borderTopColor: color,
+        borderTopColor: resolved,
         borderRadius: '50%',
         animation: 'spin 0.6s linear infinite',
       }}

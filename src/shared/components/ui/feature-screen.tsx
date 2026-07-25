@@ -301,7 +301,7 @@ export function OptionChips<T extends string>({
                   width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   backgroundColor: accent,
                 }}>
-                  <AppIcon name="checkmark" size={10} color="#fff" />
+                  <AppIcon name="checkmark" size={10} color={theme.colors.onPrimary} />
                 </span>
               )}
               {getLabel(opt)}
@@ -356,7 +356,7 @@ export function OptionChipList({
                   width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   backgroundColor: accent,
                 }}>
-                  <AppIcon name="checkmark" size={10} color="#fff" />
+                  <AppIcon name="checkmark" size={10} color={theme.colors.onPrimary} />
                 </span>
               )}
               {item.label}
@@ -406,7 +406,7 @@ export function MultiOptionChips({
                   width: 16, height: 16, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   backgroundColor: accent,
                 }}>
-                  <AppIcon name="checkmark" size={10} color="#fff" />
+                  <AppIcon name="checkmark" size={10} color={theme.colors.onPrimary} />
                 </span>
               )}
               {getLabel(opt)}

@@ -33,9 +33,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [themeMode, accent, systemScheme]);
 
   useEffect(() => {
+    const root = document.documentElement;
     document.body.style.backgroundColor = theme.colors.background;
     document.body.style.color = theme.colors.text;
-    document.documentElement.style.colorScheme = theme.isDark ? 'dark' : 'light';
+    root.style.colorScheme = theme.isDark ? 'dark' : 'light';
+    root.style.setProperty('--bb-bg', theme.colors.background);
+    root.style.setProperty('--bb-text', theme.colors.text);
+    root.style.setProperty('--bb-text-secondary', theme.colors.textSecondary);
+    root.style.setProperty('--bb-text-tertiary', theme.colors.textTertiary);
+    root.style.setProperty('--bb-primary', theme.colors.primary);
+    root.style.setProperty('--bb-border', theme.colors.border);
+    root.style.setProperty('--bb-input-bg', theme.colors.inputBg);
+    root.style.setProperty('--bb-surface', theme.colors.surface);
   }, [theme]);
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
