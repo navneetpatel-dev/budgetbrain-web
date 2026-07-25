@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Button, Card, ProgressBar, Input, FormErrorBanner } from '@/shared/components/ui/index';
+import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -81,38 +81,57 @@ export function GoalDetailPage() {
           <Input label="Target amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} type="number" error={fieldErrors.targetAmount} disabled={isPending} />
           <Input label="Target date (optional)" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} type="date" error={fieldErrors.targetDate} disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
-          <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" disabled={isPending} />
+          <FormActions
+            primaryTitle="Save Changes"
+            onPrimary={save}
+            primaryLoading={isPending}
+            secondaryTitle="Cancel"
+            onSecondary={() => setEditing(false)}
+          />
         </form>
       </FormStackScreen>
     );
   }
 
+  const progressColor = pct >= 100 ? theme.colors.success : theme.colors.primary;
+
   return (
     <>
-      <FormStackScreen title="Goal Detail" eyebrow={goal.type.replace(/_/g, ' ')}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-          <Card variant="elevated" style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Progress</span>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: theme.colors.text, margin: '4px 0' }}>{formatCurrency(goal.currentAmount, goal.currency)}<span style={{ fontSize: theme.typography.caption.fontSize, color: theme.colors.textTertiary }}> / {formatCurrency(goal.targetAmount, goal.currency)}</span></p>
-            <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.success : theme.colors.primary} />
-            <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{pct}% achieved</span>
-          </Card>
-          <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            <Row t={theme} l="Name" v={goal.name} /><Row t={theme} l="Type" v={goal.type.replace(/_/g, ' ')} /><Row t={theme} l="Target" v={formatCurrency(goal.targetAmount, goal.currency)} />{goal.targetDate && <Row t={theme} l="Target Date" v={goal.targetDate} />}
-          </Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-            <Button title="Contribute" onPress={() => navigate(`/goal/${id}/contribute`)} variant="primary" size="lg" icon="add" />
-            <Button title="Edit" onPress={startEdit} variant="outline" size="lg" icon="edit" />
-            <Button title="Delete" onPress={() => { void handleDelete(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
+      <FormStackScreen title={goal.name} eyebrow={goal.type.replace(/_/g, ' ')}>
+        <DetailHero
+          amount={formatCurrency(goal.currentAmount, goal.currency)}
+          subtitle={`of ${formatCurrency(goal.targetAmount, goal.currency)}`}
+        />
+        <div style={{ marginBottom: theme.spacing.lg }}>
+          <ProgressBar progress={pct} color={progressColor} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary }}>
+              {pct}% achieved
+            </span>
+            {pct >= 100 ? (
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: progressColor }}>
+                Done
+              </span>
+            ) : null}
           </div>
         </div>
+        <DetailMetaList
+          rows={[
+            { label: 'Type', value: goal.type.replace(/_/g, ' ') },
+            { label: 'Target', value: formatCurrency(goal.targetAmount, goal.currency) },
+            { label: 'Target date', value: goal.targetDate ?? '' },
+          ]}
+        />
+        <DetailActions
+          primaryTitle="Contribute"
+          onPrimary={() => navigate(`/goal/${id}/contribute`)}
+          secondaryTitle="Edit"
+          onSecondary={startEdit}
+          onDestructive={() => { void handleDelete(); }}
+          destructiveLoading={deleteMutation.isPending}
+        />
       </FormStackScreen>
       <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
     </>
   );
-}
-
-function Row({ t, l, v }: { t: ReturnType<typeof useTheme>; l: string; v: string }) {
-  return <div><span style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: t.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{l}</span><span style={{ display: 'block', fontSize: 15, fontWeight: 500, color: t.colors.text, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{v}</span></div>;
 }

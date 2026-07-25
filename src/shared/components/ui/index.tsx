@@ -78,7 +78,7 @@ function cssProps(style: CSSProperties): string {
 interface ButtonProps {
   title: string;
   onPress: (e: React.FormEvent) => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'dangerGhost' | 'ghost';
   loading?: boolean;
   loadingTitle?: string;
   disabled?: boolean;
@@ -97,6 +97,13 @@ function buttonVariantStyle(
   if (variant === 'danger') {
     return { backgroundColor: theme.colors.danger, color: theme.colors.onPrimary };
   }
+  if (variant === 'dangerGhost') {
+    return {
+      backgroundColor: 'transparent',
+      color: theme.colors.danger,
+      width: size === 'lg' ? '100%' : undefined,
+    };
+  }
   if (isPrimary) {
     return {
       background: `linear-gradient(135deg, ${theme.colors.gradientStart}, ${theme.colors.gradientEnd})`,
@@ -112,6 +119,7 @@ function buttonVariantStyle(
       backgroundColor: 'transparent',
       border: `1.5px solid ${theme.colors.border}`,
       color: theme.colors.primary,
+      width: size === 'lg' ? '100%' : undefined,
     };
   }
   if (variant === 'ghost') {
@@ -130,9 +138,11 @@ export function Button({
   const spinnerColor =
     variant === 'outline' || variant === 'ghost'
       ? theme.colors.primary
-      : variant === 'secondary'
-        ? theme.colors.text
-        : theme.colors.onPrimary;
+      : variant === 'dangerGhost'
+        ? theme.colors.danger
+        : variant === 'secondary'
+          ? theme.colors.text
+          : theme.colors.onPrimary;
 
   return (
     <button
@@ -595,6 +605,202 @@ export function FormActions({
       {secondaryTitle && onSecondary && (
         <Button title={secondaryTitle} onPress={onSecondary} variant="outline" disabled={primaryLoading} />
       )}
+    </div>
+  );
+}
+
+/** Detail hero: amount + title context */
+export function DetailHero({
+  amount,
+  amountColor,
+  title,
+  subtitle,
+}: {
+  amount: string;
+  amountColor?: string;
+  title?: string;
+  subtitle?: string;
+}) {
+  const theme = useTheme();
+  return (
+    <div style={{ textAlign: 'center', padding: `${theme.spacing.xl}px 0 ${theme.spacing.lg}px` }}>
+      <div
+        style={{
+          fontFamily: theme.typography.amountLg.fontFamily ?? 'Inter, sans-serif',
+          fontSize: theme.typography.amountLg.fontSize,
+          fontWeight: Number(theme.typography.amountLg.fontWeight),
+          letterSpacing: -1.2,
+          lineHeight: 1.1,
+          color: amountColor ?? theme.colors.text,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {amount}
+      </div>
+      {title ? (
+        <div
+          style={{
+            marginTop: theme.spacing.sm,
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 17,
+            fontWeight: 600,
+            color: theme.colors.text,
+            letterSpacing: -0.2,
+          }}
+        >
+          {title}
+        </div>
+      ) : null}
+      {subtitle ? (
+        <div
+          style={{
+            marginTop: 4,
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 13,
+            fontWeight: 500,
+            color: theme.colors.textTertiary,
+          }}
+        >
+          {subtitle}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Clean key/value rows — no heavy card chrome */
+export function DetailMetaList({
+  rows,
+}: {
+  rows: Array<{ label: string; value: string }>;
+}) {
+  const theme = useTheme();
+  const visible = rows.filter((r) => r.value && r.value !== '-');
+  if (!visible.length) return null;
+
+  return (
+    <div
+      style={{
+        borderTop: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
+        borderBottom: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
+      }}
+    >
+      {visible.map((row, i) => (
+        <div
+          key={row.label}
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: theme.spacing.lg,
+            padding: '14px 0',
+            borderTop: i === 0 ? 'none' : `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 13,
+              fontWeight: 500,
+              color: theme.colors.textTertiary,
+              flexShrink: 0,
+            }}
+          >
+            {row.label}
+          </span>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 14,
+              fontWeight: 600,
+              color: theme.colors.text,
+              textAlign: 'right',
+              textTransform: 'capitalize',
+            }}
+          >
+            {row.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Compact detail actions: primary + secondary in a row, quiet delete */
+export function DetailActions({
+  primaryTitle = 'Edit',
+  onPrimary,
+  primaryLoading,
+  secondaryTitle,
+  onSecondary,
+  secondaryLoading,
+  destructiveTitle = 'Delete',
+  onDestructive,
+  destructiveLoading,
+  style,
+}: {
+  primaryTitle?: string;
+  onPrimary: () => void;
+  primaryLoading?: boolean;
+  secondaryTitle?: string;
+  onSecondary?: () => void;
+  secondaryLoading?: boolean;
+  destructiveTitle?: string;
+  onDestructive?: () => void;
+  destructiveLoading?: boolean;
+  style?: CSSProperties;
+}) {
+  const theme = useTheme();
+  const busy = primaryLoading || secondaryLoading || destructiveLoading;
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: theme.spacing.md,
+        marginTop: theme.spacing.xl,
+        ...style,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: theme.spacing.sm,
+          width: '100%',
+        }}
+      >
+        <Button
+          title={primaryTitle}
+          onPress={onPrimary}
+          loading={primaryLoading}
+          disabled={busy && !primaryLoading}
+          style={{ minWidth: 120, paddingLeft: 28, paddingRight: 28 }}
+        />
+        {secondaryTitle && onSecondary ? (
+          <Button
+            title={secondaryTitle}
+            onPress={onSecondary}
+            variant="outline"
+            loading={secondaryLoading}
+            disabled={busy && !secondaryLoading}
+            style={{ minWidth: 120, paddingLeft: 28, paddingRight: 28 }}
+          />
+        ) : null}
+      </div>
+      {onDestructive ? (
+        <Button
+          title={destructiveTitle}
+          onPress={onDestructive}
+          variant="dangerGhost"
+          loading={destructiveLoading}
+          disabled={busy && !destructiveLoading}
+          style={{ paddingTop: 8, paddingBottom: 8 }}
+        />
+      ) : null}
     </div>
   );
 }

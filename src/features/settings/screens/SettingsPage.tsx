@@ -183,9 +183,9 @@ export function SettingsPage() {
           )}
         </GroupedCard>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.lg }}>
-          <Button title="Sign out" onPress={() => openConfirm(CONFIRM.signOut, signOut)} variant="outline" />
-          <Button title="Delete account" onPress={() => openConfirm(CONFIRM.deleteAccount, deleteAccount)} variant="danger" loading={deleteLoading} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: theme.spacing.md, marginTop: theme.spacing.xl }}>
+          <Button title="Sign out" onPress={() => openConfirm(CONFIRM.signOut, signOut)} variant="outline" style={{ minWidth: 160 }} />
+          <Button title="Delete account" onPress={() => openConfirm(CONFIRM.deleteAccount, deleteAccount)} variant="dangerGhost" loading={deleteLoading} />
         </div>
       </ScreenWrapper>
       <ConfirmDialog

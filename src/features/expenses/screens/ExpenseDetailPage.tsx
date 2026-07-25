@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -104,54 +104,58 @@ export function ExpenseDetailPage() {
           />
           <Input label="Notes" maxLength={maxLen('notes')} value={notes} onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }} multiline disabled={isPending} error={fieldErrors.notes} />
           {error ? <FormErrorBanner message={error} /> : null}
-          <Button title="Save Changes" onPress={handleSave} loading={isPending} size="lg" />
-          <Button title="Cancel" onPress={cancelEdit} variant="outline" disabled={isPending} />
+          <FormActions
+            primaryTitle="Save Changes"
+            onPrimary={handleSave}
+            primaryLoading={isPending}
+            secondaryTitle="Cancel"
+            onSecondary={cancelEdit}
+          />
         </form>
       </FormStackScreen>
     );
   }
 
+  const title = txn.merchant || txn.category?.name || (txn.type === 'expense' ? 'Expense' : 'Income');
+  const amountPrefix = txn.type === 'expense' ? '-' : '+';
+
   return (
     <>
-      <FormStackScreen title="Expense Detail" eyebrow={txn.type}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-          <div style={{ textAlign: 'center', padding: `${theme.spacing.xl}px 0` }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amountLg.fontSize, fontWeight: Number(theme.typography.amountLg.fontWeight), color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
-          </div>
-          <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-            <DetailRow theme={theme} label="Merchant" value={txn.merchant ?? '-'} />
-            <DetailRow theme={theme} label="Category" value={txn.category?.name ?? '-'} />
-            <DetailRow theme={theme} label="Date" value={txn.date} />
-            <DetailRow theme={theme} label="Payment" value={txn.paymentMethod ? txn.paymentMethod.replace('_', ' ') : '-'} />
-            {txn.notes && <DetailRow theme={theme} label="Notes" value={txn.notes} />}
-          </Card>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-            <Button
-              title="Edit"
-              onPress={() => {
-                startEdit();
-                setAmount(String(txn.amount));
-                setMerchant(txn.merchant ?? '');
-                setDate(txn.date);
-                setPaymentMethod(txn.paymentMethod ?? 'cash');
-                setCategoryId(txn.categoryId ?? txn.category?.id ?? '');
-                setNotes(txn.notes ?? '');
-                setFieldErrors({});
-              }}
-              variant="outline"
-              size="lg"
-              icon="edit"
-            />
-            <Button title="Duplicate" onPress={() => duplicateMutation.mutate()} variant="secondary" size="lg" loading={duplicateMutation.isPending} />
-            <Button title="Delete" onPress={() => { void handleDelete(); }} variant="danger" size="lg" loading={deleteMutation.isPending} icon="trash" />
-          </div>
-        </div>
+      <FormStackScreen title={title} eyebrow={txn.type === 'expense' ? 'Expense' : 'Income'}>
+        <DetailHero
+          amount={`${amountPrefix}${formatCurrency(txn.amount, txn.currency)}`}
+          amountColor={txn.type === 'expense' ? theme.colors.danger : theme.colors.success}
+          subtitle={txn.category?.name ?? undefined}
+        />
+        <DetailMetaList
+          rows={[
+            { label: 'Merchant', value: txn.merchant ?? '' },
+            { label: 'Category', value: txn.category?.name ?? '' },
+            { label: 'Date', value: txn.date },
+            { label: 'Payment', value: txn.paymentMethod ? txn.paymentMethod.replace(/_/g, ' ') : '' },
+            { label: 'Notes', value: txn.notes ?? '' },
+          ]}
+        />
+        <DetailActions
+          primaryTitle="Edit"
+          onPrimary={() => {
+            startEdit();
+            setAmount(String(txn.amount));
+            setMerchant(txn.merchant ?? '');
+            setDate(txn.date);
+            setPaymentMethod(txn.paymentMethod ?? 'cash');
+            setCategoryId(txn.categoryId ?? txn.category?.id ?? '');
+            setNotes(txn.notes ?? '');
+            setFieldErrors({});
+          }}
+          secondaryTitle="Duplicate"
+          onSecondary={() => duplicateMutation.mutate()}
+          secondaryLoading={duplicateMutation.isPending}
+          onDestructive={() => { void handleDelete(); }}
+          destructiveLoading={deleteMutation.isPending}
+        />
       </FormStackScreen>
       <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
     </>
   );
-}
-
-function DetailRow({ theme, label, value }: { theme: ReturnType<typeof useTheme>; label: string; value: string }) {
-  return <div><span style={{ display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '0.2px', color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{label}</span><span style={{ display: 'block', fontSize: 15, fontWeight: 500, color: theme.colors.text, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{value}</span></div>;
 }
