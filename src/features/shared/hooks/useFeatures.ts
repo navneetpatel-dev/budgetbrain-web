@@ -118,7 +118,7 @@ export function useReports() {
     try {
       const token = localStorage.getItem('access_token');
       const search = params ? `?${new URLSearchParams(params).toString()}` : '';
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1'}/reports/${format}${search}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api/v1'}/reports/${format}${search}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) throw new Error('Download failed');
