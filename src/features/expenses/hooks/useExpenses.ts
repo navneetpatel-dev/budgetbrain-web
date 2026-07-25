@@ -26,7 +26,9 @@ export function useExpenseDetail(id: string | undefined) {
 
   const updateMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPatch<Transaction>(`/expenses/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['expense', id], updated);
+      queryClient.invalidateQueries({ queryKey: ['expense', id] });
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setEditing(false);
