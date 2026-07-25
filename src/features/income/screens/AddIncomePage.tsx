@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips, OptionChipList } from '@/shared/components/ui/feature-screen';
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
@@ -22,17 +22,25 @@ type FieldErrors = { amount?: string; date?: string; notes?: string; selectedSou
 export function AddIncomePage() {
   const theme = useTheme();
   const { createMutation, error, setError } = useCreateIncome();
-  const { data: sources } = useIncomeSources();
+  const { data: sources, isLoading: sourcesLoading } = useIncomeSources();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
-  const [sourceMode, setSourceMode] = useState<'existing' | 'new'>('existing');
+  const [sourceMode, setSourceMode] = useState<'existing' | 'new'>('new');
   const [selectedSource, setSelectedSource] = useState('');
   const [newSourceName, setNewSourceName] = useState('');
   const [newSourceType, setNewSourceType] = useState('salary');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const modeInitialized = useRef(false);
 
   const isPending = createMutation.isPending;
+  const hasSources = sources.length > 0;
+
+  useEffect(() => {
+    if (modeInitialized.current || sourcesLoading) return;
+    modeInitialized.current = true;
+    if (hasSources) setSourceMode('existing');
+  }, [sourcesLoading, hasSources]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -44,7 +52,10 @@ export function AddIncomePage() {
     if (amountErr) next.amount = amountErr;
     if (dateErr) next.date = dateErr;
     if (notesErr) next.notes = notesErr;
-    if (sourceMode === 'existing' && !selectedSource) next.selectedSource = ValidationMessages.incomeSourceRequired;
+    if (sourceMode === 'existing') {
+      if (!hasSources) next.selectedSource = 'No income sources yet. Switch to New source to create one.';
+      else if (!selectedSource) next.selectedSource = ValidationMessages.incomeSourceRequired;
+    }
     if (sourceMode === 'new') {
       const sourceErr = validateText('entityName', newSourceName);
       if (sourceErr) next.newSourceName = sourceErr;
@@ -94,16 +105,28 @@ export function AddIncomePage() {
           disabled={isPending}
         />
         {sourceMode === 'existing' ? (
-          <OptionChipList
-            items={sources.map((s) => ({ id: s.id, label: s.name }))}
-            selectedId={selectedSource}
-            onSelect={(id) => {
-              setSelectedSource(id);
-              setFieldErrors((f) => ({ ...f, selectedSource: undefined }));
-            }}
-            error={fieldErrors.selectedSource}
-            disabled={isPending}
-          />
+          hasSources ? (
+            <OptionChipList
+              items={sources.map((s) => ({ id: s.id, label: s.name }))}
+              selectedId={selectedSource}
+              onSelect={(id) => {
+                setSelectedSource(id);
+                setFieldErrors((f) => ({ ...f, selectedSource: undefined }));
+              }}
+              error={fieldErrors.selectedSource}
+              disabled={isPending}
+            />
+          ) : (
+            <p style={{
+              color: fieldErrors.selectedSource ? theme.colors.danger : theme.colors.textSecondary,
+              fontSize: 13,
+              margin: `0 0 ${theme.spacing.sm}px`,
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: fieldErrors.selectedSource ? 500 : 400,
+            }}>
+              {fieldErrors.selectedSource ?? 'No income sources yet. Switch to New source to create one.'}
+            </p>
+          )
         ) : (
           <>
             <Input
