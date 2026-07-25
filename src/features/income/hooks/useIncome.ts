@@ -40,12 +40,34 @@ export function useIncomeDetail(id: string | undefined) {
     mutationFn: () => apiDelete(`/income/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['income-list'] });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       navigate(-1);
     },
   });
 
-  return { income, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation };
+  const duplicateMutation = useMutation({
+    mutationFn: () => apiPost(`/income/${id}/duplicate`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['income-list'] });
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      navigate(-1);
+    },
+    onError: (err) => setError(getApiErrorMessage(err, 'Could not duplicate income')),
+  });
+
+  return {
+    income,
+    isLoading,
+    editing,
+    error,
+    setError,
+    setEditing,
+    updateMutation,
+    deleteMutation,
+    duplicateMutation,
+  };
 }
 
 export function useCreateIncome() {

@@ -27,7 +27,9 @@ export function useGoalDetail(id: string | undefined) {
 
   const updateMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPatch<Goal>(`/goals/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['goal', id], updated);
+      queryClient.invalidateQueries({ queryKey: ['goal', id] });
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       setEditing(false);

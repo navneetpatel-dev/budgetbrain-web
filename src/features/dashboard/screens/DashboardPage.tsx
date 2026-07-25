@@ -224,7 +224,7 @@ export function DashboardPage() {
                 {recentTransactions.map((txn, i) => (
                   <div
                     key={txn.id}
-                    onClick={() => navigate(`/expense/${txn.id}`)}
+                    onClick={() => navigate(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',

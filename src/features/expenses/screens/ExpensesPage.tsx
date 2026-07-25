@@ -44,13 +44,16 @@ export function ExpensesPage() {
       data={isLoading ? [] : transactions}
       keyExtractor={(item: Transaction) => item.id}
       renderItem={(txn) => (
-        <TransactionRow transaction={txn} onPress={() => navigate(`/expense/${txn.id}`)} />
+        <TransactionRow
+          transaction={txn}
+          onPress={() => navigate(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`)}
+        />
       )}
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={6} variant="transaction" />
         ) : (
-          <EmptyState title="No expenses yet" subtitle="Your spending history will appear here" icon="activity" action="Add expense" onAction={() => navigate('/expense/add')} />
+          <EmptyState title="No transactions yet" subtitle="Your income and spending history will appear here" icon="activity" action="Add expense" onAction={() => navigate('/expense/add')} />
         )
       }
     />

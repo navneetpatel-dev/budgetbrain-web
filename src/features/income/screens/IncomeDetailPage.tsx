@@ -15,7 +15,17 @@ export function IncomeDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { income, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation } = useIncomeDetail(id);
+  const {
+    income,
+    isLoading,
+    editing,
+    error,
+    setError,
+    setEditing,
+    updateMutation,
+    deleteMutation,
+    duplicateMutation,
+  } = useIncomeDetail(id);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
@@ -86,6 +96,9 @@ export function IncomeDetailPage() {
         <DetailActions
           primaryTitle="Edit"
           onPrimary={() => { setAmount(String(income.amount)); setDate(income.date); setNotes(income.notes ?? ''); setEditing(true); }}
+          secondaryTitle="Duplicate"
+          onSecondary={() => duplicateMutation.mutate()}
+          secondaryLoading={duplicateMutation.isPending}
           onDestructive={() => { void handleDelete(); }}
           destructiveLoading={deleteMutation.isPending}
         />
