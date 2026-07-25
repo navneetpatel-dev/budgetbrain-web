@@ -70,7 +70,7 @@ export function useResponsive() {
       isLargeTablet,
       isDesktop,
       isPhone: !isTablet,
-      contentMaxWidth: (isDesktop ? 1120 : isLargeTablet ? 840 : isTablet ? 720 : undefined) as number | undefined,
+      contentMaxWidth: undefined as number | undefined,
       columns: isDesktop ? 3 : isLargeTablet ? 3 : isTablet ? 2 : 1,
       sidebarWidth: isDesktop ? 260 : 0,
       ...tokens,
