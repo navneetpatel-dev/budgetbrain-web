@@ -1,7 +1,7 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useNotifications } from '@/features/shared/hooks/useFeatures';
 
@@ -9,13 +9,11 @@ export function NotificationsPage() {
   const theme = useTheme();
   const { notifications, isLoading } = useNotifications();
 
-  if (isLoading) return <ListSkeleton count={5} variant="notification" />;
-
   return (
     <StickyHeaderFlatScreen
       header={<ProfileStackHeader screen="notifications" />}
       inset="stack"
-      data={notifications}
+      data={isLoading ? [] : notifications}
       keyExtractor={(item) => item.id}
       renderItem={(n) => (
         <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${n.read ? theme.colors.borderSubtle : theme.colors.primary}33`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm, opacity: n.read ? 0.7 : 1 }}>
@@ -25,7 +23,13 @@ export function NotificationsPage() {
           </div>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No notifications" subtitle="You're all caught up" icon="notification" />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={5} variant="notification" />
+        ) : (
+          <EmptyState title="No notifications" subtitle="You're all caught up" icon="notification" />
+        )
+      }
     />
   );
 }

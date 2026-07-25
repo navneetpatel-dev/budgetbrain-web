@@ -16,8 +16,6 @@ export function SupportPage() {
   const [message, setMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  if (isLoading) return <SupportSkeleton />;
-
   const handleSubmit = () => {
     setError(null);
     const next: FieldErrors = {};
@@ -34,7 +32,7 @@ export function SupportPage() {
     <StickyHeaderFlatScreen
       header={<ProfileStackHeader screen="support" subtitle="Get help" actionIcon="add" onAction={() => setShowForm(!showForm)} actionLabel="New Ticket" />}
       inset="stack"
-      data={tickets}
+      data={isLoading ? [] : tickets}
       keyExtractor={(item) => item.id}
       renderItem={(t) => (
         <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
@@ -46,7 +44,9 @@ export function SupportPage() {
         </div>
       )}
       ListEmptyComponent={
-        showForm ? (
+        isLoading ? (
+          <SupportSkeleton />
+        ) : showForm ? (
           <Card variant="elevated">
             <Input
               label="Subject"
@@ -72,7 +72,9 @@ export function SupportPage() {
               <Button title="Cancel" onPress={() => { setShowForm(false); setFieldErrors({}); }} variant="outline" disabled={createMutation.isPending} />
             </div>
           </Card>
-        ) : <EmptyState title="No tickets" subtitle="Need help? Create a support ticket" icon="helpCircle" action="New Ticket" onAction={() => setShowForm(true)} />
+        ) : (
+          <EmptyState title="No tickets" subtitle="Need help? Create a support ticket" icon="helpCircle" action="New Ticket" onAction={() => setShowForm(true)} />
+        )
       }
     />
   );

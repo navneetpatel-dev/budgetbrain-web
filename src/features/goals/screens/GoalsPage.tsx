@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -13,8 +13,6 @@ export function GoalsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { data, isLoading } = useGoals();
-
-  if (isLoading) return <ListSkeleton count={3} variant="goal" />;
   const goals = data ?? [];
 
   return (
@@ -22,14 +20,14 @@ export function GoalsPage() {
       header={
         <ProfileStackHeader
           screen="goals"
-          subtitle={`${goals.length} active goal${goals.length !== 1 ? 's' : ''}`}
+          subtitle={isLoading ? 'Loading…' : `${goals.length} active goal${goals.length !== 1 ? 's' : ''}`}
           actionIcon="add"
           actionLabel="Create goal"
           onAction={() => navigate('/goal/add')}
         />
       }
       inset="tab"
-      data={goals}
+      data={isLoading ? [] : goals}
       keyExtractor={(g: Goal) => g.id}
       renderItem={(g) => {
         const pct = toSafePercent(g.currentAmount, g.targetAmount);
@@ -48,7 +46,13 @@ export function GoalsPage() {
           </div>
         );
       }}
-      ListEmptyComponent={<EmptyState title="No goals yet" subtitle="Set a financial goal to stay motivated" icon="target" action="Create goal" onAction={() => navigate('/goal/add')} />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={3} variant="goal" />
+        ) : (
+          <EmptyState title="No goals yet" subtitle="Set a financial goal to stay motivated" icon="target" action="Create goal" onAction={() => navigate('/goal/add')} />
+        )
+      }
     />
   );
 }

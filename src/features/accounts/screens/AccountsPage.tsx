@@ -1,7 +1,7 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useAccounts } from '@/features/shared/hooks/useFeatures';
@@ -10,13 +10,11 @@ export function AccountsPage() {
   const theme = useTheme();
   const { accounts, isLoading } = useAccounts();
 
-  if (isLoading) return <ListSkeleton count={4} variant="account" />;
-
   return (
     <StickyHeaderFlatScreen
       header={<ProfileStackHeader screen="accounts" subtitle="Bank accounts & cards" />}
       inset="stack"
-      data={accounts}
+      data={isLoading ? [] : accounts}
       keyExtractor={(item) => item.id}
       renderItem={(acc) => (
         <div style={{
@@ -33,7 +31,13 @@ export function AccountsPage() {
           </span>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No accounts" subtitle="Add your bank accounts and cards" icon="creditCard" />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={4} variant="account" />
+        ) : (
+          <EmptyState title="No accounts" subtitle="Add your bank accounts and cards" icon="creditCard" />
+        )
+      }
     />
   );
 }

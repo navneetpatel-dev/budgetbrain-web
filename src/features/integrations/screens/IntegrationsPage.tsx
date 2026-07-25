@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
 import { useCategories } from '@/features/categories/hooks/useCategories';
@@ -14,13 +14,11 @@ export function IntegrationsPage() {
   const [categoryById, setCategoryById] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
 
-  if (isLoading) return <ListSkeleton count={4} variant="transaction" />;
-
   return (
     <StickyHeaderFlatScreen
       header={<ProfileStackHeader screen="integrations" subtitle="SMS & Email parsing" />}
       inset="stack"
-      data={pending}
+      data={isLoading ? [] : pending}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={error ? <FormErrorBanner message={error} /> : null}
       renderItem={(item) => (
@@ -78,7 +76,13 @@ export function IntegrationsPage() {
           </div>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No pending items" subtitle="Parsed SMS and email receipts appear here" icon="globe" />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={4} variant="transaction" />
+        ) : (
+          <EmptyState title="No pending items" subtitle="Parsed SMS and email receipts appear here" icon="globe" />
+        )
+      }
     />
   );
 }

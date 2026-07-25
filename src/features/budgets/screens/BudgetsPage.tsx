@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { toSafePercent } from '@/shared/utils/number';
@@ -13,8 +13,6 @@ export function BudgetsPage() {
   const navigate = useNavigate();
   const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useBudgets();
-
-  if (isLoading) return <ListSkeleton count={4} variant="budget" />;
   const budgets = data ?? [];
 
   return (
@@ -25,13 +23,13 @@ export function BudgetsPage() {
           onBack={goBack}
           eyebrow="PLAN"
           title="Budgets"
-          subtitle={`${budgets.length} active`}
+          subtitle={isLoading ? 'Loading…' : `${budgets.length} active`}
           actionIcon="add"
           actionLabel="Create budget"
           onAction={() => navigate('/budget/add')}
         />
       }
-      data={budgets}
+      data={isLoading ? [] : budgets}
       keyExtractor={(b: Budget) => b.id}
       renderItem={(b) => {
         const pct = toSafePercent(b.spent, b.amount);
@@ -50,7 +48,13 @@ export function BudgetsPage() {
           </div>
         );
       }}
-      ListEmptyComponent={<EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={() => navigate('/budget/add')} />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={4} variant="budget" />
+        ) : (
+          <EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={() => navigate('/budget/add')} />
+        )
+      }
     />
   );
 }

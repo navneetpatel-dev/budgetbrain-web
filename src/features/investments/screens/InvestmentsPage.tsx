@@ -1,7 +1,7 @@
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useInvestments } from '@/features/shared/hooks/useFeatures';
@@ -10,13 +10,11 @@ export function InvestmentsPage() {
   const theme = useTheme();
   const { investments, isLoading } = useInvestments();
 
-  if (isLoading) return <ListSkeleton count={4} variant="account" />;
-
   return (
     <StickyHeaderFlatScreen
       header={<ProfileStackHeader screen="investments" subtitle="Your portfolio" />}
       inset="stack"
-      data={investments}
+      data={isLoading ? [] : investments}
       keyExtractor={(item) => item.id}
       renderItem={(inv) => (
         <div style={{
@@ -42,7 +40,13 @@ export function InvestmentsPage() {
           </div>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No investments" subtitle="Track stocks, mutual funds, and more" icon="chart" />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={4} variant="account" />
+        ) : (
+          <EmptyState title="No investments" subtitle="Track stocks, mutual funds, and more" icon="chart" />
+        )
+      }
     />
   );
 }

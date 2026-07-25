@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -12,8 +12,6 @@ export function IncomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { data, isLoading } = useIncome();
-
-  if (isLoading) return <ListSkeleton count={4} variant="transaction" />;
   const incomeList = data ?? [];
 
   return (
@@ -21,14 +19,14 @@ export function IncomePage() {
       header={
         <ProfileStackHeader
           screen="income"
-          subtitle={`${incomeList.length} record${incomeList.length !== 1 ? 's' : ''}`}
+          subtitle={isLoading ? 'Loading…' : `${incomeList.length} record${incomeList.length !== 1 ? 's' : ''}`}
           actionIcon="add"
           actionLabel="Add income"
           onAction={() => navigate('/income/add')}
         />
       }
       inset="tab"
-      data={incomeList}
+      data={isLoading ? [] : incomeList}
       keyExtractor={(txn: Transaction) => txn.id}
       renderItem={(txn) => (
         <div onClick={() => navigate(`/income/${txn.id}`)} style={{ cursor: 'pointer', backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -36,7 +34,13 @@ export function IncomePage() {
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.success }}>+{formatCurrency(txn.amount, txn.currency)}</span>
         </div>
       )}
-      ListEmptyComponent={<EmptyState title="No income yet" subtitle="Record your first income" icon="trendingUp" action="Add Income" onAction={() => navigate('/income/add')} />}
+      ListEmptyComponent={
+        isLoading ? (
+          <ListRowsSkeleton count={4} variant="transaction" />
+        ) : (
+          <EmptyState title="No income yet" subtitle="Record your first income" icon="trendingUp" action="Add Income" onAction={() => navigate('/income/add')} />
+        )
+      }
     />
   );
 }

@@ -313,28 +313,98 @@ export function ListRowsSkeleton({
   );
 }
 
+/** Prefer embedding under a real page header. `showHeader` is for rare full-page fallbacks. */
 export function ListSkeleton({
   count = 4,
   variant = 'generic',
-  showHeader = true,
+  showHeader = false,
 }: {
   count?: number;
   variant?: ListSkeletonVariant;
   showHeader?: boolean;
 }) {
+  const theme = useTheme();
   const Row = rowForVariant(variant);
-  return (
-    <SkeletonScreen>
-      {showHeader ? <SkeletonHeaderBar withAction={variant !== 'notification'} /> : null}
+  const rows = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
       {Array.from({ length: count }).map((_, i) => (
         <Row key={i} />
       ))}
+    </div>
+  );
+
+  if (!showHeader) return rows;
+  return (
+    <SkeletonScreen>
+      <SkeletonHeaderBar withAction={variant !== 'notification'} />
+      {rows}
     </SkeletonScreen>
   );
 }
 
 export function ScreenSkeleton({ rows = 4 }: { rows?: number }) {
   return <ListSkeleton count={rows} variant="generic" showHeader />;
+}
+
+/** Dashboard body only — keep `DashboardHero` mounted while loading. */
+export function DashboardContentSkeleton() {
+  const theme = useTheme();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SurfaceCard key={i} style={{ padding: theme.spacing.md }}>
+            <SkeletonBlock width={28} height={28} radius={8} style={{ marginBottom: 12 }} />
+            <SkeletonBlock width="50%" height={11} radius={5} style={{ marginBottom: 8 }} />
+            <SkeletonBlock width="70%" height={18} radius={6} />
+          </SurfaceCard>
+        ))}
+      </div>
+      <div>
+        <SkeletonBlock width={160} height={14} radius={6} style={{ marginBottom: 12 }} />
+        <SurfaceCard>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} style={{ marginBottom: i < 3 ? theme.spacing.md : 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <SkeletonBlock width="40%" height={12} radius={5} />
+                <SkeletonBlock width={48} height={12} radius={5} />
+              </div>
+              <SkeletonBlock width="100%" height={6} radius={999} />
+            </div>
+          ))}
+        </SurfaceCard>
+      </div>
+      <div>
+        <SkeletonBlock width={140} height={14} radius={6} style={{ marginBottom: 12 }} />
+        <SurfaceCard>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                padding: `${theme.spacing.md}px 0`,
+                borderBottom: i < 2 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <SkeletonBlock width="45%" height={14} radius={6} />
+                <SkeletonBlock width={36} height={12} radius={5} />
+              </div>
+              <SkeletonBlock width="100%" height={8} radius={999} style={{ marginBottom: 6 }} />
+              <SkeletonBlock width="55%" height={11} radius={5} />
+            </div>
+          ))}
+        </SurfaceCard>
+      </div>
+      <div>
+        <SkeletonBlock width={150} height={14} radius={6} style={{ marginBottom: 12 }} />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} style={{ marginBottom: theme.spacing.sm }}>
+            <TransactionRowSkeleton />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function DashboardSkeleton() {
@@ -353,59 +423,8 @@ export function DashboardSkeleton() {
         <SkeletonBlock width={160} height={36} radius={10} style={{ marginBottom: 8 }} />
         <SkeletonBlock width={100} height={12} radius={6} />
       </div>
-      <div style={{ ...(frame as CSSProperties), paddingTop: theme.spacing.lg, display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <SurfaceCard key={i} style={{ padding: theme.spacing.md }}>
-              <SkeletonBlock width={28} height={28} radius={8} style={{ marginBottom: 12 }} />
-              <SkeletonBlock width="50%" height={11} radius={5} style={{ marginBottom: 8 }} />
-              <SkeletonBlock width="70%" height={18} radius={6} />
-            </SurfaceCard>
-          ))}
-        </div>
-        <div>
-          <SkeletonBlock width={160} height={14} radius={6} style={{ marginBottom: 12 }} />
-          <SurfaceCard>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ marginBottom: i < 3 ? theme.spacing.md : 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <SkeletonBlock width="40%" height={12} radius={5} />
-                  <SkeletonBlock width={48} height={12} radius={5} />
-                </div>
-                <SkeletonBlock width="100%" height={6} radius={999} />
-              </div>
-            ))}
-          </SurfaceCard>
-        </div>
-        <div>
-          <SkeletonBlock width={140} height={14} radius={6} style={{ marginBottom: 12 }} />
-          <SurfaceCard>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: `${theme.spacing.md}px 0`,
-                  borderBottom: i < 2 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <SkeletonBlock width="45%" height={14} radius={6} />
-                  <SkeletonBlock width={36} height={12} radius={5} />
-                </div>
-                <SkeletonBlock width="100%" height={8} radius={999} style={{ marginBottom: 6 }} />
-                <SkeletonBlock width="55%" height={11} radius={5} />
-              </div>
-            ))}
-          </SurfaceCard>
-        </div>
-        <div>
-          <SkeletonBlock width={150} height={14} radius={6} style={{ marginBottom: 12 }} />
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} style={{ marginBottom: theme.spacing.sm }}>
-              <TransactionRowSkeleton />
-            </div>
-          ))}
-        </div>
+      <div style={{ ...(frame as CSSProperties), paddingTop: theme.spacing.lg }}>
+        <DashboardContentSkeleton />
       </div>
     </div>
   );
@@ -510,11 +529,11 @@ export function SettingsSkeleton() {
   );
 }
 
+/** Content-only — keep real stack header mounted while loading. */
 export function NetWorthSkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen gap={theme.spacing.lg}>
-      <SkeletonHeaderBar withAction={false} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <div
         style={{
           borderRadius: theme.radii.xl,
@@ -541,15 +560,15 @@ export function NetWorthSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <AccountRowSkeleton key={i} />
       ))}
-    </SkeletonScreen>
+    </div>
   );
 }
 
+/** Content-only — keep real stack header mounted while loading. */
 export function FamilySkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen gap={theme.spacing.md}>
-      <SkeletonHeaderBar withAction={false} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
       {Array.from({ length: 2 }).map((_, i) => (
         <SurfaceCard key={i}>
           <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
@@ -565,15 +584,15 @@ export function FamilySkeleton() {
         <SkeletonBlock width="50%" height={48} radius={theme.radii.md} />
         <SkeletonBlock width="50%" height={48} radius={theme.radii.md} />
       </div>
-    </SkeletonScreen>
+    </div>
   );
 }
 
+/** Content-only — keep real stack header mounted while loading. */
 export function SupportSkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen gap={theme.spacing.md}>
-      <SkeletonHeaderBar />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
       <SurfaceCard>
         <SkeletonBlock width={90} height={12} radius={5} style={{ marginBottom: 14 }} />
         <SkeletonBlock width="100%" height={48} radius={theme.radii.md} style={{ marginBottom: 12 }} />
@@ -583,15 +602,14 @@ export function SupportSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <TicketRowSkeleton key={i} />
       ))}
-    </SkeletonScreen>
+    </div>
   );
 }
 
 export function SubscriptionSkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen gap={theme.spacing.md}>
-      <SkeletonHeaderBar withAction={false} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
       {Array.from({ length: 3 }).map((_, i) => (
         <SurfaceCard key={i}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
@@ -603,7 +621,7 @@ export function SubscriptionSkeleton() {
           <SkeletonBlock width="100%" height={48} radius={theme.radii.md} />
         </SurfaceCard>
       ))}
-    </SkeletonScreen>
+    </div>
   );
 }
 
@@ -683,36 +701,32 @@ function ChatAssistantBubbleSkeleton({
   );
 }
 
+/** Content-only chat body — keep real chat header mounted while loading. */
 export function AiChatSkeleton() {
   const theme = useTheme();
-  const { frame } = useScreenInsets();
 
   return (
-    <div style={{ height: '100%', backgroundColor: theme.colors.background, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ ...frame, paddingTop: theme.spacing.lg, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <SkeletonHeaderBar withAction />
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: theme.spacing.md, paddingTop: theme.spacing.sm }}>
+        <ChatUserBubbleSkeleton width="62%" height={40} />
+        <ChatAssistantBubbleSkeleton width="78%" height={72} />
+        <ChatUserBubbleSkeleton width="48%" height={40} />
+        <ChatAssistantBubbleSkeleton width="84%" height={96} />
+        <ChatUserBubbleSkeleton width="56%" height={40} />
+        <ChatAssistantBubbleSkeleton width="70%" height={64} />
+      </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: theme.spacing.md, paddingTop: theme.spacing.sm }}>
-          <ChatUserBubbleSkeleton width="62%" height={40} />
-          <ChatAssistantBubbleSkeleton width="78%" height={72} />
-          <ChatUserBubbleSkeleton width="48%" height={40} />
-          <ChatAssistantBubbleSkeleton width="84%" height={96} />
-          <ChatUserBubbleSkeleton width="56%" height={40} />
-          <ChatAssistantBubbleSkeleton width="70%" height={64} />
+      <div style={{ paddingTop: theme.spacing.md, paddingBottom: theme.spacing.lg, display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <SkeletonBlock width={132} height={32} radius={999} />
+          <SkeletonBlock width={118} height={32} radius={999} />
+          <SkeletonBlock width={148} height={32} radius={999} />
         </div>
-
-        <div style={{ paddingTop: theme.spacing.md, paddingBottom: theme.spacing.lg, display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <SkeletonBlock width={132} height={32} radius={999} />
-            <SkeletonBlock width={118} height={32} radius={999} />
-            <SkeletonBlock width={148} height={32} radius={999} />
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
+          <div style={{ flex: 1 }}>
+            <SkeletonBlock width="100%" height={48} radius={22} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10 }}>
-            <div style={{ flex: 1 }}>
-              <SkeletonBlock width="100%" height={48} radius={22} />
-            </div>
-            <SkeletonCircle size={44} />
-          </div>
+          <SkeletonCircle size={44} />
         </div>
       </div>
     </div>

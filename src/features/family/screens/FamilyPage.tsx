@@ -16,8 +16,6 @@ export function FamilyPage() {
   const [groupNameError, setGroupNameError] = useState<string>();
   const [inviteCodeError, setInviteCodeError] = useState<string>();
 
-  if (isLoading) return <FamilySkeleton />;
-
   const handleCreate = () => {
     setError(null);
     if (!groupName.trim()) {
@@ -40,10 +38,16 @@ export function FamilyPage() {
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="family" subtitle="Manage expenses together" />} inset="stack">
-      {memberships.length > 0 ? memberships.map((m) => (
-        <Card key={m.id} variant="elevated"><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
-      )) : <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />}
-      {showCreate && (
+      {isLoading ? (
+        <FamilySkeleton />
+      ) : memberships.length > 0 ? (
+        memberships.map((m) => (
+          <Card key={m.id} variant="elevated"><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
+        ))
+      ) : (
+        <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />
+      )}
+      {!isLoading && showCreate && (
         <Card variant="elevated">
           <Input
             label="Group Name"
@@ -60,7 +64,7 @@ export function FamilyPage() {
           </div>
         </Card>
       )}
-      {showJoin && (
+      {!isLoading && showJoin && (
         <Card variant="elevated">
           <Input
             label="Invite Code"
@@ -77,10 +81,12 @@ export function FamilyPage() {
           </div>
         </Card>
       )}
-      <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-        {!showCreate && <Button title="Create Group" onPress={() => { setShowCreate(true); setError(null); }} variant="outline" />}
-        {!showJoin && <Button title="Join Group" onPress={() => { setShowJoin(true); setError(null); }} variant="secondary" />}
-      </div>
+      {!isLoading && (
+        <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+          {!showCreate && <Button title="Create Group" onPress={() => { setShowCreate(true); setError(null); }} variant="outline" />}
+          {!showJoin && <Button title="Join Group" onPress={() => { setShowJoin(true); setError(null); }} variant="secondary" />}
+        </div>
+      )}
     </ScreenWrapper>
   );
 }

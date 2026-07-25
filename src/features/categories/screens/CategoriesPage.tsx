@@ -4,7 +4,7 @@ import { ProfileStackHeader } from '@/features/settings/components/ProfileStackH
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
-import { ListSkeleton } from '@/shared/components/ui/skeleton';
+import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
 import { useCategories, COLORS_PRESET } from '@/features/categories/hooks/useCategories';
@@ -39,8 +39,6 @@ export function CategoriesPage() {
     if (await confirm(CONFIRM.archiveCategory(name))) await archiveCategory(id);
   };
 
-  if (isLoading) return <ListSkeleton count={5} variant="category" />;
-
   const items = categories ?? [];
 
   return (
@@ -50,11 +48,11 @@ export function CategoriesPage() {
           header={
             <ProfileStackHeader
               screen="categories"
-              subtitle={`${items.length} categor${items.length !== 1 ? 'ies' : 'y'}`}
+              subtitle={isLoading ? 'Loading…' : `${items.length} categor${items.length !== 1 ? 'ies' : 'y'}`}
             />
           }
           inset="stack"
-          data={items}
+          data={isLoading ? [] : items}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={listError ? <FormErrorBanner message={listError} /> : undefined}
           renderItem={(cat, index) => (
@@ -90,13 +88,17 @@ export function CategoriesPage() {
             </div>
           )}
           ListEmptyComponent={
-            <EmptyState
-              title="No categories"
-              subtitle="Create categories to organize expenses"
-              icon="category"
-              action="Add category"
-              onAction={openCreate}
-            />
+            isLoading ? (
+              <ListRowsSkeleton count={5} variant="category" />
+            ) : (
+              <EmptyState
+                title="No categories"
+                subtitle="Create categories to organize expenses"
+                icon="category"
+                action="Add category"
+                onAction={openCreate}
+              />
+            )
           }
         />
         {showForm && (
