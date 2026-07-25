@@ -9,7 +9,7 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useIncomeDetail } from '../hooks/useIncome';
-import { validateAmount, validateDate } from '@/shared/validation/fieldLimits';
+import { maxLen, validateAmount, validateDate, validateOptionalText } from '@/shared/validation/fieldLimits';
 
 export function IncomeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,7 +19,7 @@ export function IncomeDetailPage() {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string; notes?: string }>({});
 
   if (isLoading) return <DetailSkeleton />;
   if (!income) return null;
@@ -35,8 +35,10 @@ export function IncomeDetailPage() {
       const next: typeof fieldErrors = {};
       const amountErr = validateAmount(amount);
       const dateErr = validateDate(date);
+      const notesErr = validateOptionalText('notes', notes);
       if (amountErr) next.amount = amountErr;
       if (dateErr) next.date = dateErr;
+      if (notesErr) next.notes = notesErr;
 
       setFieldErrors(next);
       if (Object.keys(next).length) return;
@@ -47,7 +49,7 @@ export function IncomeDetailPage() {
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
           <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
+          <Input label="Notes" value={notes} onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }} placeholder="Optional note" multiline disabled={isPending} maxLength={maxLen('notes')} error={fieldErrors.notes} />
           {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
           <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" disabled={isPending} />

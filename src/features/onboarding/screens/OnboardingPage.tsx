@@ -4,9 +4,9 @@ import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
-import { validateAmount, validateText } from '@/shared/validation/fieldLimits';
+import { validateAmount, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
 
-type FieldErrors = { name?: string; salaryRange?: string; savingsTarget?: string };
+type FieldErrors = { name?: string; country?: string; salaryRange?: string; savingsTarget?: string; goals?: string };
 
 export function OnboardingPage() {
   const theme = useTheme();
@@ -24,11 +24,15 @@ export function OnboardingPage() {
     clearError();
     const next: FieldErrors = {};
     const nameErr = validateText('name', name);
+    const countryErr = validateText('country', country);
     const salaryErr = validateText('salaryRange', salaryRange);
     const savingsErr = validateAmount(savingsTarget);
     if (nameErr) next.name = nameErr;
+    if (countryErr) next.country = countryErr;
     if (salaryErr) next.salaryRange = salaryErr;
     if (savingsErr) next.savingsTarget = savingsErr;
+    if (goals.length === 0) next.goals = ValidationMessages.financialGoalsMin;
+    else if (goals.length > 20) next.goals = ValidationMessages.financialGoalsMax;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
@@ -57,7 +61,20 @@ export function OnboardingPage() {
           <label style={labelStyle}>Currency</label>
           <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={loading} style={selectStyle}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>)}</select>
         </div>
-        <div><label style={labelStyle}>Financial Goals</label><MultiOptionChips options={FINANCIAL_GOALS.map((g) => g.id)} selected={goals} onToggle={(id) => setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id])} getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id} disabled={loading} /></div>
+        <div>
+          <label style={labelStyle}>Financial Goals</label>
+          <MultiOptionChips
+            options={FINANCIAL_GOALS.map((g) => g.id)}
+            selected={goals}
+            onToggle={(id) => {
+              setGoals((prev) => prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]);
+              setFieldErrors((f) => ({ ...f, goals: undefined }));
+            }}
+            getLabel={(id) => FINANCIAL_GOALS.find((g) => g.id === id)?.label ?? id}
+            disabled={loading}
+          />
+          {fieldErrors.goals ? <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>{fieldErrors.goals}</p> : null}
+        </div>
         <div>
           <label style={labelStyle}>Salary Range</label>
           <OptionChips

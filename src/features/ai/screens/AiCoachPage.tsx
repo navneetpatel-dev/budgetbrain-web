@@ -5,6 +5,7 @@ import { Card, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
+import { maxLen } from '@/shared/validation/fieldLimits';
 
 const SEND_SIZE = 36;
 
@@ -160,7 +161,7 @@ export function AiCoachPage() {
             onKeyDown={onKeyDown}
             placeholder="Ask about your finances..."
             rows={1}
-            maxLength={4000}
+            maxLength={maxLen('aiMessage')}
             disabled={isPending}
             aria-label="Chat message"
             style={inputStyle}

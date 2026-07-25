@@ -3,7 +3,14 @@ import { FormStackScreen, OptionChips, OptionChipList } from '@/shared/component
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateIncome, useIncomeSources } from '../hooks/useIncome';
-import { validateAmount, validateDate, validateOptionalText, validateText } from '@/shared/validation/fieldLimits';
+import {
+  maxLen,
+  validateAmount,
+  validateDate,
+  validateOptionalText,
+  validateText,
+  ValidationMessages,
+} from '@/shared/validation/fieldLimits';
 
 const SOURCE_TYPES = [
   { id: 'salary', label: 'Salary' }, { id: 'freelancing', label: 'Freelancing' },
@@ -37,7 +44,7 @@ export function AddIncomePage() {
     if (amountErr) next.amount = amountErr;
     if (dateErr) next.date = dateErr;
     if (notesErr) next.notes = notesErr;
-    if (sourceMode === 'existing' && !selectedSource) next.selectedSource = 'Select an income source';
+    if (sourceMode === 'existing' && !selectedSource) next.selectedSource = ValidationMessages.incomeSourceRequired;
     if (sourceMode === 'new') {
       const sourceErr = validateText('entityName', newSourceName);
       if (sourceErr) next.newSourceName = sourceErr;
@@ -110,7 +117,16 @@ export function AddIncomePage() {
             <OptionChips options={SOURCE_TYPES.map((t) => t.id)} value={newSourceType} onChange={setNewSourceType} getLabel={(v) => SOURCE_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
           </>
         )}
-        <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
+        <Input
+          label="Notes"
+          value={notes}
+          onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }}
+          placeholder="Optional note"
+          multiline
+          disabled={isPending}
+          maxLength={maxLen('notes')}
+          error={fieldErrors.notes}
+        />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Save Income" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

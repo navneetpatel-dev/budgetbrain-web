@@ -11,7 +11,7 @@ import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useBudgetDetail } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
-import { validateAmount, validateText } from '@/shared/validation/fieldLimits';
+import { validateAlertThreshold, validateAmount, validateText } from '@/shared/validation/fieldLimits';
 
 export function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,7 @@ export function BudgetDetailPage() {
   const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string; alertThreshold?: string }>({});
 
   if (isLoading || !budget) return <DetailSkeleton />;
 
@@ -37,9 +37,10 @@ export function BudgetDetailPage() {
       const next: typeof fieldErrors = {};
       const nameErr = validateText('entityName', name);
       const amountErr = validateAmount(amount);
+      const thresholdErr = validateAlertThreshold(alertThreshold);
       if (nameErr) next.name = nameErr;
       if (amountErr) next.amount = amountErr;
-
+      if (thresholdErr) next.alertThreshold = thresholdErr;
       setFieldErrors(next);
       if (Object.keys(next).length) return;
       updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });
@@ -50,7 +51,7 @@ export function BudgetDetailPage() {
           <Input label="Budget Name" value={name} onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }} disabled={isPending} error={fieldErrors.name} />
           <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" disabled={isPending} error={fieldErrors.amount} />
-          <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} type="number" disabled={isPending} />
+          <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => { setAlertThreshold(e.target.value); setFieldErrors((f) => ({ ...f, alertThreshold: undefined })); }} type="number" disabled={isPending} error={fieldErrors.alertThreshold} />
           {error ? <FormErrorBanner message={error} /> : null}
           <Button title="Save Changes" onPress={save} loading={isPending} size="lg" />
           <Button title="Cancel" onPress={() => setEditing(false)} variant="outline" disabled={isPending} />

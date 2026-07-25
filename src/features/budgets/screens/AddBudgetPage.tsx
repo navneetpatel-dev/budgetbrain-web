@@ -4,9 +4,9 @@ import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateBudget } from '../hooks/useBudgets';
 import { BUDGET_TYPES } from '@/shared/constants/config';
-import { validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
+import { validateAlertThreshold, validateAmount, validateDate, validateText } from '@/shared/validation/fieldLimits';
 
-type FieldErrors = { name?: string; amount?: string; startDate?: string };
+type FieldErrors = { name?: string; amount?: string; startDate?: string; alertThreshold?: string };
 
 export function AddBudgetPage() {
   const theme = useTheme();
@@ -27,9 +27,11 @@ export function AddBudgetPage() {
     const nameErr = validateText('entityName', name);
     const amountErr = validateAmount(amount);
     const dateErr = validateDate(startDate);
+    const thresholdErr = validateAlertThreshold(alertThreshold);
     if (nameErr) next.name = nameErr;
     if (amountErr) next.amount = amountErr;
     if (dateErr) next.startDate = dateErr;
+    if (thresholdErr) next.alertThreshold = thresholdErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({ name, type, amount: Number(amount), startDate, alertThreshold: Number(alertThreshold) });
@@ -66,7 +68,7 @@ export function AddBudgetPage() {
           disabled={isPending}
           error={fieldErrors.startDate}
         />
-        <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => setAlertThreshold(e.target.value)} placeholder="80" type="number" helperText="Get notified when spending reaches this percentage" disabled={isPending} />
+        <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => { setAlertThreshold(e.target.value); setFieldErrors((f) => ({ ...f, alertThreshold: undefined })); }} placeholder="80" type="number" helperText="Get notified when spending reaches this percentage" disabled={isPending} error={fieldErrors.alertThreshold} />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Create Budget" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

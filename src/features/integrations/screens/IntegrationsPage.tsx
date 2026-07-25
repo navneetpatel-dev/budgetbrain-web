@@ -1,18 +1,56 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
 import { useCategories } from '@/features/categories/hooks/useCategories';
+import { maxLen, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
+
+type ParseErrors = { content?: string; subject?: string; body?: string };
 
 export function IntegrationsPage() {
   const theme = useTheme();
-  const { pending, isLoading, confirmMutation, rejectMutation } = useIntegrations();
+  const {
+    pending,
+    isLoading,
+    parseSmsMutation,
+    parseEmailMutation,
+    confirmMutation,
+    rejectMutation,
+    error,
+    setError,
+  } = useIntegrations();
   const { categories } = useCategories();
   const [categoryById, setCategoryById] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
+  const [smsContent, setSmsContent] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [parseErrors, setParseErrors] = useState<ParseErrors>({});
+
+  const handleParseSms = () => {
+    setError(null);
+    const contentErr = validateText('smsContent', smsContent);
+    setParseErrors({ content: contentErr });
+    if (contentErr) return;
+    parseSmsMutation.mutate(
+      { content: smsContent },
+      { onSuccess: () => { setSmsContent(''); setParseErrors({}); } }
+    );
+  };
+
+  const handleParseEmail = () => {
+    setError(null);
+    const subjectErr = validateText('emailSubject', emailSubject);
+    const bodyErr = validateText('emailBody', emailBody);
+    setParseErrors({ subject: subjectErr, body: bodyErr });
+    if (subjectErr || bodyErr) return;
+    parseEmailMutation.mutate(
+      { subject: emailSubject, body: emailBody },
+      { onSuccess: () => { setEmailSubject(''); setEmailBody(''); setParseErrors({}); } }
+    );
+  };
 
   return (
     <StickyHeaderFlatScreen
@@ -20,7 +58,45 @@ export function IntegrationsPage() {
       inset="stack"
       data={isLoading ? [] : pending}
       keyExtractor={(item) => item.id}
-      ListHeaderComponent={error ? <FormErrorBanner message={error} /> : null}
+      ListHeaderComponent={
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg, marginBottom: theme.spacing.lg }}>
+          {error ? <FormErrorBanner message={error} /> : null}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Parse SMS</span>
+            <Input
+              label="SMS content"
+              value={smsContent}
+              onChange={(e) => setSmsContent(e.target.value)}
+              maxLength={maxLen('smsContent')}
+              multiline
+              error={parseErrors.content}
+              disabled={parseSmsMutation.isPending}
+            />
+            <Button title="Parse SMS" onPress={handleParseSms} loading={parseSmsMutation.isPending} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Parse email</span>
+            <Input
+              label="Subject"
+              value={emailSubject}
+              onChange={(e) => setEmailSubject(e.target.value)}
+              maxLength={maxLen('emailSubject')}
+              error={parseErrors.subject}
+              disabled={parseEmailMutation.isPending}
+            />
+            <Input
+              label="Body"
+              value={emailBody}
+              onChange={(e) => setEmailBody(e.target.value)}
+              maxLength={maxLen('emailBody')}
+              multiline
+              error={parseErrors.body}
+              disabled={parseEmailMutation.isPending}
+            />
+            <Button title="Parse Email" onPress={handleParseEmail} loading={parseEmailMutation.isPending} />
+          </div>
+        </div>
+      }
       renderItem={(item) => (
         <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -53,7 +129,7 @@ export function IntegrationsPage() {
                 onClick={() => {
                   const categoryId = categoryById[item.id];
                   if (!categoryId) {
-                    setError('Choose a category before confirming.');
+                    setError(ValidationMessages.categoryRequired);
                     return;
                   }
                   setError(null);

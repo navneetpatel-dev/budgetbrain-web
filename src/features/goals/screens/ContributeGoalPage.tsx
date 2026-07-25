@@ -4,7 +4,7 @@ import { FormStackScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useContributeGoal } from '../hooks/useGoals';
-import { validateAmount } from '@/shared/validation/fieldLimits';
+import { maxLen, validateAmount, validateOptionalText } from '@/shared/validation/fieldLimits';
 
 export function ContributeGoalPage() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +13,7 @@ export function ContributeGoalPage() {
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [amountError, setAmountError] = useState<string>();
+  const [notesError, setNotesError] = useState<string>();
 
   const isPending = contributeMutation.isPending;
 
@@ -20,11 +21,12 @@ export function ContributeGoalPage() {
     e.preventDefault();
     setError(null);
     const amountErr = validateAmount(amount);
-    if (amountErr) {
-      setAmountError(amountErr);
-      return;
-    }
+    const notesErr = validateOptionalText('notes', notes);
+    setAmountError(amountErr);
+    setNotesError(notesErr);
+    if (amountErr || notesErr) return;
     setAmountError(undefined);
+    setNotesError(undefined);
     contributeMutation.mutate({ amount: Number(amount), notes: notes || undefined });
   };
 
@@ -41,7 +43,7 @@ export function ContributeGoalPage() {
           disabled={isPending}
           error={amountError}
         />
-        <Input label="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional note" multiline disabled={isPending} />
+        <Input label="Notes (optional)" value={notes} onChange={(e) => { setNotes(e.target.value); setNotesError(undefined); }} maxLength={maxLen('notes')} error={notesError} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Add Contribution" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

@@ -8,6 +8,7 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { ensureArray } from '@/shared/utils/listData';
 import { useSearch } from '@/features/shared/hooks/useFeatures';
 import type { Transaction } from '@/shared/types';
+import { FieldLimits, maxLen, ValidationMessages } from '@/shared/validation/fieldLimits';
 
 export function SearchPage() {
   const theme = useTheme();
@@ -16,19 +17,39 @@ export function SearchPage() {
   const { data, isLoading, isFetching } = useSearch(query);
 
   const results = ensureArray<Transaction>(data?.transactions);
-  const searching = query.length >= 2 && (isLoading || isFetching);
+  const enabled = query.trim().length >= FieldLimits.search.min;
+  const searching = enabled && (isLoading || isFetching);
 
   const goBack = useStackBack('/expenses');
 
   return (
     <StickyHeaderFlatScreen
-      header={<StackNavHeader title="Search" onBack={goBack} footer={<Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search transactions..." leftIcon="search" autoFocus />} />}
+      header={
+        <StackNavHeader
+          title="Search"
+          onBack={goBack}
+          footer={
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value.slice(0, maxLen('search')))}
+              placeholder="Search transactions..."
+              leftIcon="search"
+              autoFocus
+              maxLength={maxLen('search')}
+            />
+          }
+        />
+      }
       inset="stack"
-      data={query.length >= 2 && !searching ? results : []}
+      data={enabled && !searching ? results : []}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
-        searching ? <ListSkeleton count={6} variant="transaction" showHeader={false} /> : query.length < 2 ? (
-          <p style={{ textAlign: 'center', color: theme.colors.textSecondary, marginTop: 32, fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Type at least 2 characters to search</p>
+        searching ? (
+          <ListSkeleton count={6} variant="transaction" showHeader={false} />
+        ) : !enabled ? (
+          <p style={{ textAlign: 'center', color: theme.colors.textSecondary, marginTop: 32, fontSize: 14, fontFamily: 'Inter, sans-serif' }}>
+            {ValidationMessages.minChars(FieldLimits.search.min)}
+          </p>
         ) : null
       }
       renderItem={(txn) => (
@@ -37,7 +58,7 @@ export function SearchPage() {
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
         </div>
       )}
-      ListEmptyComponent={query.length >= 2 && !searching ? <EmptyState title="No results" subtitle="Try a different search term" icon="search" /> : null}
+      ListEmptyComponent={enabled && !searching ? <EmptyState title="No results" subtitle="Try a different search term" icon="search" /> : null}
     />
   );
 }
