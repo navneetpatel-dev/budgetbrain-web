@@ -13,7 +13,7 @@ export function IncomePage() {
   const navigate = useNavigate();
   const { data, isLoading } = useIncome();
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ListSkeleton count={4} variant="transaction" />;
   const incomeList = data ?? [];
 
   return (

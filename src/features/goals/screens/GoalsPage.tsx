@@ -14,7 +14,7 @@ export function GoalsPage() {
   const navigate = useNavigate();
   const { data, isLoading } = useGoals();
 
-  if (isLoading) return <ListSkeleton count={3} />;
+  if (isLoading) return <ListSkeleton count={3} variant="goal" />;
   const goals = data ?? [];
 
   return (

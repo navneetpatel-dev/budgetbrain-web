@@ -36,7 +36,7 @@ export function useFamily() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
+  const { data, isLoading } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
     queryKey: ['family'],
     url: '/family/groups',
     itemsKey: 'memberships',
@@ -53,7 +53,7 @@ export function useFamily() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { memberships: data, createMutation, joinMutation, error, setError };
+  return { memberships: data, isLoading, createMutation, joinMutation, error, setError };
 }
 
 export function useNotifications() {

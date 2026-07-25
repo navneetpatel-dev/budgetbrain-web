@@ -16,7 +16,7 @@ export function AccountsPage() {
     queryFn: () => apiGet<FinancialAccount[]>('/accounts'),
   });
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ListSkeleton count={4} variant="account" />;
 
   const accounts = data ?? [];
 

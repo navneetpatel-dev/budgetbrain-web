@@ -2,16 +2,19 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button, Input, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { FamilySkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useFamily } from '@/features/shared/hooks/useFeatures';
 
 export function FamilyPage() {
   const theme = useTheme();
-  const { memberships, createMutation, joinMutation, error, setError } = useFamily();
+  const { memberships, isLoading, createMutation, joinMutation, error, setError } = useFamily();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
   const [inviteCode, setInviteCode] = useState('');
+
+  if (isLoading) return <FamilySkeleton />;
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="family" subtitle="Manage expenses together" />} inset="stack">

@@ -9,7 +9,7 @@ export function IntegrationsPage() {
   const theme = useTheme();
   const { pending, isLoading, confirmMutation, rejectMutation } = useIntegrations();
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ListSkeleton count={4} variant="transaction" />;
 
   return (
     <StickyHeaderFlatScreen

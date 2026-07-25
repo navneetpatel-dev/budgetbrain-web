@@ -39,7 +39,7 @@ export function CategoriesPage() {
     if (await confirm(CONFIRM.archiveCategory(name))) await archiveCategory(id);
   };
 
-  if (isLoading) return <ListSkeleton count={5} />;
+  if (isLoading) return <ListSkeleton count={5} variant="category" />;
 
   const items = categories ?? [];
 

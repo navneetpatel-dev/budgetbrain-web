@@ -16,7 +16,7 @@ export function InvestmentsPage() {
     queryFn: () => apiGet<Investment[]>('/investments'),
   });
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ListSkeleton count={4} variant="account" />;
 
   const investments = data ?? [];
 

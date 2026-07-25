@@ -14,7 +14,7 @@ export function ExpensesPage() {
   const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useExpenses();
 
-  if (isLoading) return <ListSkeleton count={6} />;
+  if (isLoading) return <ListSkeleton count={6} variant="transaction" />;
   const transactions = ensureArray<Transaction>(data?.transactions);
   const total = transactions.length;
 

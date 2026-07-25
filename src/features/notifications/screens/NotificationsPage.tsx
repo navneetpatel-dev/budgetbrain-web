@@ -9,7 +9,7 @@ export function NotificationsPage() {
   const theme = useTheme();
   const { notifications, isLoading } = useNotifications();
 
-  if (isLoading) return <ListSkeleton count={5} />;
+  if (isLoading) return <ListSkeleton count={5} variant="notification" />;
 
   return (
     <StickyHeaderFlatScreen

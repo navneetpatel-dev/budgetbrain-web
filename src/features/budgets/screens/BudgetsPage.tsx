@@ -14,7 +14,7 @@ export function BudgetsPage() {
   const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useBudgets();
 
-  if (isLoading) return <ListSkeleton count={4} />;
+  if (isLoading) return <ListSkeleton count={4} variant="budget" />;
   const budgets = data ?? [];
 
   return (

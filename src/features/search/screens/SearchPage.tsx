@@ -27,7 +27,7 @@ export function SearchPage() {
       data={query.length >= 2 && !searching ? results : []}
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
-        searching ? <ListSkeleton count={6} /> : query.length < 2 ? (
+        searching ? <ListSkeleton count={6} variant="transaction" showHeader={false} /> : query.length < 2 ? (
           <p style={{ textAlign: 'center', color: theme.colors.textSecondary, marginTop: 32, fontSize: 14, fontFamily: 'Inter, sans-serif' }}>Type at least 2 characters to search</p>
         ) : null
       }
