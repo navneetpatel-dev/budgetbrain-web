@@ -6,10 +6,11 @@ import { AiChatSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
+import { AiSuggestionChips } from '../components/AiSuggestionChips';
+import { AiRichReply } from '../components/AiRichReply';
 import { maxLen } from '@/shared/validation/fieldLimits';
 
 const SEND_SIZE = 36;
-const SUGGESTIONS = ['How am I spending?', 'Where can I save?', 'Budget advice', 'Investment tips'];
 
 export function AiCoachPage() {
   const theme = useTheme();
@@ -122,37 +123,15 @@ export function AiCoachPage() {
               Ask your AI Coach
             </h3>
             <p style={{ margin: '8px 0 0', fontSize: 13, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: '18px' }}>
-              Get insights on spending, savings, and budgets.
+              Get insights on spending, savings, and budgets. Pick a suggestion below to start.
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 16 }}>
-              {SUGGESTIONS.map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => send(q)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: theme.radii.full,
-                    cursor: 'pointer',
-                    backgroundColor: theme.colors.primarySoft,
-                    color: theme.colors.primary,
-                    border: `1px solid ${theme.colors.primary}33`,
-                    fontSize: 12,
-                    fontWeight: 600,
-                    fontFamily: 'Inter, sans-serif',
-                  }}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
           </Card>
         )}
         {messages.map((msg, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{
-              maxWidth: '80%',
-              padding: '12px 16px',
+              maxWidth: msg.role === 'assistant' ? '88%' : '80%',
+              padding: msg.role === 'assistant' ? '14px 16px' : '12px 16px',
               borderRadius: theme.radii.lg,
               backgroundColor: msg.role === 'user' ? theme.colors.primary : theme.colors.surfaceHover,
               color: msg.role === 'user' ? theme.colors.onPrimary : theme.colors.text,
@@ -161,7 +140,16 @@ export function AiCoachPage() {
               fontFamily: 'Inter, sans-serif',
               borderBottomRightRadius: msg.role === 'user' ? 4 : theme.radii.lg,
               borderBottomLeftRadius: msg.role === 'assistant' ? 4 : theme.radii.lg,
-            }}>{msg.content}</div>
+              border: msg.role === 'assistant'
+                ? `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`
+                : 'none',
+            }}>
+              {msg.role === 'assistant' ? (
+                <AiRichReply content={msg.content} />
+              ) : (
+                msg.content
+              )}
+            </div>
           </div>
         ))}
         {isPending && (
@@ -182,6 +170,16 @@ export function AiCoachPage() {
           <div style={{ marginBottom: 8 }} onClick={clearError}>
             <FormErrorBanner message={error} />
           </div>
+        ) : null}
+        {!historyLoading ? (
+          <AiSuggestionChips
+            mode={messages.length === 0 ? 'starter' : 'followup'}
+            disabled={isPending}
+            onSelect={(prompt) => {
+              clearError();
+              void send(prompt);
+            }}
+          />
         ) : null}
         <div style={composerStyle}>
           <textarea
