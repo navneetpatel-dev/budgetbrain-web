@@ -1,7 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useTheme } from '@/shared/theme';
 import { amountText, bodyMedium, caption } from '@/shared/theme/textStyles';
 import { formatCurrency } from '@/shared/utils/currency';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import type { Transaction } from '@/shared/types';
 
 function InlineProgress({ progress, color }: { progress: number; color: string }) {
@@ -190,6 +191,8 @@ export function ProgressEntityRow({
   footerRight,
   badge,
   onPress,
+  onEdit,
+  onDelete,
 }: {
   title: string;
   subtitle?: string;
@@ -201,24 +204,62 @@ export function ProgressEntityRow({
   footerRight?: string;
   badge?: ReactNode;
   onPress?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const theme = useTheme();
+  const stop = (e: MouseEvent) => e.stopPropagation();
+
+  const actions = (onEdit || onDelete) ? (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }} onClick={stop}>
+      {onEdit ? (
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Edit ${title}`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 32, height: 32, border: 'none', padding: 0, borderRadius: 8,
+            background: 'transparent', cursor: 'pointer', color: theme.colors.textTertiary,
+          }}
+        >
+          <AppIcon name="edit" size={18} color={theme.colors.textTertiary} />
+        </button>
+      ) : null}
+      {onDelete ? (
+        <button
+          type="button"
+          onClick={onDelete}
+          aria-label={`Delete ${title}`}
+          style={{
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 32, height: 32, border: 'none', padding: 0, borderRadius: 8,
+            background: 'transparent', cursor: 'pointer', color: theme.colors.danger,
+          }}
+        >
+          <AppIcon name="trash" size={18} color={theme.colors.danger} />
+        </button>
+      ) : null}
+    </div>
+  ) : null;
 
   return (
     <EntityRow
       title={title}
       subtitle={subtitle}
       onPress={onPress}
-      trailing={badge ?? (value != null ? (
-        <div style={{ textAlign: 'right', flexShrink: 0 }}>
-          <span style={{ ...amountText(theme), display: 'block', fontSize: 17 }}>{value}</span>
-          {secondaryValue ? (
-            <span style={{ ...caption(theme), display: 'block', marginTop: 2 }}>{secondaryValue}</span>
-          ) : null}
-        </div>
-      ) : undefined)}
+      trailing={actions ?? badge}
     >
-      <div style={{ marginTop: theme.spacing.md }}>
+      <div style={{ marginTop: theme.spacing.sm }}>
+        {value != null ? (
+          <div style={{ marginBottom: theme.spacing.md }}>
+            <span style={{ ...amountText(theme), display: 'block', fontSize: 17 }}>{value}</span>
+            {secondaryValue ? (
+              <span style={{ ...caption(theme), display: 'block', marginTop: 2 }}>{secondaryValue}</span>
+            ) : null}
+          </div>
+        ) : null}
+        {badge && actions ? <div style={{ marginBottom: theme.spacing.sm }}>{badge}</div> : null}
         <InlineProgress progress={progress} color={progressColor} />
         {(footerLeft || footerRight) ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6 }}>

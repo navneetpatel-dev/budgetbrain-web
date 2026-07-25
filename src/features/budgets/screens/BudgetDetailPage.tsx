@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { useParams } from 'react-router-dom';
-import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
@@ -10,23 +10,59 @@ import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useBudgetDetail } from '../hooks/useBudgets';
-import { BUDGET_TYPES } from '@/shared/constants/config';
 import { maxLen, validateAlertThreshold, validateAmount, validateText } from '@/shared/validation/fieldLimits';
 
 export function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const goBack = useStackBack('/budgets');
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { budget, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useBudgetDetail(id);
   const [name, setName] = useState('');
-  const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string; alertThreshold?: string }>({});
+  const [startedFromQuery, setStartedFromQuery] = useState(false);
+  /** True only when Edit was tapped from the view screen (not list → ?edit=1). */
+  const editFromViewRef = useRef(false);
+
+  const populateEdit = (b: NonNullable<typeof budget>) => {
+    setName(b.name);
+    setAmount(String(b.amount));
+    setAlertThreshold(String(b.alertThreshold));
+    setFieldErrors({});
+    setError(null);
+  };
+
+  const startEdit = (b: NonNullable<typeof budget>) => {
+    populateEdit(b);
+    editFromViewRef.current = true;
+    setEditing(true);
+  };
+
+  const exitEdit = () => {
+    if (editFromViewRef.current) {
+      editFromViewRef.current = false;
+      setEditing(false);
+      return;
+    }
+    goBack();
+  };
+
+  useEffect(() => {
+    if (!budget || startedFromQuery || editing) return;
+    const wantsEdit = searchParams.get('edit') === '1' || searchParams.get('edit') === 'true';
+    if (!wantsEdit) return;
+    populateEdit(budget);
+    editFromViewRef.current = false;
+    setEditing(true);
+    setStartedFromQuery(true);
+  }, [budget, searchParams, startedFromQuery, editing, setError, setEditing]);
 
   if (isLoading) {
     return (
-      <FormStackScreen title="Budget">
+      <FormStackScreen title="Budget" onBack={goBack}>
         <DetailSkeleton />
       </FormStackScreen>
     );
@@ -34,7 +70,7 @@ export function BudgetDetailPage() {
 
   if (isError || !budget) {
     return (
-      <FormStackScreen title="Budget">
+      <FormStackScreen title="Budget" onBack={goBack}>
         <EmptyState
           icon="budgets"
           title="Couldn’t load budget"
@@ -63,13 +99,19 @@ export function BudgetDetailPage() {
       if (thresholdErr) next.alertThreshold = thresholdErr;
       setFieldErrors(next);
       if (Object.keys(next).length) return;
-      updateMutation.mutate({ name, type, amount: Number(amount), alertThreshold: Number(alertThreshold) });
+      updateMutation.mutate(
+        { name, amount: Number(amount), alertThreshold: Number(alertThreshold) },
+        {
+          onSuccess: () => {
+            editFromViewRef.current = false;
+          },
+        },
+      );
     };
     return (
-      <FormStackScreen title="Edit Budget" onBack={() => setEditing(false)}>
+      <FormStackScreen title="Edit Budget" subtitle="Update budget" onBack={exitEdit}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Budget Name" maxLength={maxLen('entityName')} value={name} onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }} disabled={isPending} error={fieldErrors.name} />
-          <OptionChips options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')} value={type} onChange={setType} getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" disabled={isPending} error={fieldErrors.amount} />
           <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => { setAlertThreshold(e.target.value); setFieldErrors((f) => ({ ...f, alertThreshold: undefined })); }} type="number" disabled={isPending} error={fieldErrors.alertThreshold} />
           {error ? <FormErrorBanner message={error} /> : null}
@@ -78,7 +120,7 @@ export function BudgetDetailPage() {
             onPrimary={save}
             primaryLoading={isPending}
             secondaryTitle="Cancel"
-            onSecondary={() => setEditing(false)}
+            onSecondary={exitEdit}
           />
         </form>
       </FormStackScreen>
@@ -87,12 +129,11 @@ export function BudgetDetailPage() {
 
   const pct = toSafePercent(budget.spent, budget.amount);
   const alertAt = budget.alertThreshold ?? 80;
-
   const barColor = pct >= 100 ? theme.colors.danger : pct >= alertAt ? theme.colors.warning : theme.colors.success;
 
   return (
     <>
-      <FormStackScreen title={budget.name} eyebrow={`${budget.type} budget`}>
+      <FormStackScreen title={budget.name} eyebrow={`${budget.type} budget`} subtitle={`${pct}% used`} onBack={goBack}>
         <DetailHero
           amount={formatCurrency(budget.spent, budget.currency)}
           subtitle={`of ${formatCurrency(budget.amount, budget.currency)}`}
@@ -115,7 +156,7 @@ export function BudgetDetailPage() {
         />
         <DetailActions
           primaryTitle="Edit"
-          onPrimary={() => { setName(budget.name); setType(budget.type); setAmount(String(budget.amount)); setAlertThreshold(String(budget.alertThreshold)); setEditing(true); }}
+          onPrimary={() => startEdit(budget)}
           onDestructive={() => { void handleDelete(); }}
           destructiveLoading={deleteMutation.isPending}
         />

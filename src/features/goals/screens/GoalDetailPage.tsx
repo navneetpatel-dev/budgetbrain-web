@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FormStackScreen } from '@/shared/components/ui/feature-screen';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
@@ -21,7 +21,9 @@ type FieldErrors = { name?: string; targetAmount?: string; targetDate?: string }
 
 export function GoalDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const goBack = useStackBack('/goals');
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { goal, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useGoalDetail(id);
@@ -29,10 +31,47 @@ export function GoalDetailPage() {
   const [targetAmount, setTargetAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [startedFromQuery, setStartedFromQuery] = useState(false);
+  /** True only when Edit was tapped from the view screen (not list → ?edit=1). */
+  const editFromViewRef = useRef(false);
+
+  const populateEdit = (g: NonNullable<typeof goal>) => {
+    setName(g.name);
+    setTargetAmount(String(g.targetAmount));
+    setTargetDate(g.targetDate ?? '');
+    setFieldErrors({});
+    setError(null);
+  };
+
+  const startEdit = () => {
+    if (!goal) return;
+    populateEdit(goal);
+    editFromViewRef.current = true;
+    setEditing(true);
+  };
+
+  const exitEdit = () => {
+    if (editFromViewRef.current) {
+      editFromViewRef.current = false;
+      setEditing(false);
+      return;
+    }
+    goBack();
+  };
+
+  useEffect(() => {
+    if (!goal || startedFromQuery || editing) return;
+    const wantsEdit = searchParams.get('edit') === '1' || searchParams.get('edit') === 'true';
+    if (!wantsEdit) return;
+    populateEdit(goal);
+    editFromViewRef.current = false;
+    setEditing(true);
+    setStartedFromQuery(true);
+  }, [goal, searchParams, startedFromQuery, editing, setError, setEditing]);
 
   if (isLoading) {
     return (
-      <FormStackScreen title="Goal">
+      <FormStackScreen title="Goal" onBack={goBack}>
         <DetailSkeleton />
       </FormStackScreen>
     );
@@ -40,7 +79,7 @@ export function GoalDetailPage() {
 
   if (isError || !goal) {
     return (
-      <FormStackScreen title="Goal">
+      <FormStackScreen title="Goal" onBack={goBack}>
         <EmptyState
           icon="goals"
           title="Couldn’t load goal"
@@ -58,15 +97,6 @@ export function GoalDetailPage() {
     if (await confirm(CONFIRM.deleteGoal)) deleteMutation.mutate();
   };
 
-  const startEdit = () => {
-    setName(goal.name);
-    setTargetAmount(String(goal.targetAmount));
-    setTargetDate(goal.targetDate ?? '');
-    setFieldErrors({});
-    setError(null);
-    setEditing(true);
-  };
-
   if (editing) {
     const isPending = updateMutation.isPending;
     const save = (e?: FormEvent) => {
@@ -81,15 +111,22 @@ export function GoalDetailPage() {
       if (dateErr) next.targetDate = dateErr;
       setFieldErrors(next);
       if (Object.keys(next).length) return;
-      updateMutation.mutate({
-        name,
-        targetAmount: Number(targetAmount),
-        targetDate: targetDate.trim() || undefined,
-      });
+      updateMutation.mutate(
+        {
+          name,
+          targetAmount: Number(targetAmount),
+          targetDate: targetDate.trim() || undefined,
+        },
+        {
+          onSuccess: () => {
+            editFromViewRef.current = false;
+          },
+        },
+      );
     };
 
     return (
-      <FormStackScreen title="Edit Goal" onBack={() => setEditing(false)}>
+      <FormStackScreen title="Edit Goal" subtitle="Update goal" onBack={exitEdit}>
         <form onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Goal name" value={name} onChange={(e) => setName(e.target.value)} maxLength={maxLen('entityName')} error={fieldErrors.name} disabled={isPending} />
           <Input label="Target amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} type="number" error={fieldErrors.targetAmount} disabled={isPending} />
@@ -100,7 +137,7 @@ export function GoalDetailPage() {
             onPrimary={save}
             primaryLoading={isPending}
             secondaryTitle="Cancel"
-            onSecondary={() => setEditing(false)}
+            onSecondary={exitEdit}
           />
         </form>
       </FormStackScreen>
@@ -111,7 +148,7 @@ export function GoalDetailPage() {
 
   return (
     <>
-      <FormStackScreen title={goal.name} eyebrow={goal.type.replace(/_/g, ' ')}>
+      <FormStackScreen title={goal.name} eyebrow={goal.type.replace(/_/g, ' ')} subtitle={`${pct}% achieved`} onBack={goBack}>
         <DetailHero
           amount={formatCurrency(goal.currentAmount, goal.currency)}
           subtitle={`of ${formatCurrency(goal.targetAmount, goal.currency)}`}
