@@ -21,8 +21,13 @@ export function IncomeDetailPage() {
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string; notes?: string }>({});
 
-  if (isLoading) return <DetailSkeleton />;
-  if (!income) return null;
+  if (isLoading || !income) {
+    return (
+      <FormStackScreen title="Income">
+        <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
 
   const handleDelete = async () => {
     if (await confirm(CONFIRM.deleteIncome)) deleteMutation.mutate();

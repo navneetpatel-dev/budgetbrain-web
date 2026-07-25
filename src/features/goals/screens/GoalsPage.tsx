@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
-import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { toSafePercent } from '@/shared/utils/number';
@@ -12,14 +11,18 @@ import type { Goal } from '@/shared/types';
 export function GoalsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useGoals();
   const goals = data ?? [];
 
   return (
     <StickyHeaderFlatScreen
       header={
-        <ProfileStackHeader
-          screen="goals"
+        <FeatureHeader
+          showBack
+          onBack={goBack}
+          eyebrow="SAVE"
+          title="Goals"
           subtitle={isLoading ? 'Loading…' : `${goals.length} active goal${goals.length !== 1 ? 's' : ''}`}
           actionIcon="add"
           actionLabel="Create goal"

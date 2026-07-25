@@ -2,12 +2,15 @@ import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } f
 import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { Card, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
+import { AiChatSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
 import { maxLen } from '@/shared/validation/fieldLimits';
 
 const SEND_SIZE = 36;
+const SUGGESTIONS = ['How am I spending?', 'Where can I save?', 'Budget advice', 'Investment tips'];
 
 export function AiCoachPage() {
   const theme = useTheme();
@@ -50,9 +53,23 @@ export function AiCoachPage() {
         <ProfileStackHeader screen="ai" subtitle="Premium feature" />
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', ...frame, paddingBottom: theme.spacing.xxl }}>
           <Card variant="elevated" style={{ textAlign: 'center', maxWidth: 320 }}>
-            <div style={{ width: 56, height: 56, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.primarySoft, margin: '0 auto 16px' }}><span style={{ fontSize: 24 }}>✨</span></div>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme.colors.primarySoft,
+              border: `1px solid ${theme.colors.primary}28`,
+              margin: '0 auto 16px',
+            }}>
+              <AppIcon name="ai" size={26} color={theme.colors.primary} />
+            </div>
             <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: 0 }}>Unlock AI Coach</h3>
-            <p style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8, fontFamily: 'Inter, sans-serif', lineHeight: '20px' }}>Upgrade to Premium to get personalized AI-powered financial insights and guidance.</p>
+            <p style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8, fontFamily: 'Inter, sans-serif', lineHeight: '20px' }}>
+              Upgrade to Premium for personalized AI-powered financial insights and guidance.
+            </p>
             <div style={{ marginTop: 16 }}><Button title="Upgrade to Premium" onPress={() => navigate('/subscription')} size="lg" /></div>
           </Card>
         </div>
@@ -118,27 +135,79 @@ export function AiCoachPage() {
         onAction={messages.length > 0 ? startNewConversation : undefined}
       />
       <div style={{ flex: 1, overflowY: 'auto', ...frame, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {historyLoading && (
-          <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
-            Loading conversation...
-          </p>
-        )}
+        {historyLoading && <AiChatSkeleton />}
         {!historyLoading && messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '32px 0' }}>
-            <p style={{ fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Ask me anything about your finances. Try:</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 12 }}>
-              {['How am I spending?', 'Where can I save?', 'Budget advice', 'Investment tips'].map((q) => (
-                <button key={q} onClick={() => send(q)} style={{ padding: '8px 14px', borderRadius: theme.radii.full, cursor: 'pointer', backgroundColor: theme.colors.primarySoft, color: theme.colors.primary, border: `1px solid ${theme.colors.primary}33`, fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{q}</button>
+          <Card variant="elevated" style={{ textAlign: 'center', padding: theme.spacing.xl }}>
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: 14,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme.colors.primarySoft,
+              border: `1px solid ${theme.colors.primary}28`,
+              margin: '0 auto 14px',
+            }}>
+              <AppIcon name="ai" size={24} color={theme.colors.primary} />
+            </div>
+            <h3 style={{ margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 700, color: theme.colors.text }}>
+              Ask your AI Coach
+            </h3>
+            <p style={{ margin: '8px 0 0', fontSize: 13, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: '18px' }}>
+              Get insights on spending, savings, and budgets.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 16 }}>
+              {SUGGESTIONS.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => send(q)}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: theme.radii.full,
+                    cursor: 'pointer',
+                    backgroundColor: theme.colors.primarySoft,
+                    color: theme.colors.primary,
+                    border: `1px solid ${theme.colors.primary}33`,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  {q}
+                </button>
               ))}
             </div>
-          </div>
+          </Card>
         )}
         {messages.map((msg, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div style={{ maxWidth: '80%', padding: '12px 16px', borderRadius: theme.radii.lg, backgroundColor: msg.role === 'user' ? theme.colors.primary : theme.colors.surfaceHover, color: msg.role === 'user' ? theme.colors.onPrimary : theme.colors.text, fontSize: 14, lineHeight: '20px', fontFamily: 'Inter, sans-serif', borderBottomRightRadius: msg.role === 'user' ? 4 : theme.radii.lg, borderBottomLeftRadius: msg.role === 'assistant' ? 4 : theme.radii.lg }}>{msg.content}</div>
+            <div style={{
+              maxWidth: '80%',
+              padding: '12px 16px',
+              borderRadius: theme.radii.lg,
+              backgroundColor: msg.role === 'user' ? theme.colors.primary : theme.colors.surfaceHover,
+              color: msg.role === 'user' ? theme.colors.onPrimary : theme.colors.text,
+              fontSize: 14,
+              lineHeight: '20px',
+              fontFamily: 'Inter, sans-serif',
+              borderBottomRightRadius: msg.role === 'user' ? 4 : theme.radii.lg,
+              borderBottomLeftRadius: msg.role === 'assistant' ? 4 : theme.radii.lg,
+            }}>{msg.content}</div>
           </div>
         ))}
-        {isPending && <div style={{ display: 'flex', justifyContent: 'flex-start' }}><div style={{ padding: '12px 16px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.surfaceHover, borderBottomLeftRadius: 4 }}><div style={{ display: 'flex', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /><span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} /></div></div></div>}
+        {isPending && (
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ padding: '12px 16px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.surfaceHover, borderBottomLeftRadius: 4 }}>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} />
+                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: theme.colors.textTertiary }} />
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
       <div style={{ ...frame, paddingTop: 12, paddingBottom: 24, borderTop: `1px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.background }}>
@@ -173,10 +242,7 @@ export function AiCoachPage() {
             aria-label="Send message"
             style={sendBtnStyle}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={canSend ? theme.colors.onPrimary : theme.colors.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 2L11 13" />
-              <path d="M22 2L15 22L11 13L2 9L22 2Z" />
-            </svg>
+            <AppIcon name="chevronRight" size={18} color={canSend ? theme.colors.onPrimary : theme.colors.textSecondary} />
           </button>
         </div>
       </div>

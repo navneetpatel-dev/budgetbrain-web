@@ -430,11 +430,12 @@ export function DashboardSkeleton() {
   );
 }
 
+/** Content-only detail body — keep FormStackScreen / real header mounted. */
 export function DetailSkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: theme.spacing.xl, paddingBottom: theme.spacing.lg, gap: 10 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: theme.spacing.md, paddingBottom: theme.spacing.sm, gap: 10 }}>
         <SkeletonBlock width={72} height={12} radius={5} />
         <SkeletonBlock width={140} height={40} radius={10} />
         <SkeletonBlock width={100} height={12} radius={5} />
@@ -456,18 +457,19 @@ export function DetailSkeleton() {
           </div>
         ))}
       </SurfaceCard>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, marginTop: theme.spacing.sm }}>
         <SkeletonBlock width="100%" height={50} radius={theme.radii.md} />
         <SkeletonBlock width="100%" height={50} radius={theme.radii.md} />
       </div>
-    </SkeletonScreen>
+    </div>
   );
 }
 
+/** Content-only settings body — keep ScreenWrapper chrome stable. */
 export function SettingsSkeleton() {
   const theme = useTheme();
   return (
-    <SkeletonScreen gap={theme.spacing.lg}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg }}>
       <SurfaceCard style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, padding: theme.spacing.xl }}>
         <SkeletonCircle size={64} />
         <div style={{ flex: 1 }}>
@@ -525,7 +527,7 @@ export function SettingsSkeleton() {
           </div>
         ))}
       </SurfaceCard>
-    </SkeletonScreen>
+    </div>
   );
 }
 

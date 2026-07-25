@@ -42,7 +42,13 @@ export function ExpenseDetailPage() {
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  if (isLoading || !txn) return <DetailSkeleton />;
+  if (isLoading || !txn) {
+    return (
+      <FormStackScreen title="Expense">
+        <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
 
   const handleDelete = async () => {
     if (await confirm(CONFIRM.deleteExpense)) deleteMutation.mutate();

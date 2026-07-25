@@ -51,7 +51,13 @@ export function SettingsPage() {
     enabled: !!user,
   });
 
-  if (!user) return <SettingsSkeleton />;
+  if (!user) {
+    return (
+      <ScreenWrapper inset="tab">
+        <SettingsSkeleton />
+      </ScreenWrapper>
+    );
+  }
 
   const isPremium = ['premium', 'lifetime', 'admin'].includes(user.role ?? '');
 

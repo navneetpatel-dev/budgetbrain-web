@@ -121,7 +121,15 @@ export function AccountsPage() {
         isLoading ? (
           <ListRowsSkeleton count={4} variant="account" />
         ) : (
-          <EmptyState title="No accounts" subtitle="Add your bank accounts and cards" icon="creditCard" />
+          showForm ? null : (
+            <EmptyState
+              title="No accounts yet"
+              subtitle="Add bank accounts and cards to track balances in Net Worth"
+              icon="creditCard"
+              action="Add account"
+              onAction={() => setShowForm(true)}
+            />
+          )
         )
       }
     />

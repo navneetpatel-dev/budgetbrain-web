@@ -25,6 +25,9 @@ export function ExpensesPage() {
           eyebrow="TRACK"
           title="Activity"
           subtitle={isLoading ? 'Loading…' : `${total} transaction${total !== 1 ? 's' : ''}`}
+          actionIcon="add"
+          actionLabel="Add expense"
+          onAction={() => navigate('/expense/add')}
           footer={
             <SearchField
               placeholder="Search transactions"

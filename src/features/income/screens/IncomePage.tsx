@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
-import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useIncome } from '../hooks/useIncome';
@@ -11,14 +10,18 @@ import type { Transaction } from '@/shared/types';
 export function IncomePage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const goBack = useStackBack('/dashboard');
   const { data, isLoading } = useIncome();
   const incomeList = data ?? [];
 
   return (
     <StickyHeaderFlatScreen
       header={
-        <ProfileStackHeader
-          screen="income"
+        <FeatureHeader
+          showBack
+          onBack={goBack}
+          eyebrow="EARN"
+          title="Income"
           subtitle={isLoading ? 'Loading…' : `${incomeList.length} record${incomeList.length !== 1 ? 's' : ''}`}
           actionIcon="add"
           actionLabel="Add income"

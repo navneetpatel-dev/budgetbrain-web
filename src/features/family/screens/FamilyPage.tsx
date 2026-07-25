@@ -48,7 +48,13 @@ export function FamilyPage() {
           <Card key={m.id} variant="elevated"><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
         ))
       ) : (
-        <EmptyState title="No family groups" subtitle="Create or join a group to share expenses" icon="users" />
+        <EmptyState
+          title="No family groups"
+          subtitle="Create or join a group to share expenses together"
+          icon="users"
+          action="Create Group"
+          onAction={() => { setShowCreate(true); setError(null); }}
+        />
       )}
       {!isLoading && showCreate && (
         <Card variant="elevated">
@@ -86,10 +92,12 @@ export function FamilyPage() {
           </div>
         </Card>
       )}
-      {!isLoading && (
+      {!isLoading && !showCreate && !showJoin && (
         <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-          {!showCreate && <Button title="Create Group" onPress={() => { setShowCreate(true); setError(null); }} variant="outline" />}
-          {!showJoin && <Button title="Join Group" onPress={() => { setShowJoin(true); setError(null); }} variant="secondary" />}
+          {memberships.length > 0 && (
+            <Button title="Create Group" onPress={() => { setShowCreate(true); setError(null); }} variant="outline" />
+          )}
+          <Button title="Join Group" onPress={() => { setShowJoin(true); setError(null); }} variant="secondary" />
         </div>
       )}
     </ScreenWrapper>

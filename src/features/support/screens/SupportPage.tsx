@@ -5,7 +5,7 @@ import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/compo
 import { SupportSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useSupportTickets } from '@/features/shared/hooks/useFeatures';
-import { maxLen, validateText } from '@/shared/validation/fieldLimits';
+import { FieldLimits, maxLen, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { subject?: string; message?: string };
 
@@ -17,6 +17,14 @@ export function SupportPage() {
   const [message, setMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
+  const resetForm = () => {
+    setShowForm(false);
+    setSubject('');
+    setMessage('');
+    setFieldErrors({});
+    setError(null);
+  };
+
   const handleSubmit = () => {
     setError(null);
     const next: FieldErrors = {};
@@ -26,15 +34,57 @@ export function SupportPage() {
     if (messageErr) next.message = messageErr;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
-    createMutation.mutate({ subject, message });
+    createMutation.mutate(
+      { subject, message },
+      { onSuccess: () => resetForm() }
+    );
   };
+
+  const ticketForm = (
+    <Card variant="elevated" style={{ marginBottom: theme.spacing.lg }}>
+      <Input
+        label="Subject"
+        value={subject}
+        onChange={(e) => { setSubject(e.target.value); setFieldErrors((f) => ({ ...f, subject: undefined })); }}
+        placeholder="Brief description"
+        maxLength={maxLen('subject')}
+        disabled={createMutation.isPending}
+        error={fieldErrors.subject}
+      />
+      <Input
+        label="Message"
+        value={message}
+        onChange={(e) => { setMessage(e.target.value); setFieldErrors((f) => ({ ...f, message: undefined })); }}
+        placeholder="Describe your issue"
+        multiline
+        maxLength={maxLen('message')}
+        disabled={createMutation.isPending}
+        error={fieldErrors.message}
+        helperText={`${FieldLimits.message.min}–${FieldLimits.message.max} characters`}
+      />
+      {error ? <FormErrorBanner message={error} /> : null}
+      <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+        <Button title="Submit" onPress={handleSubmit} loading={createMutation.isPending} />
+        <Button title="Cancel" onPress={resetForm} variant="outline" disabled={createMutation.isPending} />
+      </div>
+    </Card>
+  );
 
   return (
     <StickyHeaderFlatScreen
-      header={<ProfileStackHeader screen="support" subtitle="Get help" actionIcon="add" onAction={() => setShowForm(!showForm)} actionLabel="New Ticket" />}
+      header={
+        <ProfileStackHeader
+          screen="support"
+          subtitle="Get help"
+          actionIcon="add"
+          onAction={() => setShowForm((v) => !v)}
+          actionLabel="New Ticket"
+        />
+      }
       inset="stack"
       data={isLoading ? [] : tickets}
       keyExtractor={(item) => item.id}
+      ListHeaderComponent={showForm && !isLoading ? ticketForm : null}
       renderItem={(t) => (
         <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -47,36 +97,14 @@ export function SupportPage() {
       ListEmptyComponent={
         isLoading ? (
           <SupportSkeleton />
-        ) : showForm ? (
-          <Card variant="elevated">
-            <Input
-              label="Subject"
-              value={subject}
-              onChange={(e) => { setSubject(e.target.value); setFieldErrors((f) => ({ ...f, subject: undefined })); }}
-              placeholder="Brief description"
-              maxLength={maxLen('subject')}
-              disabled={createMutation.isPending}
-              error={fieldErrors.subject}
-            />
-            <Input
-              label="Message"
-              value={message}
-              onChange={(e) => { setMessage(e.target.value); setFieldErrors((f) => ({ ...f, message: undefined })); }}
-              placeholder="Describe your issue"
-              multiline
-              maxLength={maxLen('message')}
-              disabled={createMutation.isPending}
-              error={fieldErrors.message}
-              helperText={`${FieldLimits.message.min}–${FieldLimits.message.max} characters`}
-            />
-            {error ? <FormErrorBanner message={error} /> : null}
-            <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-              <Button title="Submit" onPress={handleSubmit} loading={createMutation.isPending} />
-              <Button title="Cancel" onPress={() => { setShowForm(false); setFieldErrors({}); }} variant="outline" disabled={createMutation.isPending} />
-            </div>
-          </Card>
-        ) : (
-          <EmptyState title="No tickets" subtitle="Need help? Create a support ticket" icon="helpCircle" action="New Ticket" onAction={() => setShowForm(true)} />
+        ) : showForm ? null : (
+          <EmptyState
+            title="No tickets"
+            subtitle="Need help? Create a support ticket"
+            icon="helpCircle"
+            action="New Ticket"
+            onAction={() => setShowForm(true)}
+          />
         )
       }
     />

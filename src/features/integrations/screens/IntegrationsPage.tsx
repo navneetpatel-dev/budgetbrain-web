@@ -4,6 +4,7 @@ import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
+import { formatCurrency } from '@/shared/utils/currency';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { maxLen, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
@@ -104,7 +105,9 @@ export function IntegrationsPage() {
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{item.source}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 17, fontWeight: 700, color: theme.colors.danger, fontFamily: 'Inter, sans-serif' }}>₹{item.parsedAmount}</span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: theme.colors.danger, fontFamily: 'Inter, sans-serif' }}>
+              {formatCurrency(Number(item.parsedAmount) || 0)}
+            </span>
             <select
               value={categoryById[item.id] ?? ''}
               onChange={(e) => setCategoryById((prev) => ({ ...prev, [item.id]: e.target.value }))}

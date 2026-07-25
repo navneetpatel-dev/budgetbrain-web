@@ -144,8 +144,14 @@ export function InvestmentsPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={4} variant="account" />
-        ) : (
-          <EmptyState title="No investments" subtitle="Track stocks, mutual funds, and more" icon="chart" />
+        ) : showForm ? null : (
+          <EmptyState
+            title="No investments yet"
+            subtitle="Track stocks, mutual funds, and other holdings"
+            icon="chart"
+            action="Add investment"
+            onAction={() => setShowForm(true)}
+          />
         )
       }
     />

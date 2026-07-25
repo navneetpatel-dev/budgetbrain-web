@@ -24,7 +24,13 @@ export function BudgetDetailPage() {
   const [alertThreshold, setAlertThreshold] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string; alertThreshold?: string }>({});
 
-  if (isLoading || !budget) return <DetailSkeleton />;
+  if (isLoading || !budget) {
+    return (
+      <FormStackScreen title="Budget">
+        <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
 
   const handleDelete = async () => {
     if (await confirm(CONFIRM.deleteBudget(budget.name))) deleteMutation.mutate();

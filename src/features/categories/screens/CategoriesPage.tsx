@@ -3,9 +3,11 @@ import { Controller } from 'react-hook-form';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
+import type { AppTheme } from '@/shared/theme';
 import { ColorPicker } from '@/shared/components/ui/forms';
 import { useCategories, COLORS_PRESET } from '@/features/categories/hooks/useCategories';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
@@ -78,12 +80,20 @@ export function CategoriesPage() {
                   color: theme.colors.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>{cat.name}</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                <button type="button" onClick={() => { void moveCategory(index, -1); }} style={actionStyle(theme.colors.primary)}>↑</button>
-                <button type="button" onClick={() => { void moveCategory(index, 1); }} style={actionStyle(theme.colors.primary)}>↓</button>
-                <button type="button" onClick={() => openEdit(cat)} style={actionStyle(theme.colors.primary)}>Edit</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <button type="button" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
+                  <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
+                </button>
+                <button type="button" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
+                  <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
+                </button>
+                <button type="button" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
+                  <AppIcon name="edit" size={16} color={theme.colors.primary} />
+                </button>
                 {!cat.isDefault && (
-                  <button type="button" onClick={() => { void handleArchive(cat.id, cat.name); }} style={actionStyle(theme.colors.danger)}>Archive</button>
+                  <button type="button" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
+                    <AppIcon name="trash" size={16} color={theme.colors.danger} />
+                  </button>
                 )}
               </div>
             </div>
@@ -167,15 +177,17 @@ export function CategoriesPage() {
   );
 }
 
-function actionStyle(color: string): CSSProperties {
+function iconActionStyle(theme: AppTheme): CSSProperties {
   return {
-    fontSize: 13,
-    fontWeight: 600,
-    color,
-    background: 'none',
-    border: 'none',
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surfaceHover,
+    border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
     cursor: 'pointer',
-    fontFamily: 'Inter, sans-serif',
-    padding: '4px 2px',
+    padding: 0,
   };
 }

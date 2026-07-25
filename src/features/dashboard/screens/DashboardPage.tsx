@@ -45,10 +45,24 @@ export function DashboardPage() {
       ) : (
         <>
           <SummaryMetricsGrid>
-            <SummaryCard title="Income" amount={formatCurrency(summary.totalIncome, summary.currency)} icon="trendingUp" color={theme.colors.success} />
-            <SummaryCard title="Expenses" amount={formatCurrency(summary.totalExpenses, summary.currency)} icon="activity" color={theme.colors.danger} />
-            <SummaryCard title="Goals" amount="Track" subtitle="Savings targets" icon="target" color={theme.colors.primary} onPress={() => navigate('/goals')} />
-            <SummaryCard title="Net Worth" amount="Overview" subtitle="Assets & liabilities" icon="piggyBank" color={theme.colors.primary} onPress={() => navigate('/net-worth')} />
+            <SummaryCard title="Income" amount={formatCurrency(summary.totalIncome, summary.currency)} icon="trendingUp" color={theme.colors.success} onPress={() => navigate('/income')} />
+            <SummaryCard title="Expenses" amount={formatCurrency(summary.totalExpenses, summary.currency)} icon="activity" color={theme.colors.danger} onPress={() => navigate('/expenses')} />
+            <SummaryCard
+              title="Goals"
+              amount={goals.length > 0 ? String(goals.length) : 'Start'}
+              subtitle={goals.length > 0 ? `active goal${goals.length !== 1 ? 's' : ''}` : 'Set a savings target'}
+              icon="target"
+              color={theme.colors.primary}
+              onPress={() => navigate('/goals')}
+            />
+            <SummaryCard
+              title="Net Worth"
+              amount="View"
+              subtitle="Assets & liabilities"
+              icon="piggyBank"
+              color={theme.colors.primary}
+              onPress={() => navigate('/net-worth')}
+            />
           </SummaryMetricsGrid>
           {categoryBreakdown.length > 0 && (
             <div>

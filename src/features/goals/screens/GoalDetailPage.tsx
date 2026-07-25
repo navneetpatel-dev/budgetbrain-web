@@ -30,7 +30,13 @@ export function GoalDetailPage() {
   const [targetDate, setTargetDate] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  if (isLoading || !goal) return <DetailSkeleton />;
+  if (isLoading || !goal) {
+    return (
+      <FormStackScreen title="Goal">
+        <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
 
   const pct = toSafePercent(goal.currentAmount, goal.targetAmount);
 
