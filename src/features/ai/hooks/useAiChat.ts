@@ -23,7 +23,7 @@ export function useAiChat() {
   const [error, setError] = useState<string | null>(null);
   const seededFromId = useRef<string | null>(null);
   const user = useAppSelector((s) => s.auth.user);
-  const isPremium = user?.role === 'premium' || user?.role === 'lifetime' || user?.role === 'admin';
+  const authenticated = !!user;
 
   const {
     data: conversationSummaries,
@@ -32,7 +32,7 @@ export function useAiChat() {
   } = useQuery({
     queryKey: ['ai-conversations'],
     queryFn: () => apiGet<AiConversationSummary[]>('/ai/conversations'),
-    enabled: isPremium,
+    enabled: authenticated,
     retry: false,
   });
 
@@ -46,28 +46,22 @@ export function useAiChat() {
   } = useQuery({
     queryKey: ['ai-conversation', latestConversationId],
     queryFn: () => apiGet<AiConversation>(`/ai/conversations/${latestConversationId}`),
-    enabled: isPremium && !!latestConversationId,
+    enabled: authenticated && !!latestConversationId,
     retry: false,
   });
 
   // Seed chat from the latest saved conversation once per conversation id
   useEffect(() => {
-    if (!isPremium) {
-      seededFromId.current = null;
-      setConversationId(undefined);
-      setMessages([]);
-      return;
-    }
     if (!latestConversation?.id) return;
     if (seededFromId.current === latestConversation.id) return;
 
     seededFromId.current = latestConversation.id;
     setConversationId(latestConversation.id);
     setMessages(visibleMessages(latestConversation.messages));
-  }, [isPremium, latestConversation]);
+  }, [latestConversation]);
 
   const historyLoading =
-    isPremium &&
+    authenticated &&
     (!conversationsFetched ||
       conversationsLoading ||
       (!!latestConversationId && !conversationFetched && conversationLoading) ||
@@ -116,7 +110,6 @@ export function useAiChat() {
     messages,
     send,
     isPending,
-    isPremium,
     error,
     clearError,
     historyLoading,

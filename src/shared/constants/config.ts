@@ -64,9 +64,3 @@ export const BUDGET_TYPES = [
   { id: 'weekly', label: 'Weekly' },
   { id: 'category', label: 'Category' },
 ];
-
-export const SUBSCRIPTION_PLANS = {
-  monthly: { price: 199, period: 'month' },
-  yearly: { price: 1499, period: 'year' },
-  lifetime: { price: 3999, period: 'lifetime' },
-};

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Button, Input, GroupedCard, ListRow, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
@@ -14,11 +13,9 @@ import { useSignOut } from '@/features/auth/hooks/useAuthHooks';
 import { useDeleteAccount } from '@/features/settings/hooks/useDeleteAccount';
 import { useEditProfile, type ProfileForm } from '@/features/settings/hooks/useEditProfile';
 import { CONFIRM, type ConfirmCopy } from '@/shared/constants/confirmations';
-import { apiGet } from '@/shared/services/api';
-import { SUBSCRIPTION_PLANS, SUPPORTED_CURRENCIES } from '@/shared/constants/config';
+import { SUPPORTED_CURRENCIES } from '@/shared/constants/config';
 import { useTheme } from '@/shared/theme';
 import { ProfileHero } from '../components/ProfileHero';
-import { PremiumUpsellCard } from '../components/PremiumUpsellCard';
 import { ThemePicker } from '../components/ThemePicker';
 import { SecurityPreferencesSection } from '../components/SecurityPreferencesSection';
 import { PROFILE_FEATURE_LINKS, PROFILE_ACCOUNT_LINKS } from '../constants/profileLinks';
@@ -45,12 +42,6 @@ export function SettingsPage() {
     reset({ name: user?.name ?? '', country: user?.country ?? '', currency: user?.currency ?? 'INR' });
   }, [user, reset]);
 
-  const { data: subscription } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: () => apiGet<{ role: string; plans: typeof SUBSCRIPTION_PLANS }>('/subscriptions/status'),
-    enabled: !!user,
-  });
-
   if (!user) {
     return (
       <ScreenWrapper inset="tab">
@@ -58,8 +49,6 @@ export function SettingsPage() {
       </ScreenWrapper>
     );
   }
-
-  const isPremium = ['premium', 'lifetime', 'admin'].includes(user.role ?? '');
 
   const openConfirm = (copy: ConfirmCopy, action: () => Promise<void>) => {
     setConfirmCopy(copy);
@@ -101,8 +90,6 @@ export function SettingsPage() {
         }
         inset="tab"
       >
-        {!isPremium && <PremiumUpsellCard />}
-
         <GroupedCard title="Features">
           {PROFILE_FEATURE_LINKS.map((link, i) => (
             <ListRow
@@ -155,8 +142,7 @@ export function SettingsPage() {
           {!editingProfile ? (
             <>
               <ListRow icon="wallet" label="Currency" value={user.currency ?? 'INR'} />
-              <ListRow icon="profile" label="Country" value={user.country ?? '—'} />
-              <ListRow icon="chart" label="Plan" value={subscription?.role ?? user.role ?? 'free'} isLast />
+              <ListRow icon="profile" label="Country" value={user.country ?? '—'} isLast />
             </>
           ) : (
             <FormSection title="Edit profile" style={{ margin: theme.spacing.lg, marginTop: 0 }}>

@@ -46,7 +46,6 @@ import { FamilyPage } from '@/features/family/screens/FamilyPage';
 import { IntegrationsPage } from '@/features/integrations/screens/IntegrationsPage';
 import { NotificationsPage } from '@/features/notifications/screens/NotificationsPage';
 import { SupportPage } from '@/features/support/screens/SupportPage';
-import { SubscriptionPage } from '@/features/subscription/screens/SubscriptionPage';
 import { PrivacyPage, TermsPage } from '@/features/legal/screens/LegalPages';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
@@ -112,7 +111,6 @@ export default function App() {
                       <Route path="/integrations" element={<IntegrationsPage />} />
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/support" element={<SupportPage />} />
-                      <Route path="/subscription" element={<SubscriptionPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="*" element={<div>Not Found</div>} />

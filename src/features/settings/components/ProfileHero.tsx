@@ -2,31 +2,6 @@ import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 
-function roleLabel(role?: string) {
-  switch (role) {
-    case 'admin': return 'Admin';
-    case 'premium': return 'Premium';
-    case 'lifetime': return 'Lifetime';
-    default: return 'Free plan';
-  }
-}
-
-function roleColors(role: string | undefined, isDark: boolean, colors: ReturnType<typeof useTheme>['colors']) {
-  switch (role) {
-    case 'admin':
-      return { bg: colors.warningSoft, text: colors.warning, border: colors.warning + '44' };
-    case 'premium':
-    case 'lifetime':
-      return { bg: colors.primarySoft, text: colors.primary, border: colors.primary + '44' };
-    default:
-      return {
-        bg: isDark ? 'rgba(255,255,255,0.08)' : colors.surfaceHover,
-        text: colors.textSecondary,
-        border: isDark ? 'rgba(255,255,255,0.1)' : colors.border,
-      };
-  }
-}
-
 export function ProfileHero({
   name,
   email,
@@ -41,7 +16,7 @@ export function ProfileHero({
   const theme = useTheme();
   const { tabBarPaddingX, contentMaxWidth, isDesktop } = useResponsive();
   const initial = name?.[0]?.toUpperCase() ?? '?';
-  const badge = roleColors(role, theme.isDark, theme.colors);
+  const isAdmin = role === 'admin';
 
   return (
     <div style={{
@@ -86,24 +61,28 @@ export function ProfileHero({
           {email && (
             <span style={{ display: 'block', color: 'rgba(255,255,255,0.78)', fontSize: 13, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>{email}</span>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
-            <span style={{
-              padding: '3px 8px', borderRadius: theme.radii.full,
-              backgroundColor: badge.bg, border: `1px solid ${badge.border}`,
-              fontSize: 10, fontWeight: 800, letterSpacing: 0.6, color: badge.text, fontFamily: 'Inter, sans-serif',
-            }}>{roleLabel(role).toUpperCase()}</span>
-            {currency && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                padding: '3px 8px', borderRadius: theme.radii.full,
-                backgroundColor: 'rgba(255,255,255,0.14)',
-                fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', fontFamily: 'Inter, sans-serif',
-              }}>
-                <AppIcon name="wallet" size={11} color="rgba(255,255,255,0.85)" />
-                {currency}
-              </span>
-            )}
-          </div>
+          {(isAdmin || currency) && (
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+              {isAdmin && (
+                <span style={{
+                  padding: '3px 8px', borderRadius: theme.radii.full,
+                  backgroundColor: theme.colors.warningSoft, border: `1px solid ${theme.colors.warning}44`,
+                  fontSize: 10, fontWeight: 800, letterSpacing: 0.6, color: theme.colors.warning, fontFamily: 'Inter, sans-serif',
+                }}>ADMIN</span>
+              )}
+              {currency && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '3px 8px', borderRadius: theme.radii.full,
+                  backgroundColor: 'rgba(255,255,255,0.14)',
+                  fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.9)', fontFamily: 'Inter, sans-serif',
+                }}>
+                  <AppIcon name="wallet" size={11} color="rgba(255,255,255,0.85)" />
+                  {currency}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

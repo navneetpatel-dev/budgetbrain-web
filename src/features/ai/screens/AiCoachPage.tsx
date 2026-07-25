@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
-import { Card, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { AiChatSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -14,13 +13,11 @@ const SUGGESTIONS = ['How am I spending?', 'Where can I save?', 'Budget advice',
 
 export function AiCoachPage() {
   const theme = useTheme();
-  const navigate = useNavigate();
   const { frame } = useScreenInsets();
   const {
     messages,
     send,
     isPending,
-    isPremium,
     error,
     clearError,
     historyLoading,
@@ -46,36 +43,6 @@ export function AiCoachPage() {
       submit();
     }
   };
-
-  if (!isPremium) {
-    return (
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.colors.background }}>
-        <ProfileStackHeader screen="ai" subtitle="Premium feature" />
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', ...frame, paddingBottom: theme.spacing.xxl }}>
-          <Card variant="elevated" style={{ textAlign: 'center', maxWidth: 320 }}>
-            <div style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: theme.colors.primarySoft,
-              border: `1px solid ${theme.colors.primary}28`,
-              margin: '0 auto 16px',
-            }}>
-              <AppIcon name="ai" size={26} color={theme.colors.primary} />
-            </div>
-            <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700, color: theme.colors.text, margin: 0 }}>Unlock AI Coach</h3>
-            <p style={{ fontSize: 14, color: theme.colors.textSecondary, marginTop: 8, fontFamily: 'Inter, sans-serif', lineHeight: '20px' }}>
-              Upgrade to Premium for personalized AI-powered financial insights and guidance.
-            </p>
-            <div style={{ marginTop: 16 }}><Button title="Upgrade to Premium" onPress={() => navigate('/subscription')} size="lg" /></div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   const composerStyle: CSSProperties = {
     display: 'flex',
