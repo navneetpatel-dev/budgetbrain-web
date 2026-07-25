@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { EmptyState } from '@/shared/components/ui/index';
+import { Card, EmptyState } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -32,10 +32,13 @@ export function IncomePage() {
       data={isLoading ? [] : incomeList}
       keyExtractor={(txn: Transaction) => txn.id}
       renderItem={(txn) => (
-        <div onClick={() => navigate(`/income/${txn.id}`)} style={{ cursor: 'pointer', backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Card
+          onClick={() => navigate(`/income/${txn.id}`)}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+        >
           <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{txn.merchant || txn.notes || 'Income'}</span><span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{txn.date}</span></div>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.success }}>+{formatCurrency(txn.amount, txn.currency)}</span>
-        </div>
+        </Card>
       )}
       ListEmptyComponent={
         isLoading ? (

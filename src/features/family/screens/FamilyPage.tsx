@@ -45,7 +45,7 @@ export function FamilyPage() {
         <FamilySkeleton />
       ) : memberships.length > 0 ? (
         memberships.map((m) => (
-          <Card key={m.id} variant="elevated"><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
+          <Card key={m.id}><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
         ))
       ) : (
         <EmptyState

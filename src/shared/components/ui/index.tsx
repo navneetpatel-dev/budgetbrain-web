@@ -337,13 +337,19 @@ export function Input({
 
 /* ── Card ── */
 
+/** Surface hierarchy (mobile + web):
+ *  - default: list items / dense rows (border, no shadow)
+ *  - elevated: SummaryCard metrics + primary panels (shadow, no border)
+ *  - outline / glass: specialty accents
+ *  GroupedCard always uses the default surface. */
 interface CardProps {
   children: React.ReactNode;
   style?: CSSProperties;
   variant?: 'default' | 'elevated' | 'outline' | 'glass';
+  onClick?: () => void;
 }
 
-export function Card({ children, style, variant = 'default' }: CardProps) {
+export function Card({ children, style, variant = 'default', onClick }: CardProps) {
   const theme = useTheme();
 
   const baseStyle: CSSProperties = {
@@ -352,10 +358,11 @@ export function Card({ children, style, variant = 'default' }: CardProps) {
     padding: theme.spacing.lg,
     border: `1px solid ${variant === 'outline' ? theme.colors.border : variant === 'glass' ? (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)') : variant === 'elevated' ? 'transparent' : theme.colors.borderSubtle}`,
     boxShadow: variant === 'elevated' ? theme.shadows.md : 'none',
+    cursor: onClick ? 'pointer' : undefined,
     ...style,
   };
 
-  return <div style={baseStyle}>{children}</div>;
+  return <div style={baseStyle} onClick={onClick} role={onClick ? 'button' : undefined}>{children}</div>;
 }
 
 /* ── SummaryCard ── */
@@ -698,7 +705,7 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
           marginLeft: theme.spacing.xs,
         }}>{title}</span>
       )}
-      <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
         {children}
       </Card>
     </div>

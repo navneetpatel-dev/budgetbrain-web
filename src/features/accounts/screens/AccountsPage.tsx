@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { OptionChips, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { EmptyState, Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Card, EmptyState, Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -103,10 +103,7 @@ export function AccountsPage() {
         ) : null
       }
       renderItem={(acc) => (
-        <div style={{
-          backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg,
-          border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm,
-        }}>
+        <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{acc.name}</span>
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{acc.type.replace('_', ' ')}</span>
@@ -115,7 +112,7 @@ export function AccountsPage() {
           <span style={{ marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>
             {formatCurrency(acc.balance, acc.currency)}
           </span>
-        </div>
+        </Card>
       )}
       ListEmptyComponent={
         isLoading ? (

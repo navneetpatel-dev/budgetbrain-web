@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { EmptyState, ProgressBar } from '@/shared/components/ui/index';
+import { Card, EmptyState, ProgressBar } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -35,7 +35,7 @@ export function GoalsPage() {
       renderItem={(g) => {
         const pct = toSafePercent(g.currentAmount, g.targetAmount);
         return (
-          <div onClick={() => navigate(`/goal/${g.id}`)} style={{ cursor: 'pointer', backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
+          <Card onClick={() => navigate(`/goal/${g.id}`)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.md }}>
               <div><span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.titleSm.fontSize, fontWeight: Number(theme.typography.titleSm.fontWeight), color: theme.colors.text }}>{g.name}</span><span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{g.type.replace(/_/g, ' ')}{g.targetDate ? ` · by ${g.targetDate}` : ''}</span></div>
               {pct >= 100 && <span style={{ padding: '2px 10px', borderRadius: theme.radii.full, fontSize: 11, fontWeight: 700, backgroundColor: theme.colors.successSoft, color: theme.colors.success, fontFamily: 'Inter, sans-serif' }}>Done</span>}
@@ -46,7 +46,7 @@ export function GoalsPage() {
             </div>
             <ProgressBar progress={pct} color={pct >= 100 ? theme.colors.success : theme.colors.primary} />
             <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{pct}% achieved</span>
-          </div>
+          </Card>
         );
       }}
       ListEmptyComponent={

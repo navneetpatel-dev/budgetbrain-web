@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { Controller } from 'react-hook-form';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
+import { Card, Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
@@ -59,16 +59,7 @@ export function CategoriesPage() {
           keyExtractor={(item) => item.id}
           ListHeaderComponent={listError ? <FormErrorBanner message={listError} /> : undefined}
           renderItem={(cat, index) => (
-            <div style={{
-              backgroundColor: theme.colors.surface,
-              borderRadius: theme.radii.lg,
-              border: `1px solid ${theme.colors.borderSubtle}`,
-              padding: theme.spacing.lg,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              boxShadow: theme.shadows.sm,
-            }}>
+            <Card style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, flex: 1, minWidth: 0 }}>
                 <div style={{
                   width: 12, height: 12, borderRadius: '50%',
@@ -96,7 +87,7 @@ export function CategoriesPage() {
                   </button>
                 )}
               </div>
-            </div>
+            </Card>
           )}
           ListEmptyComponent={
             isLoading ? (

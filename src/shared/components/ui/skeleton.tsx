@@ -100,7 +100,6 @@ function SurfaceCard({ children, style }: { children: ReactNode; style?: CSSProp
         borderRadius: theme.radii.lg,
         border: `1px solid ${theme.colors.borderSubtle}`,
         padding: theme.spacing.lg,
-        boxShadow: theme.shadows.sm,
         ...style,
       }}
     >

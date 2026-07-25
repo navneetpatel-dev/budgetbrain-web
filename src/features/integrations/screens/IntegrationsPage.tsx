@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
+import { Card, EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -99,7 +99,7 @@ export function IntegrationsPage() {
         </div>
       }
       renderItem={(item) => (
-        <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
+        <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{item.parsedMerchant ?? 'Unknown'}</span>
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', color: theme.colors.textTertiary, textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>{item.source}</span>
@@ -153,7 +153,7 @@ export function IntegrationsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Card>
       )}
       ListEmptyComponent={
         isLoading ? (

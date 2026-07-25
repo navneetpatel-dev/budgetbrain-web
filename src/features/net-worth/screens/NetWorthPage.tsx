@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper, ResponsiveGrid } from '@/shared/components/ui/layout';
-import { Card, SummaryCard, EmptyState, SectionHeader, Button } from '@/shared/components/ui/index';
+import { SummaryCard, EmptyState, Button, GroupedCard, ListRow } from '@/shared/components/ui/index';
 import { NetWorthSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -94,33 +94,32 @@ export function NetWorthPage() {
           ) : (
             <>
               {accounts.length > 0 && (
-                <div>
-                  <SectionHeader title="Accounts" action="See all" onAction={() => navigate('/accounts')} />
-                  {accounts.map((acc) => (
-                    <Card key={acc.id} variant="elevated" style={{ marginBottom: theme.spacing.sm }}>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{acc.name}</span>
-                      <span style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.colors.textSecondary, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>
-                        {acc.institution ?? acc.type}{acc.accountNumberLast4 ? ` · ****${acc.accountNumberLast4}` : ''}
-                      </span>
-                      <span style={{ marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>
-                        {formatCurrency(acc.balance, acc.currency)}
-                      </span>
-                    </Card>
+                <GroupedCard title="Accounts">
+                  {accounts.map((acc, i) => (
+                    <ListRow
+                      key={acc.id}
+                      label={acc.name}
+                      subtitle={`${acc.institution ?? acc.type}${acc.accountNumberLast4 ? ` · ****${acc.accountNumberLast4}` : ''}`}
+                      value={formatCurrency(acc.balance, acc.currency)}
+                      onPress={() => navigate('/accounts')}
+                      isLast={i === accounts.length - 1}
+                    />
                   ))}
-                </div>
+                </GroupedCard>
               )}
               {investments.length > 0 && (
-                <div>
-                  <SectionHeader title="Investments" action="See all" onAction={() => navigate('/investments')} />
-                  {investments.slice(0, 5).map((inv) => (
-                    <Card key={inv.id} variant="elevated" style={{ marginBottom: theme.spacing.sm }}>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{inv.name}</span>
-                      <span style={{ marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.amount.fontSize, fontWeight: Number(theme.typography.amount.fontWeight), color: theme.colors.text }}>
-                        {formatCurrency(inv.currentValue ?? (inv.quantity * inv.currentPrice), inv.currency)}
-                      </span>
-                    </Card>
+                <GroupedCard title="Investments">
+                  {investments.slice(0, 5).map((inv, i) => (
+                    <ListRow
+                      key={inv.id}
+                      label={inv.name}
+                      subtitle={inv.type.replace('_', ' ')}
+                      value={formatCurrency(inv.currentValue ?? (inv.quantity * inv.currentPrice), inv.currency)}
+                      onPress={() => navigate('/investments')}
+                      isLast={i === Math.min(investments.length, 5) - 1}
+                    />
                   ))}
-                </div>
+                </GroupedCard>
               )}
             </>
           )}

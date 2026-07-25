@@ -86,13 +86,13 @@ export function SupportPage() {
       keyExtractor={(item) => item.id}
       ListHeaderComponent={showForm && !isLoading ? ticketForm : null}
       renderItem={(t) => (
-        <div style={{ backgroundColor: theme.colors.surface, borderRadius: theme.radii.lg, border: `1px solid ${theme.colors.borderSubtle}`, padding: theme.spacing.lg, boxShadow: theme.shadows.sm }}>
+        <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{t.subject}</span>
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', color: t.status === 'open' ? theme.colors.warning : theme.colors.success }}>{t.status}</span>
           </div>
           <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 4, display: 'block', fontFamily: 'Inter, sans-serif' }}>{new Date(t.createdAt).toLocaleDateString()}</span>
-        </div>
+        </Card>
       )}
       ListEmptyComponent={
         isLoading ? (
