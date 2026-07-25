@@ -121,13 +121,15 @@ export function TransactionRow({
           </div>
         </div>
       </div>
-      <span style={{
-        ...bodyMedium(theme, isExpense ? theme.colors.danger : theme.colors.success),
-        flexShrink: 0,
-        fontVariantNumeric: 'tabular-nums',
-      }}>
-        {isExpense ? '−' : '+'}{formatCurrency(transaction.amount, transaction.currency)}
-      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <span style={{
+          ...bodyMedium(theme, isExpense ? theme.colors.danger : theme.colors.success),
+          fontVariantNumeric: 'tabular-nums',
+        }}>
+          {isExpense ? '−' : '+'}{formatCurrency(transaction.amount, transaction.currency)}
+        </span>
+        {onPress ? <AppIcon name="chevronRight" size={14} color={theme.colors.textTertiary} /> : null}
+      </div>
     </Surface>
   );
 }
