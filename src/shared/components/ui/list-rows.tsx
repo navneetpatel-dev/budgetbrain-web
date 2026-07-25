@@ -69,9 +69,15 @@ export function TransactionRow({
 }) {
   const theme = useTheme();
   const isExpense = transaction.type === 'expense';
-  const catColor = transaction.category?.color ?? theme.colors.primary;
-  const title = transaction.merchant || transaction.category?.name || 'Transaction';
-  const subtitle = [formatDate(transaction.date), transaction.notes].filter(Boolean).join(' · ');
+  const accent =
+    (isExpense ? transaction.category?.color : undefined) ?? theme.colors.primary;
+  const title = isExpense
+    ? (transaction.merchant || transaction.category?.name || 'Expense')
+    : (transaction.incomeSource?.name || transaction.merchant || 'Income');
+  const dateLabel = formatDate(transaction.date);
+  const entityLabel = isExpense
+    ? transaction.category?.name
+    : transaction.incomeSource?.name;
 
   return (
     <Surface
@@ -79,12 +85,39 @@ export function TransactionRow({
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, minWidth: 0, flex: 1 }}>
-        <div style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: catColor, flexShrink: 0 }} />
+        <div style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: accent, flexShrink: 0 }} />
         <div style={{ minWidth: 0 }}>
           <span style={{ ...bodyMedium(theme), display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title}
           </span>
-          <span style={{ ...caption(theme), display: 'block', marginTop: 2 }}>{subtitle}</span>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            <span style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 12,
+              fontWeight: 500,
+              color: theme.colors.textTertiary,
+            }}>
+              {dateLabel}
+            </span>
+            {entityLabel ? (
+              <span style={{
+                maxWidth: '70%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 11,
+                fontWeight: 700,
+                color: accent,
+                backgroundColor: `${accent}18`,
+                border: `1px solid ${accent}44`,
+                borderRadius: theme.radii.full,
+                padding: '2px 8px',
+              }}>
+                {entityLabel}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
       <span style={{

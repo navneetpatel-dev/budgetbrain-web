@@ -528,18 +528,18 @@ export function SectionHeader({
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       gap: theme.spacing.md,
-      marginBottom: theme.spacing.md,
-      minHeight: 36,
+      marginBottom: theme.spacing.sm,
+      minHeight: 28,
     }}>
       <div style={{ minWidth: 0, flex: 1 }}>
         <h3 style={{
           fontFamily: 'Inter, sans-serif',
-          fontSize: 18,
-          fontWeight: 700,
-          letterSpacing: -0.3,
+          fontSize: 15,
+          fontWeight: 600,
+          letterSpacing: -0.2,
           color: theme.colors.text,
           margin: 0,
-          lineHeight: '24px',
+          lineHeight: '20px',
         }}>{title}</h3>
         {subtitle ? (
           <span style={{
@@ -558,24 +558,18 @@ export function SectionHeader({
           type="button"
           onClick={onAction}
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 4,
             flexShrink: 0,
-            padding: '7px 12px 7px 14px',
-            borderRadius: theme.radii.full,
-            border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`,
-            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surface,
+            padding: 0,
+            border: 'none',
+            background: 'none',
             cursor: 'pointer',
             fontFamily: 'Inter, sans-serif',
             fontSize: 13,
             fontWeight: 600,
             color: theme.colors.primary,
-            boxShadow: theme.shadows.sm,
           }}
         >
           {action}
-          <AppIcon name="chevronRight" size={14} color={theme.colors.primary} />
         </button>
       )}
     </div>

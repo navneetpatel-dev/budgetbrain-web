@@ -106,26 +106,44 @@ export function DashboardPage() {
           </SummaryMetricsGrid>
           {categoryBreakdown.length > 0 && (
             <div>
-              <SectionHeader title="Spending by Category" />
-              <Card variant="elevated">
-                <CategoryChart data={categoryBreakdown} currency={summary.currency} />
+              <SectionHeader
+                title="Spending by Category"
+                action="See all"
+                onAction={() => navigate('/expenses?type=expense')}
+              />
+              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
+                <CategoryChart
+                  data={categoryBreakdown}
+                  currency={summary.currency}
+                  onCategoryPress={(categoryId) =>
+                    navigate(`/expenses?type=expense&categoryId=${encodeURIComponent(categoryId)}`)
+                  }
+                />
               </Card>
             </div>
           )}
           {budgets.length > 0 && (
             <div>
               <SectionHeader title="Budget Progress" action="See all" onAction={() => navigate('/budgets')} />
-              <Card variant="elevated">
-                {budgets.slice(0, 3).map((b, i) => {
+              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
+                {budgets.map((b, i) => {
                   const pct = toSafePercent(b.spent, b.amount);
                   return (
-                    <div key={b.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(budgets.length, 3) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{b.name}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>{pct}%</span>
+                    <div
+                      key={b.id}
+                      style={{
+                        padding: `14px ${theme.spacing.lg}px`,
+                        paddingTop: i === 0 ? theme.spacing.md : 14,
+                        paddingBottom: i === budgets.length - 1 ? theme.spacing.md : 14,
+                        borderBottom: i < budgets.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.1, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{b.name}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
                       </div>
-                      <ProgressBar progress={pct} color={pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary} />
-                      <span style={{ fontSize: 12, color: theme.colors.textTertiary, marginTop: 6, display: 'block', fontFamily: 'Inter, sans-serif' }}>{formatCurrency(b.spent ?? 0, summary.currency)} / {formatCurrency(b.amount, b.currency)}</span>
+                      <ProgressBar progress={pct} height={6} color={pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary} />
+                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 8, display: 'block', fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(b.spent ?? 0, summary.currency)} / {formatCurrency(b.amount, b.currency)}</span>
                     </div>
                   );
                 })}
@@ -135,17 +153,25 @@ export function DashboardPage() {
           {goals.length > 0 && (
             <div>
               <SectionHeader title="Goal Progress" action="See all" onAction={() => navigate('/goals')} />
-              <Card variant="elevated">
-                {goals.slice(0, 2).map((g, i) => {
+              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
+                {goals.map((g, i) => {
                   const pct = toSafePercent(g.currentAmount, g.targetAmount);
                   return (
-                    <div key={g.id} style={{ padding: `${theme.spacing.md}px 0`, borderBottom: i < Math.min(goals.length, 2) - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{g.name}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>{pct}%</span>
+                    <div
+                      key={g.id}
+                      style={{
+                        padding: `14px ${theme.spacing.lg}px`,
+                        paddingTop: i === 0 ? theme.spacing.md : 14,
+                        paddingBottom: i === goals.length - 1 ? theme.spacing.md : 14,
+                        borderBottom: i < goals.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.1, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{g.name}</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
                       </div>
-                      <ProgressBar progress={pct} color={theme.colors.success} />
-                      <span style={{ fontSize: 12, color: theme.colors.textTertiary, marginTop: 6, display: 'block', fontFamily: 'Inter, sans-serif' }}>{formatCurrency(g.currentAmount, g.currency)} / {formatCurrency(g.targetAmount, g.currency)}</span>
+                      <ProgressBar progress={pct} height={6} color={theme.colors.success} />
+                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 8, display: 'block', fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(g.currentAmount, g.currency)} / {formatCurrency(g.targetAmount, g.currency)}</span>
                     </div>
                   );
                 })}

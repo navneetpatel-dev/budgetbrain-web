@@ -6,13 +6,13 @@ import {
   Users, MessageCircle, Sparkles, Download, ChevronRight, Trash2,
   Edit3, MoreHorizontal, ArrowUp, ArrowDown, RefreshCw, LogOut,
   Lock, X, Upload, Flag, CircleArrowDown, Landmark, Link,
-  Sun, Moon, Monitor, type LucideIcon,
+  Sun, Moon, Monitor, ListFilter, type LucideIcon,
 } from 'lucide-react';
 
 export type AppIconName =
   | 'home' | 'activity' | 'budgets' | 'profile' | 'add'
   | 'arrowLeft' | 'search' | 'eye' | 'eyeSlash' | 'checkmark'
-  | 'settings' | 'notification' | 'category' | 'calendar'
+  | 'settings' | 'notification' | 'category' | 'filter' | 'calendar'
   | 'camera' | 'receipt' | 'chart' | 'trendingUp' | 'dollar'
   | 'target' | 'piggyBank' | 'creditCard' | 'globe' | 'shield'
   | 'fileText' | 'helpCircle' | 'users' | 'chat' | 'sparkles'
@@ -37,6 +37,7 @@ const ICON_MAP: Record<AppIconName, LucideIcon> = {
   settings: Settings,
   notification: Bell,
   category: Grid3X3,
+  filter: ListFilter,
   calendar: Calendar,
   camera: Camera,
   receipt: Receipt,

@@ -208,28 +208,57 @@ export function FeatureHeader({
 /* ── HeaderIconButton ── */
 
 export function HeaderIconButton({
-  icon, onPress, label, variant = 'soft',
+  icon, onPress, label, variant = 'soft', badge,
 }: {
   icon: AppIconName; onPress: () => void; label: string; variant?: 'soft' | 'solid';
+  badge?: number | boolean;
 }) {
   const theme = useTheme();
   const isSolid = variant === 'solid';
+  const showBadge = typeof badge === 'number' ? badge > 0 : !!badge;
+  const badgeLabel = typeof badge === 'number' && badge > 0 ? String(badge > 9 ? '9+' : badge) : null;
 
   return (
     <button
       onClick={onPress}
       style={{
+        position: 'relative',
         width: 42, height: 42, borderRadius: 14, flexShrink: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: isSolid
           ? `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`
-          : (theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
-        border: `1px solid ${isSolid ? 'transparent' : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
+          : showBadge
+            ? theme.colors.primary + '28'
+            : (theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.surface),
+        border: `1.5px solid ${isSolid ? 'transparent' : showBadge ? theme.colors.primary : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle)}`,
         cursor: 'pointer',
       }}
       aria-label={label}
     >
       <AppIcon name={icon} size={20} color={isSolid ? theme.colors.onPrimary : theme.colors.primary} />
+      {showBadge ? (
+        <span style={{
+          position: 'absolute',
+          top: 5,
+          right: 5,
+          minWidth: 14,
+          height: 14,
+          borderRadius: 7,
+          padding: '0 3px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: theme.colors.primary,
+          border: `1.5px solid ${theme.colors.surface}`,
+          color: theme.colors.onPrimary,
+          fontSize: 9,
+          fontWeight: 700,
+          lineHeight: '11px',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+          {badgeLabel}
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -314,7 +343,7 @@ export function OptionChips<T extends string>({
 
   if (useSegmented) {
     return (
-      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
+      <div style={{ marginBottom: 0, opacity: disabled ? 0.55 : 1 }}>
         <div style={{
           display: 'flex',
           borderRadius: theme.radii.lg,
@@ -333,7 +362,8 @@ export function OptionChips<T extends string>({
                 onClick={() => onChange(opt)}
                 style={{
                   flex: 1,
-                  padding: '11px 6px',
+                  minWidth: 0,
+                  padding: '10px 4px',
                   border: 'none',
                   borderRight: i < options.length - 1
                     ? `1px solid ${theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle}`
@@ -343,8 +373,11 @@ export function OptionChips<T extends string>({
                   ...textStyle(theme, 'caption', {
                     fontWeight: selected ? 700 : 600,
                     color: selected ? accent : theme.colors.text,
+                    fontSize: 12,
                   }),
-                  textTransform: 'capitalize',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {getLabel(opt)}
@@ -360,14 +393,14 @@ export function OptionChips<T extends string>({
   }
 
   return (
-    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
+    <div style={{ marginBottom: 0, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt) => {
           const selected = value === opt;
           const accent = getColor?.(opt) ?? theme.colors.primary;
           return (
             <button
-              key={opt}
+              key={opt || '__all__'}
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt)}
@@ -378,10 +411,9 @@ export function OptionChips<T extends string>({
                 backgroundColor: selected ? accent + '22' : (theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.surface),
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 ...textStyle(theme, 'caption', {
-                  fontWeight: selected ? 700 : 600,
+                  fontWeight: 600,
                   color: selected ? accent : theme.colors.text,
                 }),
-                textTransform: 'capitalize',
               }}
             >
               {getLabel(opt)}
@@ -621,15 +653,27 @@ export function FormStackScreen({
 }
 
 export function StickyHeaderFlatScreen<T>({
-  header, data, renderItem, keyExtractor, ListEmptyComponent, ListHeaderComponent, contentContainerStyle, inset = 'tab',
+  header,
+  data,
+  renderItem,
+  keyExtractor,
+  ListEmptyComponent,
+  ListHeaderComponent,
+  ListFooterComponent,
+  contentContainerStyle,
+  inset = 'tab',
+  onEndReached,
 }: {
-  header: React.ReactNode; data: T[];
+  header: React.ReactNode;
+  data: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
   keyExtractor: (item: T, index: number) => string;
   ListEmptyComponent?: React.ReactNode;
   ListHeaderComponent?: React.ReactNode;
+  ListFooterComponent?: React.ReactNode;
   contentContainerStyle?: CSSProperties;
   inset?: 'tab' | 'stack' | 'none';
+  onEndReached?: () => void;
 }) {
   const theme = useTheme();
   const { frame, stackGap } = useScreenInsets();
@@ -639,13 +683,23 @@ export function StickyHeaderFlatScreen<T>({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
       {header}
-      <div style={{
-        flex: 1, overflowY: 'auto',
-        ...frame,
-        paddingTop: stackGap,
-        paddingBottom: bottomPadding,
-        ...contentContainerStyle,
-      }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          ...frame,
+          paddingTop: stackGap,
+          paddingBottom: bottomPadding,
+          ...contentContainerStyle,
+        }}
+        onScroll={(e) => {
+          if (!onEndReached) return;
+          const el = e.currentTarget;
+          if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+            onEndReached();
+          }
+        }}
+      >
         {safeData.length === 0 && ListEmptyComponent ? (
           <>
             {ListHeaderComponent}
@@ -659,6 +713,7 @@ export function StickyHeaderFlatScreen<T>({
                 {renderItem(item, index)}
               </div>
             ))}
+            {ListFooterComponent}
           </div>
         )}
       </div>

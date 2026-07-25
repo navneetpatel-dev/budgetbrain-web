@@ -3,13 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
+import { useInfinitePaginatedList } from '@/shared/hooks/usePaginatedList';
 import type { Transaction } from '@/shared/types';
+import { toExpenseListParams, type TransactionListFilters } from '../utils/transactionFilters';
 
-export function useExpenses() {
-  return useQuery({
-    queryKey: ['expenses'],
-    queryFn: () => apiGet<{ transactions: Transaction[]; total: number }>('/expenses', { page: 1, limit: 50 }),
-    select: (data) => data,
+export function useExpenses(filters: TransactionListFilters) {
+  const params = toExpenseListParams(filters);
+  return useInfinitePaginatedList<Transaction>({
+    queryKey: ['expenses', 'filtered'],
+    url: '/expenses',
+    itemsKey: 'transactions',
+    params,
+    pageSize: 20,
   });
 }
 
