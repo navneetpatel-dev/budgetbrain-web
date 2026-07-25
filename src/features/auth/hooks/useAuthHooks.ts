@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiPost, apiPatch, getApiErrorMessage } from '@/shared/services/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiPost, getApiErrorMessage, getRefreshToken } from '@/shared/services/api';
 import { useAppDispatch } from '@/shared/store/hooks';
 import { setUser } from '@/shared/store/authSlice';
 import { persistAuthSession } from '../services/auth.service';
@@ -120,7 +120,7 @@ export function useOtpLogin() {
   const verifyOtp = async (email: string, code: string) => {
     setLoading(true); setError(null);
     try {
-      const session = await apiPost<AuthSession>('/auth/otp/verify', { email, code });
+      const session = await apiPost<AuthSession>('/auth/otp/verify', { email, otp: code });
       await persistAuthSession(session);
       dispatch(setUser(session.user as User));
       navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
@@ -137,7 +137,10 @@ export function useSignOut() {
   const navigate = useNavigate();
 
   const signOut = async () => {
-    try { await apiPost('/auth/logout', {}); } catch {}
+    try {
+      const refreshToken = getRefreshToken();
+      if (refreshToken) await apiPost('/auth/logout', { refreshToken });
+    } catch {}
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     dispatch(setUser(null));

@@ -1,24 +1,16 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/shared/services/api';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState } from '@/shared/components/ui/index';
 import { ListSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import type { FinancialAccount } from '@/shared/types';
+import { useAccounts } from '@/features/shared/hooks/useFeatures';
 
 export function AccountsPage() {
   const theme = useTheme();
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['accounts'],
-    queryFn: () => apiGet<FinancialAccount[]>('/accounts'),
-  });
+  const { accounts, isLoading } = useAccounts();
 
   if (isLoading) return <ListSkeleton count={4} variant="account" />;
-
-  const accounts = data ?? [];
 
   return (
     <StickyHeaderFlatScreen

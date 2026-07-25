@@ -53,11 +53,9 @@ export const FINANCIAL_GOALS = [
 
 export const PAYMENT_METHODS = [
   { id: 'cash', label: 'Cash' },
-  { id: 'credit_card', label: 'Credit Card' },
-  { id: 'debit_card', label: 'Debit Card' },
+  { id: 'card', label: 'Card' },
   { id: 'upi', label: 'UPI' },
-  { id: 'net_banking', label: 'Net Banking' },
-  { id: 'wallet', label: 'Wallet' },
+  { id: 'bank_transfer', label: 'Bank Transfer' },
   { id: 'other', label: 'Other' },
 ];
 

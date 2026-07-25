@@ -1,26 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
+import { apiDownloadBinary, apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { ensureArray } from '@/shared/utils/listData';
 import type { FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
 import { useState } from 'react';
 
 export function useAccounts() {
-  const { data } = usePaginatedList<FinancialAccount, 'accounts'>({
+  const { data, isLoading } = usePaginatedList<FinancialAccount, 'accounts'>({
     queryKey: ['accounts'],
     url: '/accounts',
     itemsKey: 'accounts',
   });
-  return { accounts: data };
+  return { accounts: data, isLoading };
 }
 
 export function useInvestments() {
-  const { data } = usePaginatedList<Investment, 'investments'>({
+  const { data, isLoading } = usePaginatedList<Investment, 'investments'>({
     queryKey: ['investments'],
     url: '/investments',
     itemsKey: 'investments',
   });
-  return { investments: data };
+  return { investments: data, isLoading };
 }
 
 export function useSearch(query: string) {
@@ -71,12 +71,12 @@ export function useSupportTickets() {
 
   const { data, isLoading } = usePaginatedList<{ id: string; subject: string; status: string; createdAt: string }, 'tickets'>({
     queryKey: ['support-tickets'],
-    url: '/support/tickets',
+    url: '/support',
     itemsKey: 'tickets',
   });
 
   const createMutation = useMutation({
-    mutationFn: (d: { subject: string; message: string }) => apiPost('/support/tickets', d),
+    mutationFn: (d: { subject: string; message: string }) => apiPost('/support', d),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['support-tickets'] }),
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -94,7 +94,8 @@ export function useIntegrations() {
   });
 
   const confirmMutation = useMutation({
-    mutationFn: (id: string) => apiPost(`/integrations/${id}/confirm`),
+    mutationFn: ({ id, categoryId }: { id: string; categoryId: string }) =>
+      apiPost(`/integrations/${id}/confirm`, { categoryId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integrations-pending'] });
       queryClient.invalidateQueries({ queryKey: ['expenses'] });
@@ -116,13 +117,7 @@ export function useReports() {
   const download = async (format: 'csv' | 'pdf', params?: Record<string, string>) => {
     setLoading(true); setError(null);
     try {
-      const token = localStorage.getItem('access_token');
-      const search = params ? `?${new URLSearchParams(params).toString()}` : '';
-      const res = await fetch(`${import.meta.env.VITE_API_URL ?? 'http://localhost:3002/api/v1'}/reports/${format}${search}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error('Download failed');
-      const blob = await res.blob();
+      const blob = await apiDownloadBinary(`/reports/${format}`, params);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = `report.${format}`; a.click();

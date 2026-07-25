@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
-import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
+import { Card, Button, fieldControlStyle, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
@@ -10,7 +10,7 @@ export function AiCoachPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { frame } = useScreenInsets();
-  const { messages, send, isPending, isPremium } = useAiChat();
+  const { messages, send, isPending, isPremium, error, clearError } = useAiChat();
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -55,8 +55,13 @@ export function AiCoachPage() {
         <div ref={bottomRef} />
       </div>
       <div style={{ ...frame, paddingTop: 12, paddingBottom: 24, borderTop: `1px solid ${theme.colors.borderSubtle}`, backgroundColor: theme.colors.background }}>
+        {error ? (
+          <div style={{ marginBottom: 8 }} onClick={clearError}>
+            <FormErrorBanner message={error} />
+          </div>
+        ) : null}
         <div style={{ display: 'flex', gap: 8 }}>
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { send(input); setInput(''); } }} placeholder="Ask about your finances..." style={fieldControlStyle(theme, { flex: 1, fontSize: 14 })} />
+          <input value={input} onChange={(e) => { clearError(); setInput(e.target.value); }} onKeyDown={(e) => { if (e.key === 'Enter') { send(input); setInput(''); } }} placeholder="Ask about your finances..." style={fieldControlStyle(theme, { flex: 1, fontSize: 14 })} />
           <button onClick={() => { send(input); setInput(''); }} disabled={!input.trim() || isPending} style={{ width: 44, height: 44, borderRadius: theme.radii.lg, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`, border: 'none', cursor: 'pointer', opacity: input.trim() ? 1 : 0.5 }}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.colors.onPrimary} strokeWidth="2"><path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" /></svg></button>
         </div>
       </div>

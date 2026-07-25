@@ -26,7 +26,7 @@ export interface ResetPasswordInput {
 
 export interface OtpVerifyInput {
   email: string;
-  code: string;
+  otp: string;
 }
 
 export type SocialAuthProvider = 'google' | 'apple';

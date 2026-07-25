@@ -1,4 +1,4 @@
-import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL } from '../constants/config';
 import type { ApiResponse } from '../types';
 
@@ -86,23 +86,35 @@ api.interceptors.response.use(
   }
 );
 
-export async function apiGet<T>(url: string, params?: Record<string, unknown>): Promise<T> {
-  const { data } = await api.get<ApiResponse<T>>(url, { params });
+export async function apiGet<T>(
+  url: string,
+  params?: Record<string, unknown>,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  const { data } = await api.get<ApiResponse<T>>(url, { ...config, params });
   return data.data;
 }
 
-export async function apiPost<T>(url: string, body?: unknown): Promise<T> {
-  const { data } = await api.post<ApiResponse<T>>(url, body);
+export async function apiPost<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  const { data } = await api.post<ApiResponse<T>>(url, body, config);
   return data.data;
 }
 
-export async function apiPatch<T>(url: string, body?: unknown): Promise<T> {
-  const { data } = await api.patch<ApiResponse<T>>(url, body);
+export async function apiPatch<T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  const { data } = await api.patch<ApiResponse<T>>(url, body, config);
   return data.data;
 }
 
-export async function apiDelete<T>(url: string): Promise<T> {
-  const { data } = await api.delete<ApiResponse<T>>(url);
+export async function apiDelete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+  const { data } = await api.delete<ApiResponse<T>>(url, config);
   return data.data;
 }
 
