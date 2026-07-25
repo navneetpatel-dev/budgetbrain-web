@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiDownloadBinary, apiGet, apiPatch, apiPost, getApiErrorMessage } from '@/shared/services/api';
+import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { ensureArray } from '@/shared/utils/listData';
 import type { FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
@@ -176,8 +177,7 @@ export function useIntegrations() {
       apiPost(`/integrations/${id}/confirm`, { categoryId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['integrations-pending'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateMoneyQueries(queryClient);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });

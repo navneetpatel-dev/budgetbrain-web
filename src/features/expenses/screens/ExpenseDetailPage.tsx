@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -32,7 +32,7 @@ export function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { txn, isLoading, editing, error, setError, startEdit, cancelEdit, updateMutation, deleteMutation, duplicateMutation } = useExpenseDetail(id);
+  const { txn, isLoading, isError, refetch, editing, error, setError, startEdit, cancelEdit, updateMutation, deleteMutation, duplicateMutation } = useExpenseDetail(id);
   const { categories } = useCategories();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
@@ -42,10 +42,24 @@ export function ExpenseDetailPage() {
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  if (isLoading || !txn) {
+  if (isLoading) {
     return (
       <FormStackScreen title="Expense">
         <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
+
+  if (isError || !txn) {
+    return (
+      <FormStackScreen title="Expense">
+        <EmptyState
+          icon="activity"
+          title="Couldn’t load expense"
+          subtitle="Check your connection and try again"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       </FormStackScreen>
     );
   }

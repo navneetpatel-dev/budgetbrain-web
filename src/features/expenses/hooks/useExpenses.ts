@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import type { Transaction } from '@/shared/types';
 
 export function useExpenses() {
@@ -18,19 +19,19 @@ export function useExpenseDetail(id: string | undefined) {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: txn, isLoading } = useQuery({
+  const { data: txn, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['expense', id],
     queryFn: () => apiGet<Transaction>(`/expenses/${id}`),
     enabled: !!id,
+    placeholderData: undefined,
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPatch<Transaction>(`/expenses/${id}`, data),
     onSuccess: (updated) => {
       queryClient.setQueryData(['expense', id], updated);
-      queryClient.invalidateQueries({ queryKey: ['expense', id] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      void queryClient.invalidateQueries({ queryKey: ['expense', id] });
+      invalidateMoneyQueries(queryClient);
       setEditing(false);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
@@ -39,8 +40,8 @@ export function useExpenseDetail(id: string | undefined) {
   const deleteMutation = useMutation({
     mutationFn: () => apiDelete(`/expenses/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      if (id) void queryClient.removeQueries({ queryKey: ['expense', id] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
   });
@@ -48,8 +49,7 @@ export function useExpenseDetail(id: string | undefined) {
   const duplicateMutation = useMutation({
     mutationFn: () => apiPost(`/expenses/${id}/duplicate`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
   });
@@ -62,9 +62,18 @@ export function useExpenseDetail(id: string | undefined) {
   const cancelEdit = () => { setEditing(false); setError(null); };
 
   return {
-    txn, isLoading, editing, error, setError,
-    startEdit, cancelEdit,
-    updateMutation, deleteMutation, duplicateMutation,
+    txn: isPlaceholderData ? undefined : txn,
+    isLoading,
+    isError,
+    refetch,
+    editing,
+    error,
+    setError,
+    startEdit,
+    cancelEdit,
+    updateMutation,
+    deleteMutation,
+    duplicateMutation,
   };
 }
 
@@ -76,8 +85,7 @@ export function useCreateExpense() {
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<Transaction>('/expenses', data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to add expense')),

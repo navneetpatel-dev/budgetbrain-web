@@ -13,7 +13,7 @@ export function BudgetsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const goBack = useStackBack('/dashboard');
-  const { data, isLoading } = useBudgets();
+  const { data, isLoading, isError, refetch } = useBudgets();
   const budgets = data ?? [];
 
   return (
@@ -53,6 +53,8 @@ export function BudgetsPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={4} variant="budget" />
+        ) : isError ? (
+          <EmptyState title="Couldn’t load budgets" subtitle="Check your connection and try again" icon="budgets" action="Retry" onAction={() => void refetch()} />
         ) : (
           <EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={() => navigate('/budget/add')} />
         )

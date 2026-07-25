@@ -14,7 +14,7 @@ export function GoalsPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const goBack = useStackBack('/dashboard');
-  const { data, isLoading } = useGoals();
+  const { data, isLoading, isError, refetch } = useGoals();
   const goals = data ?? [];
 
   return (
@@ -60,6 +60,8 @@ export function GoalsPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={3} variant="goal" />
+        ) : isError ? (
+          <EmptyState title="Couldn’t load goals" subtitle="Check your connection and try again" icon="target" action="Retry" onAction={() => void refetch()} />
         ) : (
           <EmptyState title="No goals yet" subtitle="Set a financial goal to stay motivated" icon="target" action="Create goal" onAction={() => navigate('/goal/add')} />
         )

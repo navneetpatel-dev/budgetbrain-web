@@ -10,7 +10,7 @@ import type { Transaction } from '@/shared/types';
 export function ExpensesPage() {
   const navigate = useNavigate();
   const goBack = useStackBack('/dashboard');
-  const { data, isLoading } = useExpenses();
+  const { data, isLoading, isError, refetch } = useExpenses();
   const transactions = ensureArray<Transaction>(data?.transactions);
   const total = transactions.length;
 
@@ -52,6 +52,8 @@ export function ExpensesPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={6} variant="transaction" />
+        ) : isError ? (
+          <EmptyState title="Couldn’t load activity" subtitle="Check your connection and try again" icon="activity" action="Retry" onAction={() => void refetch()} />
         ) : (
           <EmptyState title="No transactions yet" subtitle="Your income and spending history will appear here" icon="activity" action="Add expense" onAction={() => navigate('/expense/add')} />
         )

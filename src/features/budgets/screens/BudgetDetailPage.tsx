@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -17,17 +17,31 @@ export function BudgetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { budget, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation } = useBudgetDetail(id);
+  const { budget, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useBudgetDetail(id);
   const [name, setName] = useState('');
   const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string; alertThreshold?: string }>({});
 
-  if (isLoading || !budget) {
+  if (isLoading) {
     return (
       <FormStackScreen title="Budget">
         <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
+
+  if (isError || !budget) {
+    return (
+      <FormStackScreen title="Budget">
+        <EmptyState
+          icon="budgets"
+          title="Couldn’t load budget"
+          subtitle="Check your connection and try again"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       </FormStackScreen>
     );
   }

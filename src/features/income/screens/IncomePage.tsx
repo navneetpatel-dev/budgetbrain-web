@@ -9,7 +9,7 @@ import type { Transaction } from '@/shared/types';
 export function IncomePage() {
   const navigate = useNavigate();
   const goBack = useStackBack('/dashboard');
-  const { data, isLoading } = useIncome();
+  const { data, isLoading, isError, refetch } = useIncome();
   const incomeList = data ?? [];
 
   return (
@@ -35,6 +35,8 @@ export function IncomePage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={4} variant="transaction" />
+        ) : isError ? (
+          <EmptyState title="Couldn’t load income" subtitle="Check your connection and try again" icon="trendingUp" action="Retry" onAction={() => void refetch()} />
         ) : (
           <EmptyState title="No income yet" subtitle="Record your first income" icon="trendingUp" action="Add Income" onAction={() => navigate('/income/add')} />
         )

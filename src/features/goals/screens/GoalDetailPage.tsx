@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -24,16 +24,30 @@ export function GoalDetailPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { goal, isLoading, editing, error, setError, setEditing, updateMutation, deleteMutation } = useGoalDetail(id);
+  const { goal, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useGoalDetail(id);
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
-  if (isLoading || !goal) {
+  if (isLoading) {
     return (
       <FormStackScreen title="Goal">
         <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
+
+  if (isError || !goal) {
+    return (
+      <FormStackScreen title="Goal">
+        <EmptyState
+          icon="goals"
+          title="Couldn’t load goal"
+          subtitle="Check your connection and try again"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       </FormStackScreen>
     );
   }

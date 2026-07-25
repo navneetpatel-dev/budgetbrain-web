@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
+import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import type { Transaction, IncomeSource } from '@/shared/types';
 
@@ -20,17 +21,19 @@ export function useIncomeDetail(id: string | undefined) {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: income, isLoading } = useQuery({
+  const { data: income, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['income', id],
     queryFn: () => apiGet<Transaction>(`/income/${id}`),
     enabled: !!id,
+    placeholderData: undefined,
   });
 
   const updateMutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPatch<Transaction>(`/income/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['income-list'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['income', id], updated);
+      void queryClient.invalidateQueries({ queryKey: ['income', id] });
+      invalidateMoneyQueries(queryClient);
       setEditing(false);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
@@ -39,9 +42,8 @@ export function useIncomeDetail(id: string | undefined) {
   const deleteMutation = useMutation({
     mutationFn: () => apiDelete(`/income/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['income-list'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      if (id) void queryClient.removeQueries({ queryKey: ['income', id] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
   });
@@ -49,17 +51,17 @@ export function useIncomeDetail(id: string | undefined) {
   const duplicateMutation = useMutation({
     mutationFn: () => apiPost(`/income/${id}/duplicate`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['income-list'] });
-      queryClient.invalidateQueries({ queryKey: ['expenses'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Could not duplicate income')),
   });
 
   return {
-    income,
+    income: isPlaceholderData ? undefined : income,
     isLoading,
+    isError,
+    refetch,
     editing,
     error,
     setError,
@@ -94,8 +96,7 @@ export function useCreateIncome() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['income-list'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      invalidateMoneyQueries(queryClient);
       navigate(-1);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to save income')),

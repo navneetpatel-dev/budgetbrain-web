@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
-import { SummaryCard, SectionHeader, Card, ProgressBar } from '@/shared/components/ui/index';
+import { SummaryCard, SectionHeader, Card, ProgressBar, EmptyState } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { DashboardContentSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -23,7 +23,7 @@ export function DashboardPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
-  const { data, isLoading } = useDashboard();
+  const { data, isLoading, isError, refetch } = useDashboard();
   const { data: netWorthData } = useQuery({
     queryKey: ['net-worth'],
     queryFn: () => apiGet<NetWorthSummary>('/net-worth'),
@@ -53,13 +53,21 @@ export function DashboardPage() {
           amount={summary ? toSafeNumber(summary.netSavings) : 0}
           currency={summary?.currency ?? 'INR'}
           savingsRate={summary ? Math.round(toSafeNumber(summary.savingsRate)) : undefined}
-          loading={isLoading || !summary}
+          loading={isLoading && !summary}
         />
       }
       inset="tab"
     >
-      {isLoading || !data || !summary ? (
+      {isLoading && !data ? (
         <DashboardContentSkeleton />
+      ) : isError || !data || !summary ? (
+        <EmptyState
+          icon="home"
+          title="Couldn’t load dashboard"
+          subtitle="Check your connection and try again"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       ) : (
         <>
           <SummaryMetricsGrid>

@@ -1,5 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useCallback, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
 import type {
@@ -16,87 +18,73 @@ function visibleMessages(messages: AiChatMessage[] | null | undefined): AiChatMe
   return messages.filter((m) => m.role === 'user' || m.role === 'assistant');
 }
 
-function conversationFingerprint(messages: AiChatMessage[]): string {
-  if (!messages.length) return '0';
-  const last = messages[messages.length - 1];
-  return `${messages.length}:${last.timestamp}:${last.content.length}`;
+function asConversationList(data: unknown): AiConversationSummary[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object' && Array.isArray((data as { conversations?: unknown }).conversations)) {
+    return (data as { conversations: AiConversationSummary[] }).conversations;
+  }
+  return [];
 }
 
 export function useAiChat() {
   const queryClient = useQueryClient();
+  const location = useLocation();
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const seededFingerprint = useRef<string | null>(null);
-  const skipAutoSeed = useRef(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const draftNewChat = useRef(false);
+  const messagesCountRef = useRef(0);
   const user = useAppSelector((s) => s.auth.user);
   const authenticated = !!user;
 
-  const {
-    data: conversationSummaries,
-    isLoading: conversationsLoading,
-    isFetched: conversationsFetched,
-    refetch: refetchConversations,
-  } = useQuery({
-    queryKey: ['ai-conversations'],
-    queryFn: () => apiGet<AiConversationSummary[]>('/ai/conversations'),
-    enabled: authenticated,
-    retry: false,
-    staleTime: 0,
-    refetchOnMount: 'always',
-  });
+  messagesCountRef.current = messages.length;
 
-  const latestConversationId = conversationSummaries?.[0]?.id;
+  const loadLatestConversation = useCallback(async () => {
+    if (!authenticated) {
+      setHistoryLoading(false);
+      return;
+    }
+    if (messagesCountRef.current === 0) setHistoryLoading(true);
 
-  const {
-    data: latestConversation,
-    isLoading: conversationLoading,
-    isFetched: conversationFetched,
-    isError: conversationError,
-  } = useQuery({
-    queryKey: ['ai-conversation', latestConversationId],
-    queryFn: () => apiGet<AiConversation>(`/ai/conversations/${latestConversationId}`),
-    enabled: authenticated && !!latestConversationId,
-    retry: false,
-    staleTime: 0,
-    refetchOnMount: 'always',
-  });
+    try {
+      const list = asConversationList(
+        await apiGet<AiConversationSummary[] | { conversations: AiConversationSummary[] }>('/ai/conversations'),
+      );
+      queryClient.setQueryData(['ai-conversations'], list);
 
-  // Reload latest conversation whenever this screen mounts (leave → return)
+      const latestId = list[0]?.id;
+      if (!latestId) {
+        if (!draftNewChat.current) {
+          setConversationId(undefined);
+          setMessages([]);
+        }
+        return;
+      }
+
+      const conversation = await apiGet<AiConversation>(`/ai/conversations/${latestId}`);
+      queryClient.setQueryData(['ai-conversation', latestId], conversation);
+
+      if (draftNewChat.current) return;
+
+      setConversationId(conversation.id);
+      setMessages(visibleMessages(conversation.messages));
+    } catch (err) {
+      if (messagesCountRef.current === 0) {
+        setError(getApiErrorMessage(err, 'Could not load conversation'));
+      }
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [authenticated, queryClient]);
+
+  // Reload whenever the AI route is entered
   useEffect(() => {
-    if (!authenticated) return;
-    skipAutoSeed.current = false;
-    void (async () => {
-      const list = await refetchConversations();
-      const id = list.data?.[0]?.id;
-      if (!id) return;
-      await queryClient.fetchQuery({
-        queryKey: ['ai-conversation', id],
-        queryFn: () => apiGet<AiConversation>(`/ai/conversations/${id}`),
-      });
-    })();
-  }, [authenticated, queryClient, refetchConversations]);
-
-  useEffect(() => {
-    if (skipAutoSeed.current) return;
-    if (!latestConversation?.id) return;
-
-    const incoming = visibleMessages(latestConversation.messages);
-    const fingerprint = `${latestConversation.id}:${conversationFingerprint(incoming)}`;
-    if (seededFingerprint.current === fingerprint) return;
-
-    seededFingerprint.current = fingerprint;
-    setConversationId(latestConversation.id);
-    setMessages(incoming);
-  }, [latestConversation]);
-
-  const historyLoading =
-    authenticated &&
-    (!conversationsFetched ||
-      conversationsLoading ||
-      (!!latestConversationId && !conversationFetched && conversationLoading) ||
-      (!!latestConversationId && !conversationFetched && !conversationError && !latestConversation));
+    if (location.pathname !== '/ai') return;
+    draftNewChat.current = false;
+    void loadLatestConversation();
+  }, [location.pathname, loadLatestConversation]);
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -111,21 +99,20 @@ export function useAiChat() {
 
     setError(null);
     setIsPending(true);
-    skipAutoSeed.current = false;
+    draftNewChat.current = false;
     setMessages((prev) => [...prev, userMsg]);
 
     try {
       const data = await apiPost<AiChatResponse>(
         '/ai/chat',
         { message: content, conversationId },
-        { timeout: AI_CHAT_TIMEOUT_MS }
+        { timeout: AI_CHAT_TIMEOUT_MS },
       );
       const nextMessages = visibleMessages(data.messages);
       const now = new Date().toISOString();
 
       setConversationId(data.conversationId);
       setMessages(nextMessages);
-      seededFingerprint.current = `${data.conversationId}:${conversationFingerprint(nextMessages)}`;
 
       queryClient.setQueryData<AiConversation>(['ai-conversation', data.conversationId], (prev) => ({
         id: data.conversationId,
@@ -134,7 +121,19 @@ export function useAiChat() {
         updatedAt: now,
         messages: nextMessages,
       }));
-      await queryClient.invalidateQueries({ queryKey: ['ai-conversations'] });
+      queryClient.setQueryData<AiConversationSummary[]>(['ai-conversations'], (prev) => {
+        const existing = (prev ?? []).find((c) => c.id === data.conversationId);
+        const rest = (prev ?? []).filter((c) => c.id !== data.conversationId);
+        return [
+          {
+            id: data.conversationId,
+            title: existing?.title ?? 'Conversation',
+            createdAt: existing?.createdAt ?? now,
+            updatedAt: now,
+          },
+          ...rest,
+        ];
+      });
     } catch (err) {
       setMessages((prev) => prev.slice(0, -1));
       setError(getApiErrorMessage(err, 'Could not send message'));
@@ -144,11 +143,11 @@ export function useAiChat() {
   }, [conversationId, isPending, queryClient]);
 
   const startNewConversation = useCallback(() => {
-    skipAutoSeed.current = true;
-    seededFingerprint.current = null;
+    draftNewChat.current = true;
     setConversationId(undefined);
     setMessages([]);
     setError(null);
+    setHistoryLoading(false);
   }, []);
 
   return {

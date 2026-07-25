@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Input, DetailActions, DetailHero, DetailMetaList, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -18,6 +18,8 @@ export function IncomeDetailPage() {
   const {
     income,
     isLoading,
+    isError,
+    refetch,
     editing,
     error,
     setError,
@@ -31,10 +33,24 @@ export function IncomeDetailPage() {
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string; notes?: string }>({});
 
-  if (isLoading || !income) {
+  if (isLoading) {
     return (
       <FormStackScreen title="Income">
         <DetailSkeleton />
+      </FormStackScreen>
+    );
+  }
+
+  if (isError || !income) {
+    return (
+      <FormStackScreen title="Income">
+        <EmptyState
+          icon="income"
+          title="Couldn’t load income"
+          subtitle="Check your connection and try again"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       </FormStackScreen>
     );
   }
