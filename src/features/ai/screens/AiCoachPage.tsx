@@ -10,7 +10,7 @@ export function AiCoachPage() {
   const theme = useTheme();
   const navigate = useNavigate();
   const { frame } = useScreenInsets();
-  const { messages, send, isPending, isPremium, error, clearError } = useAiChat();
+  const { messages, send, isPending, isPremium, error, clearError, historyLoading } = useAiChat();
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +36,12 @@ export function AiCoachPage() {
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: theme.colors.background }}>
       <ProfileStackHeader screen="ai" subtitle="Your personal finance assistant" />
       <div style={{ flex: 1, overflowY: 'auto', ...frame, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {messages.length === 0 && (
+        {historyLoading && (
+          <p style={{ textAlign: 'center', padding: '32px 0', fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
+            Loading conversation...
+          </p>
+        )}
+        {!historyLoading && messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <p style={{ fontSize: 14, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Ask me anything about your finances. Try:</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 12 }}>
