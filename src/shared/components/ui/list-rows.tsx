@@ -64,9 +64,11 @@ function formatDate(dateStr: string) {
 export function TransactionRow({
   transaction,
   onPress,
+  showBadge = true,
 }: {
   transaction: Transaction;
   onPress?: () => void;
+  showBadge?: boolean;
 }) {
   const theme = useTheme();
   const isExpense = transaction.type === 'expense';
@@ -83,15 +85,46 @@ export function TransactionRow({
   return (
     <Surface
       onClick={onPress}
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md }}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 14,
+        padding: '18px 18px',
+        borderRadius: theme.radii.xl,
+        minHeight: 88,
+        boxShadow: theme.isDark
+          ? '0 8px 24px rgba(0,0,0,0.22)'
+          : '0 8px 24px rgba(15, 23, 42, 0.06)',
+      }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, minWidth: 0, flex: 1 }}>
-        <div style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: accent, flexShrink: 0 }} />
-        <div style={{ minWidth: 0 }}>
-          <span style={{ ...bodyMedium(theme), display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0, flex: 1 }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          borderRadius: 14,
+          backgroundColor: `${accent}18`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}>
+          <div style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: accent }} />
+        </div>
+        <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 15,
+            fontWeight: 600,
+            letterSpacing: -0.1,
+            color: theme.colors.text,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
             {title}
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
             <span style={{
               fontFamily: 'Inter, sans-serif',
               fontSize: 12,
@@ -108,12 +141,12 @@ export function TransactionRow({
                 whiteSpace: 'nowrap',
                 fontFamily: 'Inter, sans-serif',
                 fontSize: 11,
-                fontWeight: 700,
+                fontWeight: 600,
                 color: accent,
                 backgroundColor: `${accent}18`,
                 border: `1px solid ${accent}44`,
                 borderRadius: theme.radii.full,
-                padding: '2px 8px',
+                padding: '3px 9px',
               }}>
                 {entityLabel}
               </span>
@@ -121,14 +154,48 @@ export function TransactionRow({
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <span style={{
-          ...bodyMedium(theme, isExpense ? theme.colors.danger : theme.colors.success),
-          fontVariantNumeric: 'tabular-nums',
-        }}>
-          {isExpense ? '−' : '+'}{formatCurrency(transaction.amount, transaction.currency)}
-        </span>
-        {onPress ? <AppIcon name="chevronRight" size={14} color={theme.colors.textTertiary} /> : null}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        flexShrink: 0,
+        gap: 5,
+        minWidth: 84,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8 }}>
+          <span style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 15,
+            fontWeight: 600,
+            letterSpacing: -0.1,
+            color: isExpense ? theme.colors.danger : theme.colors.success,
+            fontVariantNumeric: 'tabular-nums',
+            textAlign: 'right',
+            lineHeight: 1.2,
+          }}>
+            {isExpense ? '−' : '+'}{formatCurrency(transaction.amount, transaction.currency)}
+          </span>
+          {onPress ? <AppIcon name="chevronRight" size={15} color={theme.colors.textTertiary} /> : null}
+        </div>
+        {showBadge ? (
+          <span style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 10,
+            fontWeight: 600,
+            lineHeight: 1.2,
+            color: isExpense ? theme.colors.danger : theme.colors.success,
+            backgroundColor: isExpense ? theme.colors.dangerSoft : theme.colors.successSoft,
+            borderRadius: theme.radii.full,
+            padding: '3px 9px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: onPress ? 23 : 0,
+          }}>
+            {isExpense ? 'Expense' : 'Income'}
+          </span>
+        ) : null}
       </div>
     </Surface>
   );
@@ -254,10 +321,10 @@ export function ProgressEntityRow({
     >
       <div style={{ marginTop: theme.spacing.sm }}>
         {value != null ? (
-          <div style={{ marginBottom: theme.spacing.md }}>
-            <span style={{ ...amountText(theme), display: 'block', fontSize: 17 }}>{value}</span>
+          <div style={{ marginBottom: theme.spacing.md, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: 6 }}>
+            <span style={{ ...amountText(theme), fontSize: 17 }}>{value}</span>
             {secondaryValue ? (
-              <span style={{ ...caption(theme), display: 'block', marginTop: 2 }}>{secondaryValue}</span>
+              <span style={{ ...caption(theme), fontSize: 14, fontWeight: 500 }}>{secondaryValue}</span>
             ) : null}
           </div>
         ) : null}

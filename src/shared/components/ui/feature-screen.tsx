@@ -343,7 +343,7 @@ export function OptionChips<T extends string>({
 
   if (useSegmented) {
     return (
-      <div style={{ marginBottom: 0, opacity: disabled ? 0.55 : 1 }}>
+      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
         <div style={{
           display: 'flex',
           borderRadius: theme.radii.lg,
@@ -393,7 +393,7 @@ export function OptionChips<T extends string>({
   }
 
   return (
-    <div style={{ marginBottom: 0, opacity: disabled ? 0.55 : 1 }}>
+    <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {options.map((opt) => {
           const selected = value === opt;

@@ -64,7 +64,7 @@ export function AddExpensePage() {
 
   return (
     <FormStackScreen title="Add Expense" eyebrow="New Transaction" icon="receipt">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
         <Input
           label="Amount"
           value={amount}
