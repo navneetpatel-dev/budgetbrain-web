@@ -29,6 +29,8 @@ function isConfigError(err: unknown): boolean {
     msg.includes('google_client_id')
     || msg.includes('vite_google_client_id')
     || msg.includes('expo_public_google_client_id')
+    || msg.includes('apple_client_id')
+    || msg.includes('vite_apple_client_id')
     || msg.includes('not configured')
   );
 }
