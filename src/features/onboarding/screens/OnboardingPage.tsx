@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
-import { Button, Input, fieldControlStyle, FormErrorBanner } from '@/shared/components/ui/index';
-import { OptionChips, MultiOptionChips, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
+import { useState, type CSSProperties, type FormEvent } from 'react';
+import { Button, Input, FormErrorBanner } from '@/shared/components/ui/index';
+import { OptionChips, MultiOptionChips, SheetSelect, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
@@ -37,8 +37,8 @@ export function OnboardingPage() {
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
   };
 
-  const selectStyle = fieldControlStyle(theme);
-  const labelStyle: React.CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' };
+  const labelStyle: CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' };
+  const selectStyle: CSSProperties = { marginBottom: 0 };
 
   return (
     <StackScrollScreen header={<StackNavHeader title="Onboarding" subtitle="Tell us about yourself" showBack={false} />}>
@@ -52,13 +52,33 @@ export function OnboardingPage() {
           disabled={loading}
           error={fieldErrors.name}
         />
-        <div style={{ marginBottom: theme.spacing.lg }}>
+        <div>
           <label style={labelStyle}>Country</label>
-          <select value={country} onChange={(e) => setCountry(e.target.value)} disabled={loading} style={selectStyle}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name}</option>)}</select>
+          <SheetSelect
+            value={country}
+            options={COUNTRIES.map((c) => c.code)}
+            onChange={setCountry}
+            getLabel={(code) => COUNTRIES.find((c) => c.code === code)?.name ?? code}
+            title="Choose country"
+            disabled={loading}
+            error={fieldErrors.country}
+            style={selectStyle}
+          />
         </div>
-        <div style={{ marginBottom: theme.spacing.lg }}>
+        <div>
           <label style={labelStyle}>Currency</label>
-          <select value={currency} onChange={(e) => setCurrency(e.target.value)} disabled={loading} style={selectStyle}>{CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.symbol} {c.name}</option>)}</select>
+          <SheetSelect
+            value={currency}
+            options={CURRENCIES.map((c) => c.code)}
+            onChange={setCurrency}
+            getLabel={(code) => {
+              const c = CURRENCIES.find((item) => item.code === code);
+              return c ? `${c.symbol} ${c.name}` : code;
+            }}
+            title="Choose currency"
+            disabled={loading}
+            style={selectStyle}
+          />
         </div>
         <div>
           <label style={labelStyle}>Financial Goals</label>

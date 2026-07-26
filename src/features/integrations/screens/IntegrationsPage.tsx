@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
-import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
+import { SheetSelect, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
 import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
@@ -109,30 +109,20 @@ export function IntegrationsPage() {
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, marginTop: theme.spacing.md }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <select
+              <SheetSelect
+                compact
                 value={categoryById[item.id] ?? ''}
-                onChange={(e) => {
-                  setCategoryById((prev) => ({ ...prev, [item.id]: e.target.value }));
+                options={(categories ?? []).map((c) => c.id)}
+                onChange={(id) => {
+                  setCategoryById((prev) => ({ ...prev, [item.id]: id }));
                   setCategoryErrorById((prev) => ({ ...prev, [item.id]: undefined }));
                 }}
-                style={{
-                  minWidth: 140,
-                  padding: '6px 10px',
-                  borderRadius: theme.radii.md,
-                  border: `1px solid ${categoryErrorById[item.id] ? theme.colors.danger : theme.colors.borderSubtle}`,
-                  backgroundColor: theme.colors.background,
-                  color: categoryById[item.id] ? theme.colors.text : theme.colors.textTertiary,
-                  fontFamily: theme.typography.caption.fontFamily ?? 'Inter',
-                  fontSize: 12,
-                }}
-              >
-                <option value="" disabled>
-                  Choose
-                </option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+                getLabel={(id) => (categories ?? []).find((c) => c.id === id)?.name ?? id}
+                getColor={(id) => (categories ?? []).find((c) => c.id === id)?.color ?? undefined}
+                title="Choose category"
+                placeholder="Choose"
+                error={categoryErrorById[item.id]}
+              />
               <button
                 onClick={() => {
                   const categoryId = categoryById[item.id];
@@ -159,11 +149,6 @@ export function IntegrationsPage() {
                 Reject
               </button>
             </div>
-            {categoryErrorById[item.id] ? (
-              <p style={{ color: theme.colors.danger, fontSize: 12, margin: 0, fontWeight: 500, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>
-                {categoryErrorById[item.id]}
-              </p>
-            ) : null}
           </div>
         </EntityRow>
       )}

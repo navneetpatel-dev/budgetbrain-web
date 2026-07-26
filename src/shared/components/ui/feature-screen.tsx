@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
+import { ActionSheet } from './ActionSheet';
 import { useTheme } from '@/shared/theme';
 import { caption, textStyle } from '@/shared/theme/textStyles';
 import { ensureArray } from '@/shared/utils/listData';
@@ -288,56 +289,126 @@ export function SearchField({ placeholder, onPress, rightAction }: { placeholder
   );
 }
 
+/* ── SheetSelect (ActionSheet-backed dropdown) ── */
+
+export function SheetSelect<T extends string>({
+  value,
+  options,
+  onChange,
+  getLabel = (v) => v,
+  getColor,
+  placeholder = 'Choose',
+  title = 'Choose option',
+  error,
+  disabled,
+  compact,
+  capitalize,
+  style,
+}: {
+  value: T | '';
+  options: T[];
+  onChange: (v: T) => void;
+  getLabel?: (v: T) => string;
+  getColor?: (v: T) => string | undefined;
+  placeholder?: string;
+  title?: string;
+  error?: string;
+  disabled?: boolean;
+  compact?: boolean;
+  capitalize?: boolean;
+  style?: CSSProperties;
+}) {
+  const theme = useTheme();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const hasValue = !!value && options.includes(value as T);
+  const selected = hasValue ? (value as T) : undefined;
+  const accent = selected ? getColor?.(selected) : undefined;
+  const borderColor = error
+    ? theme.colors.danger
+    : (theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle);
+
+  return (
+    <div style={{ marginBottom: compact ? 0 : theme.spacing.lg, opacity: disabled ? 0.55 : 1, ...style }}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setSheetOpen(true)}
+        aria-label={selected ? getLabel(selected) : placeholder}
+        style={{
+          width: compact ? 'auto' : '100%',
+          minWidth: compact ? 140 : undefined,
+          boxSizing: 'border-box',
+          height: compact ? 36 : 48,
+          padding: compact ? '0 10px' : '0 12px',
+          borderRadius: compact ? theme.radii.md : theme.radii.lg,
+          border: `${compact ? 1 : 1.5}px solid ${borderColor}`,
+          backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBg,
+          color: selected ? theme.colors.text : theme.colors.textTertiary,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: compact ? 12 : 15,
+          fontWeight: 600,
+          textTransform: capitalize ? 'capitalize' : undefined,
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, overflow: 'hidden' }}>
+          {accent ? (
+            <span style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: accent, flexShrink: 0 }} />
+          ) : null}
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {selected ? getLabel(selected) : placeholder}
+          </span>
+        </span>
+        <AppIcon name="chevronRight" size={compact ? 13 : 14} color={theme.colors.textTertiary} />
+      </button>
+      {error ? (
+        <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
+      ) : null}
+      <ActionSheet
+        visible={sheetOpen}
+        title={title}
+        onClose={() => setSheetOpen(false)}
+        items={options.map((opt) => ({
+          id: opt,
+          label: getLabel(opt),
+          onPress: () => onChange(opt),
+        }))}
+      />
+    </div>
+  );
+}
+
 /* ── OptionChips ── */
 
 export function OptionChips<T extends string>({
-  options, value, onChange, getLabel = (v) => v, getColor, error, disabled,
+  options, value, onChange, getLabel = (v) => v, getColor, error, disabled, mode = 'auto',
 }: {
   options: T[]; value: T; onChange: (v: T) => void;
   getLabel?: (v: T) => string; getColor?: (v: T) => string | undefined; error?: string; disabled?: boolean;
+  /** `sheet` always opens ActionSheet; `auto` uses sheet when options > 8 */
+  mode?: 'auto' | 'sheet';
 }) {
   const theme = useTheme();
-  /** Shared rule with mobile: ≤4 segmented, 5–8 chips, >8 select. */
-  const useSelect = options.length > 8;
-  const useSegmented = options.length <= 4;
+  /** Shared rule with mobile: ≤4 segmented, 5–8 chips, >8 sheet. */
+  const useSelect = mode === 'sheet' || options.length > 8;
+  const useSegmented = mode === 'auto' && options.length <= 4;
 
   if (useSelect) {
-    const hasValue = options.includes(value);
-    const borderColor = error
-      ? theme.colors.danger
-      : (theme.isDark ? 'rgba(255,255,255,0.1)' : theme.colors.borderSubtle);
     return (
-      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
-        <select
-          value={hasValue ? value : ''}
-          disabled={disabled}
-          onChange={(e) => {
-            if (e.target.value) onChange(e.target.value as T);
-          }}
-          style={{
-            width: '100%',
-            boxSizing: 'border-box',
-            height: 48,
-            padding: '0 12px',
-            borderRadius: theme.radii.lg,
-            border: `1.5px solid ${borderColor}`,
-            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg,
-            color: hasValue ? theme.colors.text : theme.colors.textTertiary,
-            ...textStyle(theme, 'bodyMedium', { fontWeight: 600 }),
-            textTransform: 'capitalize',
-          }}
-        >
-          <option value="" disabled>
-            Choose
-          </option>
-          {options.map((opt) => (
-            <option key={opt} value={opt}>{getLabel(opt)}</option>
-          ))}
-        </select>
-        {error && (
-          <p style={{ ...caption(theme, theme.colors.danger), marginTop: theme.spacing.xs, fontWeight: 500 }}>{error}</p>
-        )}
-      </div>
+      <SheetSelect
+        value={value}
+        options={options}
+        onChange={onChange}
+        getLabel={getLabel}
+        getColor={getColor}
+        error={error}
+        disabled={disabled}
+        capitalize
+      />
     );
   }
 
@@ -429,58 +500,32 @@ export function OptionChips<T extends string>({
 }
 
 export function OptionChipList({
-  items, selectedId, onSelect, error, disabled,
+  items, selectedId, onSelect, error, disabled, mode = 'auto',
 }: {
   items: { id: string; label: string; color?: string }[];
   selectedId: string;
   onSelect: (id: string) => void;
   error?: string;
   disabled?: boolean;
+  /** `sheet` always opens ActionSheet; `auto` uses sheet when options > 8 */
+  mode?: 'auto' | 'sheet';
 }) {
   const theme = useTheme();
   const safeItems = ensureArray<{ id: string; label: string; color?: string }>(items);
-  const useSelect = safeItems.length > 8;
-  const selected = safeItems.find((i) => i.id === selectedId);
+  const useSelect = mode === 'sheet' || safeItems.length > 8;
 
   if (useSelect) {
-    const borderColor = error
-      ? theme.colors.danger
-      : (theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.borderSubtle);
     return (
-      <div style={{ marginBottom: theme.spacing.lg, opacity: disabled ? 0.55 : 1 }}>
-        <select
-          value={selectedId}
-          disabled={disabled}
-          onChange={(e) => onSelect(e.target.value)}
-          style={{
-            width: '100%', boxSizing: 'border-box', height: 48, padding: '0 12px',
-            borderRadius: theme.radii.lg,
-            border: `1.5px solid ${borderColor}`,
-            backgroundColor: theme.isDark ? 'rgba(255,255,255,0.05)' : theme.colors.inputBg,
-            color: selected ? theme.colors.text : theme.colors.textTertiary,
-            fontFamily: theme.typography.bodyMedium.fontFamily ?? 'Inter',
-            fontSize: 15, fontWeight: 600,
-          }}
-        >
-          <option value="" disabled>
-            Choose
-          </option>
-          {safeItems.map((item) => (
-            <option key={item.id} value={item.id}>{item.label}</option>
-          ))}
-        </select>
-        {selected?.color ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8 }}>
-            <div style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: selected.color }} />
-            <span style={{ fontSize: 12, color: theme.colors.textTertiary, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>
-              {selected.label}
-            </span>
-          </div>
-        ) : null}
-        {error && (
-          <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: theme.spacing.xs, fontWeight: 500, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}>{error}</p>
-        )}
-      </div>
+      <SheetSelect
+        value={selectedId}
+        options={safeItems.map((item) => item.id)}
+        onChange={onSelect}
+        getLabel={(id) => safeItems.find((item) => item.id === id)?.label ?? id}
+        getColor={(id) => safeItems.find((item) => item.id === id)?.color}
+        error={error}
+        disabled={disabled}
+        title="Choose category"
+      />
     );
   }
 
