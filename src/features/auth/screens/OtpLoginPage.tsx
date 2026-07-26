@@ -1,5 +1,5 @@
 import { useForm, Controller } from 'react-hook-form';
-import { Button, Input } from '@/shared/components/ui/index';
+import { Button, Input, OtpInput } from '@/shared/components/ui/index';
 import { AuthShell, AuthFooter, AuthForm, AuthInfoBanner, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
 import { maxLen } from '@/shared/validation/fieldLimits';
@@ -55,7 +55,14 @@ export function OtpLoginPage() {
               name="otp"
               rules={authFieldRules.otp}
               render={({ field }) => (
-                <Input label="Verification code" maxLength={maxLen("otp")} value={field.value} onChange={field.onChange} placeholder="000000" type="text" autoComplete="one-time-code" autoFocus disabled={loading} error={errors.otp?.message} />
+                <OtpInput
+                  label="Verification code"
+                  value={field.value}
+                  onChange={field.onChange}
+                  autoFocus
+                  disabled={loading}
+                  error={errors.otp?.message}
+                />
               )}
             />
             <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />

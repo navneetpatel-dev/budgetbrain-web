@@ -922,4 +922,5 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
 export { FormErrorBanner };
 export { ActionSheet } from './ActionSheet';
 export type { ActionSheetItem } from './ActionSheet';
+export { OtpInput } from './OtpInput';
 export { TransactionRow, EntityRow, ProgressEntityRow, NotificationRow } from './list-rows';
