@@ -215,13 +215,16 @@ interface InputProps {
   readOnly?: boolean;
   disabled?: boolean;
   maxLength?: number;
+  /** HTML date/time bounds (`YYYY-MM-DD` for type="date"). */
+  min?: string;
+  max?: string;
   onKeyDown?: (e: React.KeyboardEvent) => void;
 }
 
 export function Input({
   label, error, helperText, secureToggle, leftIcon,
   variant = 'default', value, onChange, placeholder, type: inputType,
-  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, maxLength, onKeyDown,
+  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, maxLength, min, max, onKeyDown,
 }: InputProps) {
   const theme = useTheme();
   const [hidden, setHidden] = useState(inputType === 'password');
@@ -315,6 +318,8 @@ export function Input({
             readOnly={readOnly}
             disabled={disabled}
             maxLength={maxLength}
+            min={min}
+            max={max}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onKeyDown={onKeyDown}

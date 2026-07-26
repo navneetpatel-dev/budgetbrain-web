@@ -9,17 +9,20 @@ import {
   maxLen,
   validateAlertThreshold,
   validateAmount,
-  validateDate,
+  validateBoundedDate,
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
+
+type Period = 'monthly' | 'weekly' | 'custom';
 
 type FieldErrors = {
   name?: string;
   amount?: string;
   startDate?: string;
+  endDate?: string;
   alertThreshold?: string;
-  categoryId?: string;
 };
 
 export function AddBudgetPage() {
@@ -27,14 +30,20 @@ export function AddBudgetPage() {
   const { createMutation, error, setError } = useCreateBudget();
   const { categories } = useCategories();
   const [name, setName] = useState('');
-  const [type, setType] = useState<'monthly' | 'weekly' | 'category'>('monthly');
+  const [type, setType] = useState<Period>('monthly');
   const [amount, setAmount] = useState('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('80');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState('__all__');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const isPending = createMutation.isPending;
+  const ALL_SPENDING = '__all__';
+  const categoryItems = [
+    { id: ALL_SPENDING, label: 'All spending' },
+    ...(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined })),
+  ];
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -42,13 +51,19 @@ export function AddBudgetPage() {
     const next: FieldErrors = {};
     const nameErr = validateText('entityName', name);
     const amountErr = validateAmount(amount);
-    const dateErr = validateDate(startDate);
+    const dateErr = validateBoundedDate('budgetStart', startDate);
     const thresholdErr = validateAlertThreshold(alertThreshold);
     if (nameErr) next.name = nameErr;
     if (amountErr) next.amount = amountErr;
     if (dateErr) next.startDate = dateErr;
     if (thresholdErr) next.alertThreshold = thresholdErr;
-    if (type === 'category' && !categoryId) next.categoryId = ValidationMessages.categoryRequired;
+    if (type === 'custom') {
+      if (!endDate) next.endDate = ValidationMessages.endDateRequired;
+      else {
+        const endErr = validateBoundedDate('budgetEnd', endDate, { startDate });
+        if (endErr) next.endDate = endErr;
+      }
+    }
     setFieldErrors(next);
     if (Object.keys(next).length) return;
     createMutation.mutate({
@@ -56,9 +71,19 @@ export function AddBudgetPage() {
       type,
       amount: Number(amount),
       startDate,
+      endDate: type === 'custom' ? endDate : undefined,
       alertThreshold: Number(alertThreshold),
-      categoryId: type === 'category' ? categoryId : undefined,
+      categoryId: !categoryId || categoryId === ALL_SPENDING ? undefined : categoryId,
     });
+  };
+
+  const labelStyle = {
+    display: 'block' as const,
+    fontSize: 13,
+    fontWeight: 600,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.sm,
+    fontFamily: 'Inter, sans-serif',
   };
 
   return (
@@ -73,11 +98,14 @@ export function AddBudgetPage() {
           disabled={isPending}
           error={fieldErrors.name}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Type</label>
+        <label style={labelStyle}>Period</label>
         <OptionChips
-          options={BUDGET_TYPES.map((t) => t.id as 'monthly' | 'weekly' | 'category')}
+          options={BUDGET_TYPES.map((t) => t.id)}
           value={type}
-          onChange={(v) => { setType(v); setFieldErrors((f) => ({ ...f, categoryId: undefined })); }}
+          onChange={(v) => {
+            setType(v);
+            setFieldErrors((f) => ({ ...f, endDate: undefined }));
+          }}
           getLabel={(v) => BUDGET_TYPES.find((t) => t.id === v)?.label ?? v}
           disabled={isPending}
         />
@@ -94,11 +122,30 @@ export function AddBudgetPage() {
         <Input
           label="Start Date"
           value={startDate}
-          onChange={(e) => { setStartDate(e.target.value); setFieldErrors((f) => ({ ...f, startDate: undefined })); }}
+          onChange={(e) => {
+            const next = e.target.value;
+            setStartDate(next);
+            if (endDate && next && endDate < next) setEndDate(next);
+            setFieldErrors((f) => ({ ...f, startDate: undefined, endDate: undefined }));
+          }}
           type="date"
+          min={DateBounds.budgetStart(startDate).min}
+          max={DateBounds.budgetStart(startDate).max}
           disabled={isPending}
           error={fieldErrors.startDate}
         />
+        {type === 'custom' ? (
+          <Input
+            label="End Date"
+            value={endDate}
+            onChange={(e) => { setEndDate(e.target.value); setFieldErrors((f) => ({ ...f, endDate: undefined })); }}
+            type="date"
+            min={DateBounds.budgetEnd(startDate, endDate).min}
+            max={DateBounds.budgetEnd(startDate, endDate).max}
+            disabled={isPending}
+            error={fieldErrors.endDate}
+          />
+        ) : null}
         <Input
           label="Alert Threshold (%)"
           value={alertThreshold}
@@ -109,18 +156,14 @@ export function AddBudgetPage() {
           disabled={isPending}
           error={fieldErrors.alertThreshold}
         />
-        {type === 'category' ? (
-          <>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
-            <OptionChipList
-              items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}
-              selectedId={categoryId}
-              onSelect={(id) => { setCategoryId(id); setFieldErrors((f) => ({ ...f, categoryId: undefined })); }}
-              disabled={isPending}
-              error={fieldErrors.categoryId}
-            />
-          </>
-        ) : null}
+        <label style={labelStyle}>Category (optional)</label>
+        <OptionChipList
+          items={categoryItems}
+          selectedId={categoryId}
+          onSelect={setCategoryId}
+          disabled={isPending}
+          mode="sheet"
+        />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Create Budget" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

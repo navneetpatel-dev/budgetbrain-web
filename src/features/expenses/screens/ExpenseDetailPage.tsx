@@ -14,11 +14,12 @@ import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
   validateAmount,
-  validateDate,
+  validateBoundedDate,
   validateOptionalText,
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 type FieldErrors = {
   amount?: string;
@@ -76,7 +77,7 @@ export function ExpenseDetailPage() {
       const next: FieldErrors = {};
       const amountErr = validateAmount(amount);
       const merchantErr = validateText('merchant', merchant);
-      const dateErr = validateDate(date);
+      const dateErr = validateBoundedDate('transaction', date);
       const notesErr = validateOptionalText('notes', notes);
       if (amountErr) next.amount = amountErr;
       if (merchantErr) next.merchant = merchantErr;
@@ -99,7 +100,16 @@ export function ExpenseDetailPage() {
         <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
           <Input label="Merchant" maxLength={maxLen('merchant')} value={merchant} onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }} placeholder="e.g. Starbucks" disabled={isPending} error={fieldErrors.merchant} />
-          <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
+          <Input
+            label="Date"
+            value={date}
+            onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }}
+            type="date"
+            min={DateBounds.transaction(date).min}
+            max={DateBounds.transaction(date).max}
+            disabled={isPending}
+            error={fieldErrors.date}
+          />
           <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
           <OptionChips
             options={PAYMENT_METHODS.map((p) => p.id)}

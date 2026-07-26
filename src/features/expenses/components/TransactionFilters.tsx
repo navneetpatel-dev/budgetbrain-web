@@ -9,6 +9,7 @@ import type {
   TransactionListFilters,
   TransactionTypeFilter,
 } from '../utils/transactionFilters';
+import { DateBounds } from '@/shared/utils/dateBounds';
 import { FilterEntityPicker } from './FilterEntityPicker';
 
 const TYPE_OPTIONS: TransactionTypeFilter[] = ['all', 'expense', 'income'];
@@ -102,13 +103,24 @@ export function TransactionFilters({
             label="From"
             type="date"
             value={filters.startDate ?? ''}
-            onChange={(e) => patch({ startDate: e.target.value })}
+            onChange={(e) => {
+              const startDate = e.target.value;
+              if (filters.endDate && startDate && filters.endDate < startDate) {
+                patch({ startDate, endDate: startDate });
+                return;
+              }
+              patch({ startDate });
+            }}
+            min={DateBounds.rangeFrom(filters.endDate, filters.startDate).min}
+            max={DateBounds.rangeFrom(filters.endDate, filters.startDate).max}
           />
           <Input
             label="To"
             type="date"
             value={filters.endDate ?? ''}
             onChange={(e) => patch({ endDate: e.target.value })}
+            min={DateBounds.rangeTo(filters.startDate, filters.endDate).min}
+            max={DateBounds.rangeTo(filters.startDate, filters.endDate).max}
           />
         </div>
       ) : null}

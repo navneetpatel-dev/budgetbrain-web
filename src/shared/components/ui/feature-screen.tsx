@@ -320,7 +320,8 @@ export function SheetSelect<T extends string>({
 }) {
   const theme = useTheme();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const hasValue = !!value && options.includes(value as T);
+  /** Allow empty-string options (e.g. "All spending") to count as selected. */
+  const hasValue = options.includes(value as T);
   const selected = hasValue ? (value as T) : undefined;
   const accent = selected ? getColor?.(selected) : undefined;
   const borderColor = error
@@ -525,6 +526,7 @@ export function OptionChipList({
         error={error}
         disabled={disabled}
         title="Choose category"
+        placeholder="All spending"
       />
     );
   }

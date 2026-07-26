@@ -10,11 +10,12 @@ import { useInvestments } from '@/features/shared/hooks/useFeatures';
 import {
   maxLen,
   validateAmount,
-  validateDate,
+  validateBoundedDate,
   validateOptionalText,
   validateQuantity,
   validateText,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 const INVESTMENT_TYPES = [
   { id: 'stocks', label: 'Stocks' },
@@ -55,7 +56,7 @@ export function InvestmentsPage() {
     const qtyErr = validateQuantity(quantity);
     const priceErr = validateAmount(purchasePrice);
     const currentErr = currentPrice.trim() ? validateAmount(currentPrice) : undefined;
-    const dateErr = validateDate(purchaseDate);
+    const dateErr = validateBoundedDate('investmentPurchase', purchaseDate);
     if (nameErr) next.name = nameErr;
     if (symbolErr) next.symbol = symbolErr;
     if (qtyErr) next.quantity = qtyErr;
@@ -112,7 +113,16 @@ export function InvestmentsPage() {
             <Input label="Quantity" value={quantity} onChange={(e) => setQuantity(e.target.value)} type="number" error={fieldErrors.quantity} disabled={createMutation.isPending} />
             <Input label="Purchase price" value={purchasePrice} onChange={(e) => setPurchasePrice(e.target.value)} type="number" error={fieldErrors.purchasePrice} disabled={createMutation.isPending} />
             <Input label="Current price" value={currentPrice} onChange={(e) => setCurrentPrice(e.target.value)} type="number" error={fieldErrors.currentPrice} disabled={createMutation.isPending} />
-            <Input label="Purchase date" value={purchaseDate} onChange={(e) => setPurchaseDate(e.target.value)} type="date" error={fieldErrors.purchaseDate} disabled={createMutation.isPending} />
+            <Input
+              label="Purchase date"
+              value={purchaseDate}
+              onChange={(e) => setPurchaseDate(e.target.value)}
+              type="date"
+              min={DateBounds.investmentPurchase(purchaseDate).min}
+              max={DateBounds.investmentPurchase(purchaseDate).max}
+              error={fieldErrors.purchaseDate}
+              disabled={createMutation.isPending}
+            />
             <Button title="Save Investment" onPress={handleSubmit} loading={createMutation.isPending} />
             <Button title="Cancel" onPress={() => { setShowForm(false); setError(null); }} variant="outline" disabled={createMutation.isPending} />
           </div>

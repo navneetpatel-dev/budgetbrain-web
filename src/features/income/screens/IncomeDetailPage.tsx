@@ -9,7 +9,8 @@ import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useIncomeDetail } from '../hooks/useIncome';
-import { maxLen, validateAmount, validateDate, validateOptionalText } from '@/shared/validation/fieldLimits';
+import { maxLen, validateAmount, validateBoundedDate, validateOptionalText } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 export function IncomeDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -65,7 +66,7 @@ export function IncomeDetailPage() {
       setError(null);
       const next: typeof fieldErrors = {};
       const amountErr = validateAmount(amount);
-      const dateErr = validateDate(date);
+      const dateErr = validateBoundedDate('transaction', date);
       const notesErr = validateOptionalText('notes', notes);
       if (amountErr) next.amount = amountErr;
       if (dateErr) next.date = dateErr;
@@ -79,7 +80,16 @@ export function IncomeDetailPage() {
       <FormStackScreen title="Edit Income" onBack={() => setEditing(false)}>
         <form onSubmit={(e: FormEvent) => { e.preventDefault(); save(); }} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" leftIcon="dollar" disabled={isPending} error={fieldErrors.amount} />
-          <Input label="Date" value={date} onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }} type="date" disabled={isPending} error={fieldErrors.date} />
+          <Input
+            label="Date"
+            value={date}
+            onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }}
+            type="date"
+            min={DateBounds.transaction(date).min}
+            max={DateBounds.transaction(date).max}
+            disabled={isPending}
+            error={fieldErrors.date}
+          />
           <Input label="Notes" value={notes} onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }} placeholder="Optional note" multiline disabled={isPending} maxLength={maxLen('notes')} error={fieldErrors.notes} />
           {error ? <FormErrorBanner message={error} /> : null}
           <FormActions

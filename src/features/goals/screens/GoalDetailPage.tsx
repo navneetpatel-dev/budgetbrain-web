@@ -13,9 +13,10 @@ import { useGoalDetail } from '../hooks/useGoals';
 import {
   maxLen,
   validateAmount,
-  validateOptionalDate,
+  validateBoundedDate,
   validateText,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 type FieldErrors = { name?: string; targetAmount?: string; targetDate?: string };
 
@@ -105,7 +106,7 @@ export function GoalDetailPage() {
       const next: FieldErrors = {};
       const nameErr = validateText('entityName', name);
       const amountErr = validateAmount(targetAmount);
-      const dateErr = validateOptionalDate(targetDate);
+      const dateErr = validateBoundedDate('goalTarget', targetDate, { optional: true });
       if (nameErr) next.name = nameErr;
       if (amountErr) next.targetAmount = amountErr;
       if (dateErr) next.targetDate = dateErr;
@@ -130,7 +131,16 @@ export function GoalDetailPage() {
         <form onSubmit={save} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
           <Input label="Goal name" value={name} onChange={(e) => setName(e.target.value)} maxLength={maxLen('entityName')} error={fieldErrors.name} disabled={isPending} />
           <Input label="Target amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} type="number" error={fieldErrors.targetAmount} disabled={isPending} />
-          <Input label="Target date (optional)" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} type="date" error={fieldErrors.targetDate} disabled={isPending} />
+          <Input
+            label="Target date (optional)"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            type="date"
+            min={DateBounds.goalTarget(targetDate).min}
+            max={DateBounds.goalTarget(targetDate).max}
+            error={fieldErrors.targetDate}
+            disabled={isPending}
+          />
           {error ? <FormErrorBanner message={error} /> : null}
           <FormActions
             primaryTitle="Save Changes"

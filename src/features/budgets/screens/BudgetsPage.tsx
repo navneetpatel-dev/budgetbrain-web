@@ -61,7 +61,7 @@ export function BudgetsPage() {
           return (
             <ProgressEntityRow
               title={b.name}
-              subtitle={`${b.type}${b.category?.name ? ` · ${b.category.name}` : ''}`}
+              subtitle={`${b.type.charAt(0).toUpperCase()}${b.type.slice(1)}${b.category?.name ? ` · ${b.category.name}` : ' · All spending'}`}
               value={formatCurrency(b.spent ?? 0, b.currency)}
               secondaryValue={`/ ${formatCurrency(b.amount, b.currency)}`}
               progress={pct}

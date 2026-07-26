@@ -6,11 +6,12 @@ import { useCreateIncome, useIncomeSources } from '../hooks/useIncome';
 import {
   maxLen,
   validateAmount,
-  validateDate,
+  validateBoundedDate,
   validateOptionalText,
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 const SOURCE_TYPES = [
   { id: 'salary', label: 'Salary' }, { id: 'freelancing', label: 'Freelancing' },
@@ -47,7 +48,7 @@ export function AddIncomePage() {
     setError(null);
     const next: FieldErrors = {};
     const amountErr = validateAmount(amount);
-    const dateErr = validateDate(date);
+    const dateErr = validateBoundedDate('transaction', date);
     const notesErr = validateOptionalText('notes', notes);
     if (amountErr) next.amount = amountErr;
     if (dateErr) next.date = dateErr;
@@ -90,6 +91,8 @@ export function AddIncomePage() {
           value={date}
           onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }}
           type="date"
+          min={DateBounds.transaction(date).min}
+          max={DateBounds.transaction(date).max}
           disabled={isPending}
           error={fieldErrors.date}
         />

@@ -133,7 +133,12 @@ export function BudgetDetailPage() {
 
   return (
     <>
-      <FormStackScreen title={budget.name} eyebrow={`${budget.type} budget`} subtitle={`${pct}% used`} onBack={goBack}>
+      <FormStackScreen
+        title={budget.name}
+        eyebrow={`${budget.type.charAt(0).toUpperCase()}${budget.type.slice(1)} budget`}
+        subtitle={`${pct}% used`}
+        onBack={goBack}
+      >
         <DetailHero
           amount={formatCurrency(budget.spent, budget.currency)}
           subtitle={`of ${formatCurrency(budget.amount, budget.currency)}`}
@@ -148,10 +153,11 @@ export function BudgetDetailPage() {
         </div>
         <DetailMetaList
           rows={[
-            { label: 'Type', value: budget.type },
+            { label: 'Period', value: `${budget.type.charAt(0).toUpperCase()}${budget.type.slice(1)}` },
+            { label: 'Category', value: budget.category?.name ?? 'All spending' },
             { label: 'Alert', value: `${budget.alertThreshold}%` },
             { label: 'Started', value: budget.startDate },
-            { label: 'Ends', value: budget.endDate ?? '' },
+            ...(budget.endDate ? [{ label: 'Ends', value: budget.endDate }] : []),
           ]}
         />
         <DetailActions

@@ -8,11 +8,12 @@ import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
   validateAmount,
-  validateDate,
+  validateBoundedDate,
   validateOptionalText,
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
+import { DateBounds } from '@/shared/utils/dateBounds';
 
 type FieldErrors = {
   amount?: string;
@@ -42,7 +43,7 @@ export function AddExpensePage() {
     const next: FieldErrors = {};
     const amountErr = validateAmount(amount);
     const merchantErr = validateText('merchant', merchant);
-    const dateErr = validateDate(date);
+    const dateErr = validateBoundedDate('transaction', date);
     const notesErr = validateOptionalText('notes', notes);
     if (amountErr) next.amount = amountErr;
     if (merchantErr) next.merchant = merchantErr;
@@ -89,6 +90,8 @@ export function AddExpensePage() {
           value={date}
           onChange={(e) => { setDate(e.target.value); setFieldErrors((f) => ({ ...f, date: undefined })); }}
           type="date"
+          min={DateBounds.transaction(date).min}
+          max={DateBounds.transaction(date).max}
           disabled={isPending}
           error={fieldErrors.date}
         />

@@ -62,5 +62,5 @@ export const PAYMENT_METHODS = [
 export const BUDGET_TYPES = [
   { id: 'monthly', label: 'Monthly' },
   { id: 'weekly', label: 'Weekly' },
-  { id: 'category', label: 'Category' },
-];
+  { id: 'custom', label: 'Custom' },
+] as const;
