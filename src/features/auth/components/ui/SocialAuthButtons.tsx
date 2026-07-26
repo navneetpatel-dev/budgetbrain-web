@@ -2,13 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { useTheme } from '@/shared/theme';
 import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
-import { isAppleSignInConfigured } from '@/features/auth/services/appleAuth.service';
+// import { isAppleSignInConfigured } from '@/features/auth/services/appleAuth.service';
 import { AuthDivider } from './AuthDivider';
 import { AuthErrorBanner } from './AuthBanners';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
 const googleEnabled = Boolean(GOOGLE_CLIENT_ID?.trim());
-const appleEnabled = isAppleSignInConfigured();
+// const appleEnabled = isAppleSignInConfigured();
+const appleEnabled = false; // temporarily hide Apple login
 
 function GoogleMark() {
   return (
@@ -30,6 +31,7 @@ function GoogleMark() {
   );
 }
 
+/* restore with Apple button
 function AppleMark({ color }: { color: string }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill={color} aria-hidden>
@@ -37,6 +39,7 @@ function AppleMark({ color }: { color: string }) {
     </svg>
   );
 }
+*/
 
 function Spinner({ color }: { color: string }) {
   return (
@@ -56,9 +59,10 @@ export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boole
   const theme = useTheme();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(320);
-  const { loading, error, clearError, signInGoogle, signInApple, reportProviderError } = useSocialAuth();
+  const { loading, error, clearError, signInGoogle, reportProviderError } = useSocialAuth();
+  // const { signInApple } = useSocialAuth(); // restore with Apple button
   const isGoogleLoading = loading === 'google';
-  const isAppleLoading = loading === 'apple';
+  // const isAppleLoading = loading === 'apple';
   const isBusy = formDisabled || !!loading;
 
   useEffect(() => {
@@ -103,23 +107,23 @@ export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boole
     reportProviderError('google', new Error('VITE_GOOGLE_CLIENT_ID is not configured'));
   };
 
-  const onAppleUnavailable = () => {
-    reportProviderError('apple', new Error('VITE_APPLE_CLIENT_ID is not configured'));
-  };
+  // const onAppleUnavailable = () => {
+  //   reportProviderError('apple', new Error('VITE_APPLE_CLIENT_ID is not configured'));
+  // };
 
   const onGoogleError = () => {
     reportProviderError('google', new Error('popup_closed'));
   };
 
-  const onAppleClick = () => {
-    if (!appleEnabled) {
-      onAppleUnavailable();
-      return;
-    }
-    if (isBusy) return;
-    clearError();
-    void signInApple();
-  };
+  // const onAppleClick = () => {
+  //   if (!appleEnabled) {
+  //     onAppleUnavailable();
+  //     return;
+  //   }
+  //   if (isBusy) return;
+  //   clearError();
+  //   void signInApple();
+  // };
 
   // Google overlay needs full row width when Apple is absent; half when both show.
   const googleOverlayWidth = appleEnabled
@@ -179,6 +183,7 @@ export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boole
           </button>
         </div>
 
+        {/* Apple login temporarily disabled
         <button
           type="button"
           onClick={onAppleClick}
@@ -206,6 +211,7 @@ export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boole
             </>
           )}
         </button>
+        */}
       </div>
       {error ? <AuthErrorBanner message={error} /> : null}
     </div>
