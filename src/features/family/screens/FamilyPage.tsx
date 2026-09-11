@@ -1,11 +1,72 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card, Button, Input, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { Card, Button, Input, EmptyState, FormErrorBanner, SectionHeader } from '@/shared/components/ui/index';
 import { FamilySkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
-import { useFamily } from '@/features/shared/hooks/useFeatures';
+import { useAppSelector } from '@/shared/store/hooks';
+import { formatCurrency } from '@/shared/utils/currency';
+import {
+  useFamily,
+  useFamilyBalances,
+  useFamilyMembers,
+  useGroupSplits,
+  useSettleSplit,
+} from '@/features/shared/hooks/useFeatures';
 import { maxLen, validateInviteCode, validateText } from '@/shared/validation/fieldLimits';
+
+function GroupBalances({ groupId }: { groupId: string }) {
+  const theme = useTheme();
+  const currentUser = useAppSelector((s) => s.auth.user);
+  const { data: balances } = useFamilyBalances(groupId);
+  const { data: members } = useFamilyMembers(groupId);
+  const { data: pendingSplits } = useGroupSplits(groupId);
+  const settleMutation = useSettleSplit();
+
+  const nameFor = (userId: string) => {
+    if (userId === currentUser?.id) return 'You';
+    const member = members?.find((m) => m.userId === userId);
+    return member?.user?.name ?? member?.user?.email ?? 'Member';
+  };
+
+  if (!balances || balances.length === 0) return null;
+
+  return (
+    <Card>
+      <SectionHeader title="Balances" subtitle="Who owes whom for shared expenses" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        {balances.map((b) => (
+          <div key={`${b.fromUserId}-${b.toUserId}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: theme.spacing.sm }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: theme.colors.text }}>
+              {nameFor(b.fromUserId)} owes {nameFor(b.toUserId)}
+            </span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 700, color: theme.colors.primary }}>
+              {formatCurrency(b.amount, currentUser?.currency ?? 'INR')}
+            </span>
+          </div>
+        ))}
+      </div>
+      {pendingSplits && pendingSplits.length > 0 ? (
+        <div style={{ marginTop: theme.spacing.md, paddingTop: theme.spacing.md, borderTop: `1px solid ${theme.colors.borderSubtle}`, display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+          {pendingSplits.map((split) => (
+            <div key={split.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: theme.spacing.sm }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textSecondary, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {split.transaction?.merchant ?? 'Expense'} — {nameFor(split.userId)}'s share: {formatCurrency(split.shareAmount, currentUser?.currency ?? 'INR')}
+              </span>
+              <button
+                onClick={() => settleMutation.mutate(split.id)}
+                disabled={settleMutation.isPending}
+                style={{ padding: '5px 12px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'Inter, sans-serif', flexShrink: 0 }}
+              >
+                Settle
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </Card>
+  );
+}
 
 export function FamilyPage() {
   const theme = useTheme();
@@ -45,7 +106,10 @@ export function FamilyPage() {
         <FamilySkeleton />
       ) : memberships.length > 0 ? (
         memberships.map((m) => (
-          <Card key={m.id}><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
+          <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <Card><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
+            <GroupBalances groupId={m.groupId} />
+          </div>
         ))
       ) : (
         <EmptyState

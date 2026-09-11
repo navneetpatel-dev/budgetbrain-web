@@ -35,6 +35,17 @@ export function removeGoalDetail(queryClient: QueryClient, goalId: string) {
   void queryClient.removeQueries({ queryKey: ['goal', goalId] });
 }
 
+export function invalidateLoanQueries(queryClient: QueryClient, loanId?: string) {
+  void queryClient.invalidateQueries({ queryKey: ['loans'] });
+  if (loanId) {
+    void queryClient.invalidateQueries({ queryKey: ['loan', loanId] });
+  }
+}
+
+export function removeLoanDetail(queryClient: QueryClient, loanId: string) {
+  void queryClient.removeQueries({ queryKey: ['loan', loanId] });
+}
+
 export function invalidateCategoryConsumers(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: ['categories'] });
   void queryClient.invalidateQueries({ queryKey: ['expenses'] });

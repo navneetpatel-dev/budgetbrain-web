@@ -11,6 +11,7 @@ export interface User {
   monthlySavingsTarget: number | null;
   theme?: string | null;
   accent?: string | null;
+  weeklyDigestOptIn?: boolean;
 }
 
 export interface AuthTokens {
@@ -40,6 +41,7 @@ export interface Transaction {
   paymentMethod: string | null;
   category?: Category;
   incomeSource?: IncomeSource;
+  tags?: string[] | null;
 }
 
 export interface Budget {
@@ -52,6 +54,9 @@ export interface Budget {
   startDate: string;
   endDate: string | null;
   alertThreshold: number;
+  rollover: boolean;
+  rolloverAmount?: number;
+  effectiveAmount?: number;
   spent?: number;
   category?: Category;
 }
@@ -109,6 +114,81 @@ export interface Goal {
   targetDate: string | null;
 }
 
+export interface Loan {
+  id: string;
+  userId: string;
+  name: string;
+  type: 'loan' | 'credit_card' | 'emi' | 'other';
+  principal: number;
+  interestRate: number | null;
+  emiAmount: number | null;
+  remainingBalance: number;
+  currency: string;
+  startDate: string;
+  dueDayOfMonth: number | null;
+  notes: string | null;
+  closed: boolean;
+  payments?: LoanPayment[];
+}
+
+export interface LoanPayment {
+  id: string;
+  loanId: string;
+  userId: string;
+  amount: number;
+  notes: string | null;
+  paidAt: string;
+}
+
+export interface RecurringSeries {
+  id: string;
+  userId: string;
+  merchant: string;
+  categoryId: string | null;
+  amount: number;
+  currency: string;
+  cadence: 'weekly' | 'monthly' | 'yearly';
+  nextDueDate: string;
+  lastChargedDate: string | null;
+  active: boolean;
+  reminderDaysBefore: number;
+  source: 'manual' | 'detected';
+  category?: Category;
+}
+
+export interface ExpenseSplitParticipant {
+  id: string;
+  transactionId: string;
+  groupId: string;
+  userId: string;
+  shareAmount: number;
+  settled: boolean;
+  settledAt: string | null;
+}
+
+export interface FamilyGroupMember {
+  id: string;
+  groupId: string;
+  userId: string;
+  role: string;
+  user?: { id: string; name: string | null; email: string; avatarUrl: string | null };
+}
+
+export interface SplitBalance {
+  fromUserId: string;
+  toUserId: string;
+  amount: number;
+}
+
+export interface MonthlyRecap {
+  periodStart: string;
+  periodEnd: string;
+  totalSpent: number;
+  topCategory: { name: string; amount: number } | null;
+  biggestExpense: { merchant: string | null; amount: number } | null;
+  noSpendStreak: number;
+}
+
 export interface DashboardData {
   summary: {
     totalIncome: number;
@@ -121,6 +201,8 @@ export interface DashboardData {
   budgets: Budget[];
   goals: Goal[];
   categoryBreakdown: Array<{ categoryId: string; total: string; category?: Category }>;
+  noSpendStreak: number;
+  upcomingBills: RecurringSeries[];
 }
 
 export interface PaginationMeta {

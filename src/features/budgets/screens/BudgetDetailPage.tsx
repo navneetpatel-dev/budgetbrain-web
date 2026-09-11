@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, Toggle } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -22,6 +22,7 @@ export function BudgetDetailPage() {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
+  const [rollover, setRollover] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; amount?: string; alertThreshold?: string }>({});
   const [startedFromQuery, setStartedFromQuery] = useState(false);
   /** True only when Edit was tapped from the view screen (not list → ?edit=1). */
@@ -31,6 +32,7 @@ export function BudgetDetailPage() {
     setName(b.name);
     setAmount(String(b.amount));
     setAlertThreshold(String(b.alertThreshold));
+    setRollover(b.rollover);
     setFieldErrors({});
     setError(null);
   };
@@ -100,7 +102,12 @@ export function BudgetDetailPage() {
       setFieldErrors(next);
       if (Object.keys(next).length) return;
       updateMutation.mutate(
-        { name, amount: Number(amount), alertThreshold: Number(alertThreshold) },
+        {
+          name,
+          amount: Number(amount),
+          alertThreshold: Number(alertThreshold),
+          ...(budget.type !== 'custom' && { rollover }),
+        },
         {
           onSuccess: () => {
             editFromViewRef.current = false;
@@ -114,6 +121,18 @@ export function BudgetDetailPage() {
           <Input label="Budget Name" maxLength={maxLen('entityName')} value={name} onChange={(e) => { setName(e.target.value); setFieldErrors((f) => ({ ...f, name: undefined })); }} disabled={isPending} error={fieldErrors.name} />
           <Input label="Amount" value={amount} onChange={(e) => { setAmount(e.target.value); setFieldErrors((f) => ({ ...f, amount: undefined })); }} type="number" disabled={isPending} error={fieldErrors.amount} />
           <Input label="Alert Threshold (%)" value={alertThreshold} onChange={(e) => { setAlertThreshold(e.target.value); setFieldErrors((f) => ({ ...f, alertThreshold: undefined })); }} type="number" disabled={isPending} error={fieldErrors.alertThreshold} />
+          {budget.type !== 'custom' ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md,
+              padding: `${theme.spacing.md}px 0`, marginBottom: theme.spacing.sm,
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>Roll over unused amount</span>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
+              </div>
+              <Toggle value={rollover} onChange={setRollover} disabled={isPending} label="Roll over unused amount" />
+            </div>
+          ) : null}
           {error ? <FormErrorBanner message={error} /> : null}
           <FormActions
             primaryTitle="Save Changes"
@@ -127,9 +146,11 @@ export function BudgetDetailPage() {
     );
   }
 
-  const pct = toSafePercent(budget.spent, budget.amount);
+  const effectiveAmount = budget.effectiveAmount ?? budget.amount;
+  const pct = toSafePercent(budget.spent, effectiveAmount);
   const alertAt = budget.alertThreshold ?? 80;
   const barColor = pct >= 100 ? theme.colors.danger : pct >= alertAt ? theme.colors.warning : theme.colors.success;
+  const rolloverAmount = budget.rolloverAmount ?? 0;
 
   return (
     <>
@@ -141,7 +162,7 @@ export function BudgetDetailPage() {
       >
         <DetailHero
           amount={formatCurrency(budget.spent, budget.currency)}
-          subtitle={`of ${formatCurrency(budget.amount, budget.currency)}`}
+          subtitle={`of ${formatCurrency(effectiveAmount, budget.currency)}`}
         />
         <div style={{ marginBottom: theme.spacing.lg }}>
           <ProgressBar progress={pct} color={barColor} />
@@ -158,6 +179,9 @@ export function BudgetDetailPage() {
             { label: 'Alert', value: `${budget.alertThreshold}%` },
             { label: 'Started', value: budget.startDate },
             ...(budget.endDate ? [{ label: 'Ends', value: budget.endDate }] : []),
+            ...(rolloverAmount !== 0
+              ? [{ label: 'Rollover', value: `${rolloverAmount > 0 ? '+' : '-'}${formatCurrency(Math.abs(rolloverAmount), budget.currency)}` }]
+              : []),
           ]}
         />
         <DetailActions

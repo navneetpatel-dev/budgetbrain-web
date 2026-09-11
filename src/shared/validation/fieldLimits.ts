@@ -13,6 +13,7 @@ export const FieldLimits = {
   avatarUrl: { min: 1, max: 500 },
   merchant: { min: 1, max: 255 },
   notes: { min: 1, max: 2000 },
+  tag: { min: 1, max: 30 },
   search: { min: 2, max: 100 },
   entityName: { min: 1, max: 255 },
   categoryName: { min: 1, max: 100 },

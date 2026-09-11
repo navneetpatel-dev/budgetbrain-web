@@ -4,6 +4,10 @@ import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateExpense } from '../hooks/useExpenses';
 import { useCategories } from '@/features/categories/hooks/useCategories';
+import { fetchCategorySuggestion } from '../hooks/useCategorySuggestion';
+import { TagInput } from '../components/TagInput';
+import { SplitWithFamilyField, type SplitPayload } from '@/features/family/components/SplitWithFamilyField';
+import { useCreateSplit } from '@/features/shared/hooks/useFeatures';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -26,6 +30,7 @@ type FieldErrors = {
 export function AddExpensePage() {
   const theme = useTheme();
   const { createMutation, error, setError } = useCreateExpense();
+  const createSplitMutation = useCreateSplit();
   const { categories } = useCategories();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
@@ -33,9 +38,22 @@ export function AddExpensePage() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [categorySuggested, setCategorySuggested] = useState(false);
+  const [splitPayload, setSplitPayload] = useState<SplitPayload | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const isPending = createMutation.isPending;
+
+  const handleMerchantBlur = async () => {
+    if (categoryId || !merchant.trim()) return;
+    const suggestedId = await fetchCategorySuggestion(merchant).catch(() => null);
+    if (suggestedId) {
+      setCategoryId(suggestedId);
+      setCategorySuggested(true);
+      setFieldErrors((f) => ({ ...f, categoryId: undefined }));
+    }
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -52,15 +70,29 @@ export function AddExpensePage() {
     if (!categoryId) next.categoryId = ValidationMessages.categoryRequired;
     setFieldErrors(next);
     if (Object.keys(next).length) return;
-    createMutation.mutate({
-      type: 'expense',
-      amount: Number(amount),
-      merchant,
-      date,
-      paymentMethod,
-      categoryId,
-      notes: notes || undefined,
-    });
+    createMutation.mutate(
+      {
+        type: 'expense',
+        amount: Number(amount),
+        merchant,
+        date,
+        paymentMethod,
+        categoryId,
+        notes: notes || undefined,
+        tags: tags.length ? tags : undefined,
+      },
+      {
+        onSuccess: (created) => {
+          if (splitPayload && created) {
+            createSplitMutation.mutate({
+              groupId: splitPayload.groupId,
+              transactionId: created.id,
+              participants: splitPayload.participants,
+            });
+          }
+        },
+      }
+    );
   };
 
   return (
@@ -79,7 +111,8 @@ export function AddExpensePage() {
         <Input
           label="Merchant"
           value={merchant}
-          onChange={(e) => { setMerchant(e.target.value); setFieldErrors((f) => ({ ...f, merchant: undefined })); }}
+          onChange={(e) => { setMerchant(e.target.value); setCategorySuggested(false); setFieldErrors((f) => ({ ...f, merchant: undefined })); }}
+          onBlur={() => { void handleMerchantBlur(); }}
           placeholder="e.g. Starbucks"
           maxLength={maxLen('merchant')}
           disabled={isPending}
@@ -103,11 +136,19 @@ export function AddExpensePage() {
           getLabel={(v) => PAYMENT_METHODS.find((p) => p.id === v)?.label ?? v}
           disabled={isPending}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: theme.spacing.sm }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Category</label>
+          {categorySuggested ? (
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: theme.colors.primary, backgroundColor: theme.colors.primarySoft,
+              borderRadius: theme.radii.full, padding: '2px 8px', fontFamily: 'Inter, sans-serif',
+            }}>Suggested</span>
+          ) : null}
+        </div>
         <OptionChipList
           items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}
           selectedId={categoryId}
-          onSelect={(id) => { setCategoryId(id); setFieldErrors((f) => ({ ...f, categoryId: undefined })); }}
+          onSelect={(id) => { setCategoryId(id); setCategorySuggested(false); setFieldErrors((f) => ({ ...f, categoryId: undefined })); }}
           disabled={isPending}
           error={fieldErrors.categoryId}
         />
@@ -121,6 +162,8 @@ export function AddExpensePage() {
           disabled={isPending}
           error={fieldErrors.notes}
         />
+        <TagInput value={tags} onChange={setTags} disabled={isPending} />
+        <SplitWithFamilyField amount={Number(amount) || 0} onSplitChange={setSplitPayload} disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Save Expense" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

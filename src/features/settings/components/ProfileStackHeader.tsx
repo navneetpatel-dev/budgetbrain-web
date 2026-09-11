@@ -15,7 +15,9 @@ export type ProfileScreenKey =
   | 'notifications'
   | 'support'
   | 'privacy'
-  | 'terms';
+  | 'terms'
+  | 'loans'
+  | 'subscriptions';
 
 const PROFILE_SCREEN_TITLES: Record<ProfileScreenKey, string> = {
   goals: 'Goals',
@@ -32,6 +34,8 @@ const PROFILE_SCREEN_TITLES: Record<ProfileScreenKey, string> = {
   support: 'Support',
   privacy: 'Privacy Policy',
   terms: 'Terms of Service',
+  loans: 'Debts',
+  subscriptions: 'Subscriptions',
 };
 
 export function ProfileStackHeader({

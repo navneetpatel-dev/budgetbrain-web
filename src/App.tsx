@@ -42,10 +42,17 @@ import { AccountsPage } from '@/features/accounts/screens/AccountsPage';
 import { InvestmentsPage } from '@/features/investments/screens/InvestmentsPage';
 import { SearchPage } from '@/features/search/screens/SearchPage';
 import { ReportsPage } from '@/features/reports/screens/ReportsPage';
+import { RecapPage } from '@/features/reports/screens/RecapPage';
 import { FamilyPage } from '@/features/family/screens/FamilyPage';
 import { IntegrationsPage } from '@/features/integrations/screens/IntegrationsPage';
 import { NotificationsPage } from '@/features/notifications/screens/NotificationsPage';
 import { SupportPage } from '@/features/support/screens/SupportPage';
+import { LoansPage } from '@/features/loans/screens/LoansPage';
+import { AddLoanPage } from '@/features/loans/screens/AddLoanPage';
+import { LoanDetailPage } from '@/features/loans/screens/LoanDetailPage';
+import { PayLoanPage } from '@/features/loans/screens/PayLoanPage';
+import { SubscriptionsPage } from '@/features/subscriptions/screens/SubscriptionsPage';
+import { AddSubscriptionPage } from '@/features/subscriptions/screens/AddSubscriptionPage';
 import { PrivacyPage, TermsPage } from '@/features/legal/screens/LegalPages';
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
@@ -107,10 +114,17 @@ export default function App() {
                       <Route path="/investments" element={<InvestmentsPage />} />
                       <Route path="/search" element={<SearchPage />} />
                       <Route path="/reports" element={<ReportsPage />} />
+                      <Route path="/reports/recap" element={<RecapPage />} />
                       <Route path="/family" element={<FamilyPage />} />
                       <Route path="/integrations" element={<IntegrationsPage />} />
                       <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/support" element={<SupportPage />} />
+                      <Route path="/loans" element={<LoansPage />} />
+                      <Route path="/loan/add" element={<AddLoanPage />} />
+                      <Route path="/loan/:id" element={<LoanDetailPage />} />
+                      <Route path="/loan/:id/pay" element={<PayLoanPage />} />
+                      <Route path="/subscriptions" element={<SubscriptionsPage />} />
+                      <Route path="/subscriptions/add" element={<AddSubscriptionPage />} />
                       <Route path="/privacy" element={<PrivacyPage />} />
                       <Route path="/terms" element={<TermsPage />} />
                       <Route path="*" element={<div>Not Found</div>} />

@@ -55,15 +55,17 @@ export function BudgetsPage() {
         data={isLoading ? [] : budgets}
         keyExtractor={(b: Budget) => b.id}
         renderItem={(b) => {
-          const pct = toSafePercent(b.spent, b.amount);
+          const effectiveAmount = b.effectiveAmount ?? b.amount;
+          const pct = toSafePercent(b.spent, effectiveAmount);
           const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary;
-          const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : undefined;
+          const rolloverAmount = b.rolloverAmount ?? 0;
+          const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : rolloverAmount !== 0 ? `${rolloverAmount > 0 ? '+' : '-'}${formatCurrency(Math.abs(rolloverAmount), b.currency)} rollover` : undefined;
           return (
             <ProgressEntityRow
               title={b.name}
               subtitle={`${b.type.charAt(0).toUpperCase()}${b.type.slice(1)}${b.category?.name ? ` · ${b.category.name}` : ' · All spending'}`}
               value={formatCurrency(b.spent ?? 0, b.currency)}
-              secondaryValue={`/ ${formatCurrency(b.amount, b.currency)}`}
+              secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
               progress={pct}
               progressColor={color}
               footerLeft={`${pct}% used`}

@@ -118,6 +118,14 @@ export async function apiDelete<T>(url: string, config?: AxiosRequestConfig): Pr
   return data.data;
 }
 
+/** Multipart form upload (e.g. CSV import) — field name must match what the backend expects. */
+export async function apiPostFormData<T>(url: string, formData: FormData): Promise<T> {
+  const { data } = await api.post<ApiResponse<T>>(url, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return data.data;
+}
+
 /** Extract a user-facing message from axios / API errors (prefers Zod field message). */
 export function getApiErrorMessage(err: unknown, fallback = 'Something went wrong'): string {
   if (axios.isAxiosError(err)) {

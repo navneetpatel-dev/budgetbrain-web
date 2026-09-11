@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, Toggle } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useCreateBudget } from '../hooks/useBudgets';
 import { useCategories } from '@/features/categories/hooks/useCategories';
@@ -36,6 +36,7 @@ export function AddBudgetPage() {
   const [endDate, setEndDate] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('80');
   const [categoryId, setCategoryId] = useState('__all__');
+  const [rollover, setRollover] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const isPending = createMutation.isPending;
@@ -74,6 +75,7 @@ export function AddBudgetPage() {
       endDate: type === 'custom' ? endDate : undefined,
       alertThreshold: Number(alertThreshold),
       categoryId: !categoryId || categoryId === ALL_SPENDING ? undefined : categoryId,
+      rollover: type === 'custom' ? false : rollover,
     });
   };
 
@@ -164,6 +166,18 @@ export function AddBudgetPage() {
           disabled={isPending}
           mode="sheet"
         />
+        {type !== 'custom' ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md,
+            padding: `${theme.spacing.md}px 0`, marginBottom: theme.spacing.lg,
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>Roll over unused amount</span>
+              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
+            </div>
+            <Toggle value={rollover} onChange={setRollover} disabled={isPending} label="Roll over unused amount" />
+          </div>
+        ) : null}
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Create Budget" onPress={handleSubmit} loading={isPending} size="lg" />
       </form>

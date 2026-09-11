@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Button, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -10,6 +10,9 @@ import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useExpenseDetail } from '../hooks/useExpenses';
 import { useCategories } from '@/features/categories/hooks/useCategories';
+import { TagInput } from '../components/TagInput';
+import { SplitWithFamilyField, type SplitPayload } from '@/features/family/components/SplitWithFamilyField';
+import { useCreateSplit } from '@/features/shared/hooks/useFeatures';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -41,7 +44,11 @@ export function ExpenseDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [splitPayload, setSplitPayload] = useState<SplitPayload | null>(null);
+  const [splitSaved, setSplitSaved] = useState(false);
+  const createSplitMutation = useCreateSplit();
 
   if (isLoading) {
     return (
@@ -71,8 +78,8 @@ export function ExpenseDetailPage() {
 
   if (editing) {
     const isPending = updateMutation.isPending;
-    const handleSave = (e: FormEvent) => {
-      e.preventDefault();
+    const handleSave = (e?: FormEvent) => {
+      e?.preventDefault();
       setError(null);
       const next: FieldErrors = {};
       const amountErr = validateAmount(amount);
@@ -93,6 +100,7 @@ export function ExpenseDetailPage() {
         paymentMethod,
         categoryId,
         notes: notes || undefined,
+        tags,
       });
     };
     return (
@@ -127,6 +135,7 @@ export function ExpenseDetailPage() {
             error={fieldErrors.categoryId}
           />
           <Input label="Notes" maxLength={maxLen('notes')} value={notes} onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }} multiline disabled={isPending} error={fieldErrors.notes} />
+          <TagInput value={tags} onChange={setTags} disabled={isPending} />
           {error ? <FormErrorBanner message={error} /> : null}
           <FormActions
             primaryTitle="Save Changes"
@@ -158,6 +167,7 @@ export function ExpenseDetailPage() {
             { label: 'Date', value: txn.date },
             { label: 'Payment', value: txn.paymentMethod ? txn.paymentMethod.replace(/_/g, ' ') : '' },
             { label: 'Notes', value: txn.notes ?? '' },
+            { label: 'Tags', value: (txn.tags ?? []).join(', ') },
           ]}
         />
         <DetailActions
@@ -170,6 +180,7 @@ export function ExpenseDetailPage() {
             setPaymentMethod(txn.paymentMethod ?? 'cash');
             setCategoryId(txn.categoryId ?? txn.category?.id ?? '');
             setNotes(txn.notes ?? '');
+            setTags(txn.tags ?? []);
             setFieldErrors({});
           }}
           secondaryTitle="Duplicate"
@@ -178,6 +189,24 @@ export function ExpenseDetailPage() {
           onDestructive={() => { void handleDelete(); }}
           destructiveLoading={deleteMutation.isPending}
         />
+        {txn.type === 'expense' ? (
+          <div style={{ marginTop: theme.spacing.xl }}>
+            <SplitWithFamilyField amount={txn.amount} onSplitChange={setSplitPayload} disabled={createSplitMutation.isPending} />
+            {splitPayload ? (
+              <Button
+                title={splitSaved ? 'Split saved' : 'Save split'}
+                onPress={() => {
+                  createSplitMutation.mutate(
+                    { groupId: splitPayload.groupId, transactionId: txn.id, participants: splitPayload.participants },
+                    { onSuccess: () => setSplitSaved(true) }
+                  );
+                }}
+                loading={createSplitMutation.isPending}
+                variant="outline"
+              />
+            ) : null}
+          </div>
+        ) : null}
       </FormStackScreen>
       <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
     </>

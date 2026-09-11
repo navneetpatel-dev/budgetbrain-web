@@ -104,6 +104,44 @@ export function DashboardPage() {
               onPress={() => navigate('/net-worth')}
             />
           </SummaryMetricsGrid>
+          {data.noSpendStreak > 0 && (
+            <Card variant="elevated" style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+              <span style={{ fontSize: 28 }}>🔥</span>
+              <div>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 700, color: theme.colors.text }}>
+                  {data.noSpendStreak}-day no-spend streak
+                </span>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary }}>
+                  Keep it up!
+                </span>
+              </div>
+            </Card>
+          )}
+          {data.upcomingBills.length > 0 && (
+            <div>
+              <SectionHeader title="Upcoming bills" action="See all" onAction={() => navigate('/subscriptions')} />
+              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
+                {data.upcomingBills.map((bill, i) => (
+                  <div
+                    key={bill.id}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
+                      borderBottom: i < data.upcomingBills.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>{bill.merchant}</span>
+                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Due {bill.nextDueDate}</span>
+                    </div>
+                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: theme.colors.text, flexShrink: 0, marginLeft: theme.spacing.md }}>
+                      {formatCurrency(bill.amount, bill.currency)}
+                    </span>
+                  </div>
+                ))}
+              </Card>
+            </div>
+          )}
           {categoryBreakdown.length > 0 && (
             <div>
               <SectionHeader

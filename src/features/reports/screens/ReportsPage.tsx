@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
@@ -8,6 +9,7 @@ import { DateBounds } from '@/shared/utils/dateBounds';
 
 export function ReportsPage() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { download, loading } = useReports();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -21,6 +23,7 @@ export function ReportsPage() {
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="reports" subtitle="Export your data" />} inset="stack">
+      <Button title="View monthly recap" onPress={() => navigate('/reports/recap')} variant="outline" icon="sparkles" size="lg" />
       <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Date Range</label>
         <div style={{ display: 'flex', gap: theme.spacing.sm }}>

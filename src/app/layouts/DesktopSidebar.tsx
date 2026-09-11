@@ -25,6 +25,8 @@ const SECONDARY_NAV: NavItem[] = [
   { route: '/goals', label: 'Goals', icon: 'target' },
   { route: '/income', label: 'Income', icon: 'trendingUp' },
   { route: '/ai', label: 'AI Coach', icon: 'sparkles' },
+  { route: '/loans', label: 'Debts', icon: 'creditCard' },
+  { route: '/subscriptions', label: 'Subscriptions', icon: 'calendar' },
 ];
 
 export function DesktopSidebar() {

@@ -3,7 +3,7 @@ import { apiDownloadBinary, apiGet, apiPatch, apiPost, getApiErrorMessage } from
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { ensureArray } from '@/shared/utils/listData';
-import type { FinancialAccount, Investment, NotificationItem, ParsedTransactionPending } from '@/shared/types';
+import type { ExpenseSplitParticipant, FamilyGroupMember, FinancialAccount, Investment, NotificationItem, ParsedTransactionPending, SplitBalance, Transaction } from '@/shared/types';
 import { useState } from 'react';
 import { FieldLimits } from '@/shared/validation/fieldLimits';
 
@@ -120,6 +120,61 @@ export function useFamily() {
   });
 
   return { memberships: data, isLoading, createMutation, joinMutation, error, setError };
+}
+
+export function useFamilyMembers(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ['family-members', groupId],
+    queryFn: () => apiGet<{ members: FamilyGroupMember[] }>(`/family/groups/${groupId}/members`),
+    enabled: !!groupId,
+    select: (d) => ensureArray<FamilyGroupMember>(d.members),
+  });
+}
+
+export function useFamilyBalances(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ['family-balances', groupId],
+    queryFn: () => apiGet<{ balances: SplitBalance[] }>(`/family/groups/${groupId}/balances`),
+    enabled: !!groupId,
+    select: (d) => ensureArray<SplitBalance>(d.balances),
+  });
+}
+
+export type PendingSplit = ExpenseSplitParticipant & { transaction?: Pick<Transaction, 'id' | 'merchant' | 'amount' | 'date'> & { userId?: string } };
+
+/** Individual unsettled splits (not the aggregated balances) so each can be settled one at a time. */
+export function useGroupSplits(groupId: string | undefined) {
+  return usePaginatedList<PendingSplit, 'splits'>({
+    queryKey: ['family-splits', groupId],
+    url: `/family/groups/${groupId}/splits`,
+    itemsKey: 'splits',
+    enabled: !!groupId,
+  });
+}
+
+export function useSettleSplit() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (splitId: string) => apiPost(`/family/splits/${splitId}/settle`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['family-splits'] });
+      void queryClient.invalidateQueries({ queryKey: ['family-balances'] });
+    },
+  });
+}
+
+export function useCreateSplit() {
+  return useMutation({
+    mutationFn: ({
+      groupId,
+      transactionId,
+      participants,
+    }: {
+      groupId: string;
+      transactionId: string;
+      participants: { userId: string; shareAmount: number }[];
+    }) => apiPost(`/family/groups/${groupId}/splits`, { transactionId, participants }),
+  });
 }
 
 export function useNotifications() {

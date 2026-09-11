@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { SheetSelect, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, FormErrorBanner, Input, Button } from '@/shared/components/ui/index';
@@ -6,6 +7,7 @@ import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
+import { apiPostFormData, getApiErrorMessage } from '@/shared/services/api';
 import { useIntegrations } from '@/features/shared/hooks/useFeatures';
 import { useCategories } from '@/features/categories/hooks/useCategories';
 import { maxLen, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
@@ -25,12 +27,37 @@ export function IntegrationsPage() {
     setError,
   } = useIntegrations();
   const { categories } = useCategories();
+  const queryClient = useQueryClient();
   const [categoryById, setCategoryById] = useState<Record<string, string>>({});
   const [categoryErrorById, setCategoryErrorById] = useState<Record<string, string | undefined>>({});
   const [smsContent, setSmsContent] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [parseErrors, setParseErrors] = useState<ParseErrors>({});
+  const [csvUploading, setCsvUploading] = useState(false);
+  const [csvError, setCsvError] = useState<string | null>(null);
+  const [csvSuccess, setCsvSuccess] = useState<string | null>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCsvSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setCsvError(null);
+    setCsvSuccess(null);
+    setCsvUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const result = await apiPostFormData<{ imported: number }>('/integrations/csv', formData);
+      setCsvSuccess(`Imported ${result.imported} row${result.imported === 1 ? '' : 's'} — review them below.`);
+      void queryClient.invalidateQueries({ queryKey: ['integrations-pending'] });
+    } catch (err) {
+      setCsvError(getApiErrorMessage(err, 'Could not import CSV file'));
+    } finally {
+      setCsvUploading(false);
+    }
+  };
 
   const handleParseSms = () => {
     setError(null);
@@ -64,6 +91,22 @@ export function IntegrationsPage() {
       ListHeaderComponent={
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg, marginBottom: theme.spacing.lg }}>
           {error ? <FormErrorBanner message={error} /> : null}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Import bank statement</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary }}>CSV with date, description, and amount columns</span>
+            {csvError ? <FormErrorBanner message={csvError} /> : null}
+            {csvSuccess ? (
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: theme.colors.success }}>{csvSuccess}</span>
+            ) : null}
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => { void handleCsvSelected(e); }}
+              style={{ display: 'none' }}
+            />
+            <Button title="Choose CSV file" onPress={() => csvInputRef.current?.click()} loading={csvUploading} variant="outline" icon="upload" />
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Parse SMS</span>
             <Input

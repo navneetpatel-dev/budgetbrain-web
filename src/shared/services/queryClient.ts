@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
       // Keep visited module data warm so sidebar switches don't flash skeletons.
       gcTime: 15 * 60 * 1000,
       retry: 2,
-      placeholderData: (previousData) => previousData,
+      placeholderData: (previousData: unknown) => previousData,
     },
   },
 });

@@ -219,12 +219,13 @@ interface InputProps {
   min?: string;
   max?: string;
   onKeyDown?: (e: React.KeyboardEvent) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 export function Input({
   label, error, helperText, secureToggle, leftIcon,
   variant = 'default', value, onChange, placeholder, type: inputType,
-  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, maxLength, min, max, onKeyDown,
+  name, multiline, rows = 4, autoFocus, autoComplete, readOnly, disabled, maxLength, min, max, onKeyDown, onBlur,
 }: InputProps) {
   const theme = useTheme();
   const [hidden, setHidden] = useState(inputType === 'password');
@@ -302,7 +303,7 @@ export function Input({
             disabled={disabled}
             maxLength={maxLength}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => { setFocused(false); onBlur?.(e); }}
             onKeyDown={onKeyDown}
             style={sharedInputStyle}
           />
@@ -321,7 +322,7 @@ export function Input({
             min={min}
             max={max}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => { setFocused(false); onBlur?.(e); }}
             onKeyDown={onKeyDown}
             style={sharedInputStyle}
           />
@@ -891,6 +892,50 @@ export function ListRow({
   }
 
   return <div>{content}</div>;
+}
+
+/* ── Toggle ── */
+
+export function Toggle({
+  value, onChange, disabled, label,
+}: {
+  value: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string;
+}) {
+  const theme = useTheme();
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      aria-label={label}
+      disabled={disabled}
+      onClick={() => onChange(!value)}
+      style={{
+        width: 44,
+        height: 26,
+        borderRadius: 13,
+        border: 'none',
+        padding: 2,
+        flexShrink: 0,
+        backgroundColor: value ? theme.colors.primary : (theme.isDark ? 'rgba(255,255,255,0.15)' : theme.colors.borderSubtle),
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: value ? 'flex-end' : 'flex-start',
+        transition: 'background-color 0.15s',
+      }}
+    >
+      <span style={{
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        backgroundColor: '#fff',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+      }} />
+    </button>
+  );
 }
 
 /* ── GroupedCard ── */
