@@ -1,7 +1,10 @@
 import type { CSSProperties } from 'react';
+import { useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 
 export type ActionSheetItem = {
   id: string;
@@ -25,7 +28,8 @@ export function ActionSheet({
 }) {
   const theme = useTheme();
   const { isTablet, isDesktop, width } = useResponsive();
-  if (!visible) return null;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(visible, dialogRef, onClose);
 
   const centered = isTablet;
   const sheetMaxWidth = isDesktop ? 560 : isTablet ? Math.min(520, width - 48) : undefined;
@@ -45,10 +49,19 @@ export function ActionSheet({
     fontFamily: 'Inter, sans-serif',
   };
 
+  const sheetDuration = theme.motion.duration.base / 1000;
+  const sheetTransition = { duration: sheetDuration, ease: theme.motion.easing };
+
   return (
-    <div
+    <AnimatePresence>
+      {visible && (
+    <motion.div
       role="presentation"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={sheetTransition}
       style={{
         position: 'fixed',
         inset: 0,
@@ -60,11 +73,17 @@ export function ActionSheet({
         padding: centered ? 24 : 0,
       }}
     >
-      <div
+      <motion.div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: centered ? 8 : 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: centered ? 8 : 24 }}
+        transition={sheetTransition}
         style={{
           width: centered ? '100%' : '100%',
           maxWidth: sheetMaxWidth ?? '100%',
@@ -80,7 +99,6 @@ export function ActionSheet({
             ? `${theme.spacing.lg}px ${theme.spacing.xl}px`
             : `${theme.spacing.sm}px ${theme.spacing.lg}px max(16px, env(safe-area-inset-bottom))`,
           boxShadow: theme.shadows.lg,
-          animation: centered ? 'bb-fade-up 0.2s ease' : 'bb-sheet-up 0.22s ease',
         }}
       >
         {!centered ? (
@@ -105,6 +123,7 @@ export function ActionSheet({
         }}>
           {items.map((item, i) => (
             <button
+              className="bb-interactive"
               key={item.id}
               type="button"
               onClick={() => {
@@ -148,6 +167,7 @@ export function ActionSheet({
           ))}
         </div>
         <button
+          className="bb-interactive"
           type="button"
           onClick={onClose}
           style={{
@@ -160,7 +180,9 @@ export function ActionSheet({
         >
           Cancel
         </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

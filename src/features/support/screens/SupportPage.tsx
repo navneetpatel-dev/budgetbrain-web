@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, Card, EmptyState, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, Card, EmptyState, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { EntityRow } from '@/shared/components/ui/list-rows';
 import { SupportSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -17,6 +17,7 @@ export function SupportPage() {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [justSubmitted, setJustSubmitted] = useState(false);
 
   const resetForm = () => {
     setShowForm(false);
@@ -37,7 +38,13 @@ export function SupportPage() {
     if (Object.keys(next).length) return;
     createMutation.mutate(
       { subject, message },
-      { onSuccess: () => resetForm() }
+      {
+        onSuccess: () => {
+          resetForm();
+          setJustSubmitted(true);
+          setTimeout(() => setJustSubmitted(false), 2500);
+        },
+      }
     );
   };
 
@@ -85,7 +92,13 @@ export function SupportPage() {
       inset="stack"
       data={isLoading ? [] : tickets}
       keyExtractor={(item) => item.id}
-      ListHeaderComponent={showForm && !isLoading ? ticketForm : null}
+      ListHeaderComponent={
+        showForm && !isLoading
+          ? ticketForm
+          : justSubmitted
+            ? <div style={{ marginBottom: theme.spacing.lg }}><FormSuccessBanner message="Ticket submitted — we'll get back to you soon" /></div>
+            : null
+      }
       renderItem={(t) => (
         <EntityRow
           title={t.subject}

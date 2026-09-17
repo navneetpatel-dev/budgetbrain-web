@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, Toggle } from '@/shared/components/ui/index';
+import { Input, ProgressBar, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner, Toggle } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -18,7 +18,7 @@ export function BudgetDetailPage() {
   const goBack = useStackBack('/budgets');
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { budget, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useBudgetDetail(id);
+  const { budget, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation, showSuccess } = useBudgetDetail(id);
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('');
@@ -127,8 +127,8 @@ export function BudgetDetailPage() {
               padding: `${theme.spacing.md}px 0`, marginBottom: theme.spacing.sm,
             }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>Roll over unused amount</span>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodyMedium.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>Roll over unused amount</span>
+                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
               </div>
               <Toggle value={rollover} onChange={setRollover} disabled={isPending} label="Roll over unused amount" />
             </div>
@@ -160,6 +160,7 @@ export function BudgetDetailPage() {
         subtitle={`${pct}% used`}
         onBack={goBack}
       >
+        {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
           amount={formatCurrency(budget.spent, budget.currency)}
           subtitle={`of ${formatCurrency(effectiveAmount, budget.currency)}`}

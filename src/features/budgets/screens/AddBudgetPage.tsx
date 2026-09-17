@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner, Toggle } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner, Toggle } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateBudget } from '../hooks/useBudgets';
 import { useCategories } from '@/features/categories/hooks/useCategories';
@@ -27,7 +28,7 @@ type FieldErrors = {
 
 export function AddBudgetPage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateBudget();
+  const { createMutation, error, setError, showSuccess } = useCreateBudget();
   const { categories } = useCategories();
   const [name, setName] = useState('');
   const [type, setType] = useState<Period>('monthly');
@@ -79,14 +80,6 @@ export function AddBudgetPage() {
     });
   };
 
-  const labelStyle = {
-    display: 'block' as const,
-    fontSize: 13,
-    fontWeight: 600,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
-    fontFamily: 'Inter, sans-serif',
-  };
 
   return (
     <FormStackScreen title="Create Budget" eyebrow="New Budget" icon="budgets">
@@ -100,7 +93,7 @@ export function AddBudgetPage() {
           disabled={isPending}
           error={fieldErrors.name}
         />
-        <label style={labelStyle}>Period</label>
+        <FormFieldLabel>Period</FormFieldLabel>
         <OptionChips
           options={BUDGET_TYPES.map((t) => t.id)}
           value={type}
@@ -158,7 +151,7 @@ export function AddBudgetPage() {
           disabled={isPending}
           error={fieldErrors.alertThreshold}
         />
-        <label style={labelStyle}>Category (optional)</label>
+        <FormFieldLabel>Category (optional)</FormFieldLabel>
         <OptionChipList
           items={categoryItems}
           selectedId={categoryId}
@@ -172,14 +165,15 @@ export function AddBudgetPage() {
             padding: `${theme.spacing.md}px 0`, marginBottom: theme.spacing.lg,
           }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>Roll over unused amount</span>
-              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
+              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodyMedium.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>Roll over unused amount</span>
+              <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize, color: theme.colors.textTertiary, marginTop: 2 }}>Carry last period's leftover (or deficit) into this one</span>
             </div>
             <Toggle value={rollover} onChange={setRollover} disabled={isPending} label="Roll over unused amount" />
           </div>
         ) : null}
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Create Budget" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Budget created" /> : null}
+        <Button title="Create Budget" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

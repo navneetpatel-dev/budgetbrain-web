@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card, Button, Input, EmptyState, FormErrorBanner, SectionHeader } from '@/shared/components/ui/index';
+import { Card, Button, Input, EmptyState, FormErrorBanner, FormSuccessBanner, SectionHeader } from '@/shared/components/ui/index';
 import { FamilySkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useAppSelector } from '@/shared/store/hooks';
@@ -54,6 +54,7 @@ function GroupBalances({ groupId }: { groupId: string }) {
                 {split.transaction?.merchant ?? 'Expense'} — {nameFor(split.userId)}'s share: {formatCurrency(split.shareAmount, currentUser?.currency ?? 'INR')}
               </span>
               <button
+                className="bb-interactive"
                 onClick={() => settleMutation.mutate(split.id)}
                 disabled={settleMutation.isPending}
                 style={{ padding: '5px 12px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, fontFamily: 'Inter, sans-serif', flexShrink: 0 }}
@@ -70,7 +71,7 @@ function GroupBalances({ groupId }: { groupId: string }) {
 
 export function FamilyPage() {
   const theme = useTheme();
-  const { memberships, isLoading, createMutation, joinMutation, error, setError } = useFamily();
+  const { memberships, isLoading, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess } = useFamily();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -107,7 +108,7 @@ export function FamilyPage() {
       ) : memberships.length > 0 ? (
         memberships.map((m) => (
           <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-            <Card><span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
+            <Card><span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
             <GroupBalances groupId={m.groupId} />
           </div>
         ))
@@ -132,6 +133,7 @@ export function FamilyPage() {
             error={groupNameError}
           />
           {error ? <FormErrorBanner message={error} /> : null}
+          {showCreateSuccess ? <FormSuccessBanner message="Group created" /> : null}
           <div style={{ display: 'flex', gap: theme.spacing.sm }}>
             <Button title="Create" onPress={handleCreate} loading={createMutation.isPending} />
             <Button title="Cancel" onPress={() => { setShowCreate(false); setError(null); setGroupNameError(undefined); }} variant="outline" disabled={createMutation.isPending} />
@@ -150,6 +152,7 @@ export function FamilyPage() {
             error={inviteCodeError}
           />
           {error ? <FormErrorBanner message={error} /> : null}
+          {showJoinSuccess ? <FormSuccessBanner message="Joined group" /> : null}
           <div style={{ display: 'flex', gap: theme.spacing.sm }}>
             <Button title="Join" onPress={handleJoin} loading={joinMutation.isPending} />
             <Button title="Cancel" onPress={() => { setShowJoin(false); setError(null); setInviteCodeError(undefined); }} variant="outline" disabled={joinMutation.isPending} />

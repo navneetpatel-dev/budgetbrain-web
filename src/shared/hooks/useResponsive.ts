@@ -70,7 +70,8 @@ export function useResponsive() {
       isLargeTablet,
       isDesktop,
       isPhone: !isTablet,
-      contentMaxWidth: undefined as number | undefined,
+      // Cap content width at desktop so it doesn't stretch edge-to-edge on ultra-wide monitors.
+      contentMaxWidth: isDesktop ? 1160 : (undefined as number | undefined),
       columns: isDesktop ? 3 : isLargeTablet ? 3 : isTablet ? 2 : 1,
       sidebarWidth: isDesktop ? 260 : 0,
       ...tokens,

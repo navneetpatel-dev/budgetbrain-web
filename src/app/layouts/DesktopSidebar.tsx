@@ -123,6 +123,7 @@ function SidebarLink({ item, isActive, onPress }: { item: NavItem; isActive: boo
   return (
     <button
       onClick={onPress}
+      aria-current={isActive ? 'page' : undefined}
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '10px 12px', borderRadius: theme.radii.md,

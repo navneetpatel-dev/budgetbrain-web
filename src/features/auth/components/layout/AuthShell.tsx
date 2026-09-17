@@ -12,7 +12,8 @@ function PanelEyebrow({ children }: { children: string }) {
   return (
     <span style={{
       display: 'block',
-      fontSize: 12, fontWeight: 600, letterSpacing: 0.2,
+      fontSize: theme.typography.label.fontSize, fontWeight: Number(theme.typography.label.fontWeight),
+      letterSpacing: theme.typography.label.letterSpacing,
       color: theme.colors.primary, textTransform: 'capitalize',
       marginBottom: theme.spacing.lg,
       fontFamily: 'Inter, sans-serif',
@@ -208,11 +209,11 @@ export function AuthFooter({
       gap: 4,
     }}>
       {text && (
-        <span style={{ fontSize: 15, fontWeight: 500, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
+        <span style={{ fontSize: theme.typography.bodyMedium.fontSize, fontWeight: Number(theme.typography.bodyMedium.fontWeight), color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
           {text}
         </span>
       )}
-      <Link to={href} style={{ fontSize: 15, fontWeight: 600, color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>
+      <Link to={href} style={{ fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>
         {linkText}
       </Link>
     </div>
@@ -234,7 +235,7 @@ export function AuthLink({
     <Link
       to={to}
       style={{
-        fontSize: 15, fontWeight: 600, color: theme.colors.primary,
+        fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.primary,
         fontFamily: 'Inter, sans-serif',
         display: 'block',
         textAlign: align,

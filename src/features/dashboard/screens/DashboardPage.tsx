@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
-import { SummaryCard, SectionHeader, Card, ProgressBar, EmptyState } from '@/shared/components/ui/index';
-import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
+import { SummaryCard, SectionHeader, Card, EmptyState } from '@/shared/components/ui/index';
+import { EntityRow, ProgressEntityRow, TransactionRow } from '@/shared/components/ui/list-rows';
 import { DashboardContentSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
+import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useAppSelector } from '@/shared/store/hooks';
 import { apiGet } from '@/shared/services/api';
@@ -22,6 +23,7 @@ interface NetWorthSummary {
 export function DashboardPage() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { stackGap } = useScreenInsets();
   const user = useAppSelector((s) => s.auth.user);
   const { data, isLoading, isError, refetch } = useDashboard();
   const { data: netWorthData } = useQuery({
@@ -33,6 +35,7 @@ export function DashboardPage() {
   const recentTransactions = ensureArray<Transaction>(data?.recentTransactions);
   const budgets = ensureArray<Budget>(data?.budgets);
   const goals = ensureArray<Goal>(data?.goals);
+  const upcomingBills = ensureArray<NonNullable<typeof data>['upcomingBills'][number]>(data?.upcomingBills);
   const goalsProgress = goals.length
     ? Math.round(goals.reduce((sum, g) => sum + toSafePercent(g.currentAmount, g.targetAmount), 0) / goals.length)
     : null;
@@ -44,6 +47,8 @@ export function DashboardPage() {
     total: string;
     category?: import('@/shared/types').Category;
   }>(data?.categoryBreakdown);
+
+  const sectionStack = { display: 'flex' as const, flexDirection: 'column' as const, gap: stackGap };
 
   return (
     <ScreenWrapper
@@ -69,7 +74,7 @@ export function DashboardPage() {
           onAction={() => void refetch()}
         />
       ) : (
-        <>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.section }}>
           <SummaryMetricsGrid>
             <SummaryCard
               title="Income"
@@ -104,6 +109,7 @@ export function DashboardPage() {
               onPress={() => navigate('/net-worth')}
             />
           </SummaryMetricsGrid>
+
           {data.noSpendStreak > 0 && (
             <Card variant="elevated" style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
               <span style={{ fontSize: 28 }}>🔥</span>
@@ -117,31 +123,24 @@ export function DashboardPage() {
               </div>
             </Card>
           )}
-          {data.upcomingBills.length > 0 && (
+
+          {upcomingBills.length > 0 && (
             <div>
               <SectionHeader title="Upcoming bills" action="See all" onAction={() => navigate('/subscriptions')} />
-              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
-                {data.upcomingBills.map((bill, i) => (
-                  <div
+              <div style={sectionStack}>
+                {upcomingBills.map((bill) => (
+                  <EntityRow
                     key={bill.id}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
-                      borderBottom: i < data.upcomingBills.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
-                    }}
-                  >
-                    <div style={{ minWidth: 0 }}>
-                      <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 600, color: theme.colors.text }}>{bill.merchant}</span>
-                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Due {bill.nextDueDate}</span>
-                    </div>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: theme.colors.text, flexShrink: 0, marginLeft: theme.spacing.md }}>
-                      {formatCurrency(bill.amount, bill.currency)}
-                    </span>
-                  </div>
+                    title={bill.merchant}
+                    subtitle={`Due ${bill.nextDueDate}`}
+                    value={formatCurrency(bill.amount, bill.currency)}
+                    onPress={() => navigate('/subscriptions')}
+                  />
                 ))}
-              </Card>
+              </div>
             </div>
           )}
+
           {categoryBreakdown.length > 0 && (
             <div>
               <SectionHeader
@@ -160,63 +159,56 @@ export function DashboardPage() {
               </Card>
             </div>
           )}
+
           {budgets.length > 0 && (
             <div>
               <SectionHeader title="Budget Progress" action="See all" onAction={() => navigate('/budgets')} />
-              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
-                {budgets.map((b, i) => {
-                  const pct = toSafePercent(b.spent, b.amount);
+              <div style={sectionStack}>
+                {budgets.map((b) => {
+                  const effectiveAmount = b.effectiveAmount ?? b.amount;
+                  const pct = toSafePercent(b.spent, effectiveAmount);
+                  const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary;
                   return (
-                    <div
+                    <ProgressEntityRow
                       key={b.id}
-                      style={{
-                        padding: `14px ${theme.spacing.lg}px`,
-                        paddingTop: i === 0 ? theme.spacing.md : 14,
-                        paddingBottom: i === budgets.length - 1 ? theme.spacing.md : 14,
-                        borderBottom: i < budgets.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.1, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{b.name}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
-                      </div>
-                      <ProgressBar progress={pct} height={6} color={pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary} />
-                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 8, display: 'block', fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(b.spent ?? 0, summary.currency)} / {formatCurrency(b.amount, b.currency)}</span>
-                    </div>
+                      title={b.name}
+                      value={formatCurrency(b.spent ?? 0, summary.currency)}
+                      secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
+                      progress={pct}
+                      progressColor={color}
+                      footerRight={`${pct}%`}
+                      onPress={() => navigate(`/budget/${b.id}`)}
+                    />
                   );
                 })}
-              </Card>
+              </div>
             </div>
           )}
+
           {goals.length > 0 && (
             <div>
               <SectionHeader title="Goal Progress" action="See all" onAction={() => navigate('/goals')} />
-              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
-                {goals.map((g, i) => {
+              <div style={sectionStack}>
+                {goals.map((g) => {
                   const pct = toSafePercent(g.currentAmount, g.targetAmount);
                   return (
-                    <div
+                    <ProgressEntityRow
                       key={g.id}
-                      style={{
-                        padding: `14px ${theme.spacing.lg}px`,
-                        paddingTop: i === 0 ? theme.spacing.md : 14,
-                        paddingBottom: i === goals.length - 1 ? theme.spacing.md : 14,
-                        borderBottom: i < goals.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
-                      }}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.1, color: theme.colors.text, fontFamily: 'Inter, sans-serif' }}>{g.name}</span>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
-                      </div>
-                      <ProgressBar progress={pct} height={6} color={theme.colors.success} />
-                      <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, marginTop: 8, display: 'block', fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(g.currentAmount, g.currency)} / {formatCurrency(g.targetAmount, g.currency)}</span>
-                    </div>
+                      title={g.name}
+                      value={formatCurrency(g.currentAmount, g.currency)}
+                      secondaryValue={`/ ${formatCurrency(g.targetAmount, g.currency)}`}
+                      progress={pct}
+                      progressColor={theme.colors.success}
+                      footerRight={`${pct}%`}
+                      onPress={() => navigate(`/goal/${g.id}`)}
+                    />
                   );
                 })}
-              </Card>
+              </div>
             </div>
           )}
-          <div style={{ marginTop: theme.spacing.sm }}>
+
+          <div>
             <SectionHeader
               title="Recent Activity"
               subtitle={
@@ -228,127 +220,26 @@ export function DashboardPage() {
               onAction={() => navigate('/expenses')}
             />
             {recentTransactions.length === 0 ? (
-              <Card
-                variant="elevated"
-                style={{
-                  padding: `${theme.spacing.xl}px ${theme.spacing.lg}px`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  gap: theme.spacing.md,
-                }}
-              >
-                <div
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 14,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: theme.colors.primarySoft,
-                    border: `1px solid ${theme.colors.primary}28`,
-                  }}
-                >
-                  <AppIcon name="receipt" size={22} color={theme.colors.primary} />
-                </div>
-                <div>
-                  <span style={{
-                    display: 'block',
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 15,
-                    fontWeight: 600,
-                    color: theme.colors.text,
-                    marginBottom: 4,
-                  }}>No activity yet</span>
-                  <span style={{
-                    display: 'block',
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: theme.colors.textSecondary,
-                    lineHeight: '18px',
-                    maxWidth: 260,
-                  }}>Log an expense or income to start tracking your spending.</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate('/expense/add')}
-                  style={{
-                    marginTop: 4,
-                    padding: '10px 16px',
-                    borderRadius: theme.radii.full,
-                    border: 'none',
-                    backgroundColor: theme.colors.primary,
-                    color: theme.colors.onPrimary,
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Add expense
-                </button>
-              </Card>
+              <EmptyState
+                icon="receipt"
+                title="No activity yet"
+                subtitle="Log an expense or income to start tracking your spending."
+                action="Add expense"
+                onAction={() => navigate('/expense/add')}
+              />
             ) : (
-              <Card variant="elevated" style={{ padding: 0, overflow: 'hidden' }}>
-                {recentTransactions.map((txn, i) => (
-                  <div
+              <div style={sectionStack}>
+                {recentTransactions.map((txn) => (
+                  <TransactionRow
                     key={txn.id}
-                    onClick={() => navigate(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: `${theme.spacing.md}px ${theme.spacing.lg}px`,
-                      borderBottom: i < recentTransactions.length - 1 ? `1px solid ${theme.colors.borderSubtle}` : 'none',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md, minWidth: 0 }}>
-                      <div style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 12,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        backgroundColor: txn.category?.color ? txn.category.color + '18' : theme.colors.primarySoft,
-                      }}>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: txn.category?.color ?? theme.colors.primary }}>
-                          {(txn.category?.name ?? txn.merchant ?? 'T')[0].toUpperCase()}
-                        </span>
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <span style={{
-                          display: 'block',
-                          fontFamily: 'Inter, sans-serif',
-                          fontSize: 15,
-                          fontWeight: 600,
-                          color: theme.colors.text,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}>{txn.merchant || txn.category?.name || 'Transaction'}</span>
-                        <span style={{ fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>{txn.date}</span>
-                      </div>
-                    </div>
-                    <span style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: 15,
-                      fontWeight: 700,
-                      flexShrink: 0,
-                      marginLeft: theme.spacing.md,
-                      color: txn.type === 'expense' ? theme.colors.danger : theme.colors.success,
-                    }}>{txn.type === 'expense' ? '-' : '+'}{formatCurrency(txn.amount, txn.currency)}</span>
-                  </div>
+                    transaction={txn}
+                    onPress={() => navigate(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`)}
+                  />
                 ))}
-              </Card>
+              </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </ScreenWrapper>
   );

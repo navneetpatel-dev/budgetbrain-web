@@ -22,17 +22,19 @@ export function useCreateRecurringSeries() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<RecurringSeries>('/recurring-series', data),
     onSuccess: () => {
       invalidate(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to add subscription')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }
 
 export function useDismissRecurringSeries() {

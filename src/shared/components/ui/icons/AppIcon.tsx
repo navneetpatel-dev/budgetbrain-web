@@ -8,6 +8,8 @@ import {
   Lock, X, Upload, Flag, CircleArrowDown, Landmark, Link,
   Sun, Moon, Monitor, ListFilter, type LucideIcon,
 } from 'lucide-react';
+import { useTheme } from '@/shared/theme';
+import type { ThemeIconSizes } from '@/shared/theme';
 
 export type AppIconName =
   | 'home' | 'activity' | 'budgets' | 'profile' | 'add'
@@ -82,13 +84,18 @@ const ICON_MAP: Record<AppIconName, LucideIcon> = {
   personFill: User,
 };
 
+type IconSizeName = keyof ThemeIconSizes;
+
 interface AppIconProps {
   name: AppIconName;
-  size?: number;
+  /** A raw pixel size, or a named token from the icon size scale (defaults to `md` = 20px). */
+  size?: number | IconSizeName;
   color?: string;
 }
 
-export function AppIcon({ name, size = 20, color = 'currentColor' }: AppIconProps) {
+export function AppIcon({ name, size = 'md', color = 'currentColor' }: AppIconProps) {
+  const theme = useTheme();
   const Icon = ICON_MAP[name] ?? HelpCircle;
-  return <Icon size={size} color={color} strokeWidth={2} />;
+  const resolvedSize = typeof size === 'number' ? size : theme.iconSizes[size];
+  return <Icon size={resolvedSize} color={color} strokeWidth={2} />;
 }

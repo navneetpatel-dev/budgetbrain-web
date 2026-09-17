@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
+import { motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
@@ -55,7 +56,7 @@ export function AiCoachPage() {
     border: `1px solid ${focused ? theme.colors.primary + '66' : theme.isDark ? 'rgba(255,255,255,0.12)' : theme.colors.border}`,
     backgroundColor: theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.inputBg,
     boxSizing: 'border-box',
-    transition: 'border-color 0.2s, background-color 0.2s',
+    transition: `border-color ${theme.motion.duration.base}ms, background-color ${theme.motion.duration.base}ms`,
   };
 
   const inputStyle: CSSProperties = {
@@ -200,15 +201,18 @@ export function AiCoachPage() {
             aria-label="Chat message"
             style={inputStyle}
           />
-          <button
+          <motion.button
             type="button"
             onClick={submit}
             disabled={!canSend}
             aria-label="Send message"
+            whileHover={canSend ? { scale: 1.05 } : undefined}
+            whileTap={canSend ? { scale: 0.95 } : undefined}
+            transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
             style={sendBtnStyle}
           >
             <AppIcon name="chevronRight" size={18} color={canSend ? theme.colors.onPrimary : theme.colors.textSecondary} />
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>

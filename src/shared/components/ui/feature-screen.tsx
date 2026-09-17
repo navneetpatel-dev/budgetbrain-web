@@ -34,6 +34,7 @@ export function BackButton({ onPress, size = 'default' }: { onPress?: () => void
 
   return (
     <button
+      className="bb-interactive"
       onClick={onPress ?? stackBack}
       style={{
         width: compact ? 36 : 40, height: compact ? 36 : 40,
@@ -100,6 +101,7 @@ export function StackNavHeader({
           </div>
           {onAction && actionIcon && (
             <button
+              className="bb-interactive"
               onClick={onAction}
               style={{
                 width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -188,6 +190,7 @@ export function FeatureHeader({
         </div>
         {onAction && actionIcon && (
           <button
+            className="bb-interactive"
             onClick={onAction}
             style={{
               width: 42, height: 42, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -221,6 +224,7 @@ export function HeaderIconButton({
 
   return (
     <button
+      className="bb-interactive"
       onClick={onPress}
       style={{
         position: 'relative',
@@ -272,6 +276,7 @@ export function SearchField({ placeholder, onPress, rightAction }: { placeholder
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.sm }}>
       <button
+        className="bb-interactive"
         onClick={onPress}
         style={{
           flex: 1, display: 'flex', alignItems: 'center', gap: theme.spacing.sm,
@@ -331,10 +336,13 @@ export function SheetSelect<T extends string>({
   return (
     <div style={{ marginBottom: compact ? 0 : theme.spacing.lg, opacity: disabled ? 0.55 : 1, ...style }}>
       <button
+        className="bb-interactive"
         type="button"
         disabled={disabled}
         onClick={() => setSheetOpen(true)}
         aria-label={selected ? getLabel(selected) : placeholder}
+        aria-haspopup="dialog"
+        aria-expanded={sheetOpen}
         style={{
           width: compact ? 'auto' : '100%',
           minWidth: compact ? 140 : undefined,
@@ -428,10 +436,12 @@ export function OptionChips<T extends string>({
             const accent = getColor?.(opt) ?? theme.colors.primary;
             return (
               <button
+                className="bb-interactive"
                 key={opt}
                 type="button"
                 disabled={disabled}
                 onClick={() => onChange(opt)}
+                aria-pressed={selected}
                 style={{
                   flex: 1,
                   minWidth: 0,
@@ -472,10 +482,12 @@ export function OptionChips<T extends string>({
           const accent = getColor?.(opt) ?? theme.colors.primary;
           return (
             <button
+              className="bb-interactive"
               key={opt || '__all__'}
               type="button"
               disabled={disabled}
               onClick={() => onChange(opt)}
+              aria-pressed={selected}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 12px', borderRadius: theme.radii.lg,
@@ -539,10 +551,12 @@ export function OptionChipList({
           const accent = item.color ?? theme.colors.primary;
           return (
             <button
+              className="bb-interactive"
               key={item.id}
               type="button"
               disabled={disabled}
               onClick={() => onSelect(item.id)}
+              aria-pressed={isSelected}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '9px 12px', borderRadius: theme.radii.lg,
@@ -584,10 +598,12 @@ export function MultiOptionChips({
           const accent = theme.colors.primary;
           return (
             <button
+              className="bb-interactive"
               key={opt}
               type="button"
               disabled={disabled}
               onClick={() => onToggle(opt)}
+              aria-pressed={isSelected}
               style={{
                 display: 'flex', alignItems: 'center', gap: 6,
                 padding: '9px 14px', borderRadius: theme.radii.lg,
@@ -631,6 +647,7 @@ export function ActionFab({ onPress, label = 'Add' }: { onPress: () => void; lab
 
   return (
     <button
+      className="bb-interactive"
       onClick={onPress}
       style={{
         position: 'fixed',

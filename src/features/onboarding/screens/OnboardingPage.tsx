@@ -1,5 +1,6 @@
 import { useState, type CSSProperties, type FormEvent } from 'react';
 import { Button, Input, FormErrorBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { OptionChips, MultiOptionChips, SheetSelect, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
 import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
@@ -37,7 +38,6 @@ export function OnboardingPage() {
     submit({ name, country, currency, financialGoals: goals, salaryRange, monthlySavingsTarget: Number(savingsTarget) });
   };
 
-  const labelStyle: CSSProperties = { display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' };
   const selectStyle: CSSProperties = { marginBottom: 0 };
 
   return (
@@ -53,7 +53,7 @@ export function OnboardingPage() {
           error={fieldErrors.name}
         />
         <div>
-          <label style={labelStyle}>Country</label>
+          <FormFieldLabel>Country</FormFieldLabel>
           <SheetSelect
             value={country}
             options={COUNTRIES.map((c) => c.code)}
@@ -66,7 +66,7 @@ export function OnboardingPage() {
           />
         </div>
         <div>
-          <label style={labelStyle}>Currency</label>
+          <FormFieldLabel>Currency</FormFieldLabel>
           <SheetSelect
             value={currency}
             options={CURRENCIES.map((c) => c.code)}
@@ -81,7 +81,7 @@ export function OnboardingPage() {
           />
         </div>
         <div>
-          <label style={labelStyle}>Financial Goals</label>
+          <FormFieldLabel>Financial Goals</FormFieldLabel>
           <MultiOptionChips
             options={FINANCIAL_GOALS.map((g) => g.id)}
             selected={goals}
@@ -95,7 +95,7 @@ export function OnboardingPage() {
           {fieldErrors.goals ? <p style={{ color: theme.colors.danger, fontSize: 12, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>{fieldErrors.goals}</p> : null}
         </div>
         <div>
-          <label style={labelStyle}>Salary Range</label>
+          <FormFieldLabel>Salary Range</FormFieldLabel>
           <OptionChips
             options={SALARY_RANGES.map((s) => s.id)}
             value={salaryRange}

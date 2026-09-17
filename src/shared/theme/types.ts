@@ -30,16 +30,35 @@ export interface ThemeColors {
 }
 
 export interface ThemeTypography {
-  display: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string };
-  title: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string };
-  titleSm: { fontSize: number; fontWeight: string; fontFamily?: string };
-  body: { fontSize: number; fontWeight: string; fontFamily?: string };
-  bodyMedium: { fontSize: number; fontWeight: string; fontFamily?: string };
-  bodySemibold: { fontSize: number; fontWeight: string; fontFamily?: string };
-  caption: { fontSize: number; fontWeight: string; fontFamily?: string };
-  label: { fontSize: number; fontWeight: string; letterSpacing: number; textTransform: 'none' | 'uppercase'; fontFamily?: string };
-  amount: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; fontVariantNumeric?: string };
-  amountLg: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; fontVariantNumeric?: string };
+  display: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; lineHeight?: number };
+  title: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; lineHeight?: number };
+  titleSm: { fontSize: number; fontWeight: string; fontFamily?: string; lineHeight?: number };
+  body: { fontSize: number; fontWeight: string; fontFamily?: string; lineHeight?: number };
+  bodyMedium: { fontSize: number; fontWeight: string; fontFamily?: string; lineHeight?: number };
+  bodySemibold: { fontSize: number; fontWeight: string; fontFamily?: string; lineHeight?: number };
+  caption: { fontSize: number; fontWeight: string; fontFamily?: string; lineHeight?: number };
+  label: { fontSize: number; fontWeight: string; letterSpacing: number; textTransform: 'none' | 'uppercase'; fontFamily?: string; lineHeight?: number };
+  amount: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; fontVariantNumeric?: string; lineHeight?: number };
+  amountLg: { fontSize: number; fontWeight: string; letterSpacing: number; fontFamily?: string; fontVariantNumeric?: string; lineHeight?: number };
+}
+
+/** Icon size scale (px) — consumed by AppIcon's `size` convenience prop. */
+export interface ThemeIconSizes {
+  xs: number;
+  sm: number;
+  md: number;
+  lg: number;
+  xl: number;
+}
+
+/** Motion tokens — durations in ms, easing as a cubic-bezier tuple for Framer Motion. */
+export interface ThemeMotion {
+  duration: {
+    fast: number;
+    base: number;
+    slow: number;
+  };
+  easing: [number, number, number, number];
 }
 
 export interface ThemeSpacing {
@@ -74,5 +93,7 @@ export interface AppTheme {
   spacing: ThemeSpacing;
   radii: ThemeRadii;
   shadows: ThemeShadows;
+  iconSizes: ThemeIconSizes;
+  motion: ThemeMotion;
   isDark: boolean;
 }

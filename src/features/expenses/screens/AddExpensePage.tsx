@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateExpense } from '../hooks/useExpenses';
 import { useCategories } from '@/features/categories/hooks/useCategories';
@@ -29,7 +30,7 @@ type FieldErrors = {
 
 export function AddExpensePage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateExpense();
+  const { createMutation, error, setError, showSuccess } = useCreateExpense();
   const createSplitMutation = useCreateSplit();
   const { categories } = useCategories();
   const [amount, setAmount] = useState('');
@@ -128,7 +129,7 @@ export function AddExpensePage() {
           disabled={isPending}
           error={fieldErrors.date}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
+        <FormFieldLabel>Payment Method</FormFieldLabel>
         <OptionChips
           options={PAYMENT_METHODS.map((p) => p.id)}
           value={paymentMethod}
@@ -137,7 +138,7 @@ export function AddExpensePage() {
           disabled={isPending}
         />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: theme.spacing.sm }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Category</label>
+          <FormFieldLabel style={{ marginBottom: 0 }}>Category</FormFieldLabel>
           {categorySuggested ? (
             <span style={{
               fontSize: 10, fontWeight: 700, color: theme.colors.primary, backgroundColor: theme.colors.primarySoft,
@@ -165,7 +166,8 @@ export function AddExpensePage() {
         <TagInput value={tags} onChange={setTags} disabled={isPending} />
         <SplitWithFamilyField amount={Number(amount) || 0} onSplitChange={setSplitPayload} disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Save Expense" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Expense saved" /> : null}
+        <Button title="Save Expense" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

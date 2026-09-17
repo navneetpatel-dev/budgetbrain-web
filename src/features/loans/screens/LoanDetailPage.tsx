@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -21,7 +21,7 @@ export function LoanDetailPage() {
   const goBack = useStackBack('/loans');
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { loan, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useLoanDetail(id);
+  const { loan, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation, showSuccess } = useLoanDetail(id);
   const [name, setName] = useState('');
   const [interestRate, setInterestRate] = useState('');
   const [emiAmount, setEmiAmount] = useState('');
@@ -129,6 +129,7 @@ export function LoanDetailPage() {
   return (
     <>
       <FormStackScreen title={loan.name} eyebrow={loan.type.replace(/_/g, ' ')} subtitle={loan.closed ? 'Paid off' : `${pct}% paid off`} onBack={goBack}>
+        {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
           amount={formatCurrency(loan.remainingBalance, loan.currency)}
           subtitle={`remaining of ${formatCurrency(loan.principal, loan.currency)}`}

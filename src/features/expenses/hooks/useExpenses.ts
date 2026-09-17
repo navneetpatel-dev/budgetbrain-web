@@ -23,6 +23,7 @@ export function useExpenseDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: txn, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['expense', id],
@@ -38,6 +39,8 @@ export function useExpenseDetail(id: string | undefined) {
       void queryClient.invalidateQueries({ queryKey: ['expense', id] });
       invalidateMoneyQueries(queryClient);
       setEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -79,6 +82,7 @@ export function useExpenseDetail(id: string | undefined) {
     updateMutation,
     deleteMutation,
     duplicateMutation,
+    showSuccess,
   };
 }
 
@@ -86,15 +90,18 @@ export function useCreateExpense() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<Transaction>('/expenses', data),
     onSuccess: () => {
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      // Brief confirmation before leaving, instead of an instant navigate-away.
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to add expense')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }

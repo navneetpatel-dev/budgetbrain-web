@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
+import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, Button, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
@@ -9,9 +11,10 @@ import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import type { AppTheme } from '@/shared/theme';
-import { ColorPicker } from '@/shared/components/ui/forms';
+import { ColorPicker, FormFieldLabel } from '@/shared/components/ui/forms';
 import { useCategories, COLORS_PRESET } from '@/features/categories/hooks/useCategories';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { maxLen, textRules } from '@/shared/validation/fieldLimits';
 
@@ -38,6 +41,8 @@ export function CategoriesPage() {
     moveCategory,
   } = useCategories();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
+  const formDialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(showForm, formDialogRef, () => setShowForm(false));
 
   const handleArchive = async (id: string, name: string) => {
     if (await confirm(CONFIRM.archiveCategory(name))) await archiveCategory(id);
@@ -65,17 +70,17 @@ export function CategoriesPage() {
               accentColor={cat.color || theme.colors.primary}
               trailing={
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                  <button type="button" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
+                  <button type="button" className="bb-interactive" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
                     <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
                   </button>
-                  <button type="button" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
+                  <button type="button" className="bb-interactive" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
                     <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
                   </button>
-                  <button type="button" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
+                  <button type="button" className="bb-interactive" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
                     <AppIcon name="edit" size={16} color={theme.colors.primary} />
                   </button>
                   {!cat.isDefault && (
-                    <button type="button" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
+                    <button type="button" className="bb-interactive" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
                       <AppIcon name="trash" size={16} color={theme.colors.danger} />
                     </button>
                   )}
@@ -97,17 +102,38 @@ export function CategoriesPage() {
             )
           }
         />
+        <AnimatePresence>
         {showForm && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 200,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: theme.colors.overlay, padding: 24,
-          }}>
-            <div style={{
-              backgroundColor: theme.colors.surface, borderRadius: theme.radii.xl,
-              padding: theme.spacing.xl, maxWidth: 420, width: '100%', boxShadow: theme.shadows.lg,
+          <motion.div
+            role="presentation"
+            onClick={() => setShowForm(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: theme.motion.duration.base / 1000, ease: theme.motion.easing }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 200,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: theme.colors.overlay, padding: 24,
             }}>
-              <h3 style={{
+            <motion.div
+              ref={formDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="category-form-title"
+              tabIndex={-1}
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: theme.motion.duration.base / 1000, ease: theme.motion.easing }}
+              style={{
+                backgroundColor: theme.colors.surface, borderRadius: theme.radii.xl,
+                padding: theme.spacing.xl, maxWidth: 420, width: '100%', boxShadow: theme.shadows.lg,
+              }}>
+              <h3
+                id="category-form-title"
+                style={{
                 fontFamily: 'Inter, sans-serif', fontSize: 17, fontWeight: 700,
                 color: theme.colors.text, margin: '0 0 4px 0',
               }}>{editingId ? 'Edit Category' : 'New Category'}</h3>
@@ -134,10 +160,7 @@ export function CategoriesPage() {
                 )}
               />
               <div style={{ marginBottom: theme.spacing.lg }}>
-                <span style={{
-                  fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary,
-                  marginBottom: 8, display: 'block', fontFamily: 'Inter, sans-serif',
-                }}>Color</span>
+                <FormFieldLabel>Color</FormFieldLabel>
                 <ColorPicker
                   value={selectedColor}
                   options={COLORS_PRESET.map((c) => ({ id: c, swatch: c }))}
@@ -152,9 +175,10 @@ export function CategoriesPage() {
                 secondaryTitle="Cancel"
                 onSecondary={() => setShowForm(false)}
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
         {!showForm && <ActionFab onPress={openCreate} label="Add category" />}
       </div>
       <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />

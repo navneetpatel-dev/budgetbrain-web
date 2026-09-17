@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { OptionChips, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { EmptyState, Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -93,7 +94,7 @@ export function AccountsPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs, marginBottom: theme.spacing.lg }}>
             {error ? <FormErrorBanner message={error} /> : null}
             <Input label="Account name" value={name} onChange={(e) => setName(e.target.value)} maxLength={maxLen('entityName')} error={fieldErrors.name} disabled={createMutation.isPending} />
-            <label style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Type</label>
+            <FormFieldLabel>Type</FormFieldLabel>
             <OptionChips options={ACCOUNT_TYPES.map((t) => t.id)} value={type} onChange={setType} getLabel={(v) => ACCOUNT_TYPES.find((t) => t.id === v)?.label ?? v} disabled={createMutation.isPending} />
             <Input label="Institution" value={institution} onChange={(e) => setInstitution(e.target.value)} maxLength={maxLen('institution')} error={fieldErrors.institution} disabled={createMutation.isPending} />
             <Input label="Last 4 digits" value={last4} onChange={(e) => setLast4(e.target.value)} maxLength={maxLen('accountNumberLast4')} error={fieldErrors.accountNumberLast4} disabled={createMutation.isPending} />

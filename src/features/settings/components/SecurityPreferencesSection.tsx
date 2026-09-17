@@ -20,11 +20,11 @@ export function SecurityPreferencesSection() {
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <span style={{
-            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15,
-            fontWeight: 600, color: theme.colors.text,
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize,
+            fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text,
           }}>Weekly spending digest</span>
           <span style={{
-            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12,
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize,
             color: theme.colors.textTertiary, marginTop: 2,
           }}>A Monday recap of last week's spending</span>
         </div>
@@ -40,16 +40,16 @@ export function SecurityPreferencesSection() {
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <span style={{
-            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15,
-            fontWeight: 600, color: theme.colors.text,
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize,
+            fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text,
           }}>Biometric lock</span>
           <span style={{
-            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12,
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize,
             color: theme.colors.textTertiary, marginTop: 2,
           }}>Require auth when reopening</span>
         </div>
         <span style={{
-          fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
+          fontFamily: 'Inter, sans-serif', fontSize: theme.typography.label.fontSize, fontWeight: Number(theme.typography.label.fontWeight),
           color: theme.colors.textSecondary, flexShrink: 0, marginLeft: 12,
         }}>Mobile app only</span>
       </div>

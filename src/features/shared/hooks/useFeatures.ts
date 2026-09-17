@@ -101,6 +101,8 @@ export function useSearch(query: string) {
 export function useFamily() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showCreateSuccess, setShowCreateSuccess] = useState(false);
+  const [showJoinSuccess, setShowJoinSuccess] = useState(false);
 
   const { data, isLoading } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
     queryKey: ['family'],
@@ -110,16 +112,24 @@ export function useFamily() {
 
   const createMutation = useMutation({
     mutationFn: (d: { name: string }) => apiPost('/family/groups', d),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['family'] }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['family'] });
+      setShowCreateSuccess(true);
+      setTimeout(() => setShowCreateSuccess(false), 2000);
+    },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
   const joinMutation = useMutation({
     mutationFn: (d: { inviteCode: string }) => apiPost('/family/join', d),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['family'] }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['family'] });
+      setShowJoinSuccess(true);
+      setTimeout(() => setShowJoinSuccess(false), 2000);
+    },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { memberships: data, isLoading, createMutation, joinMutation, error, setError };
+  return { memberships: data, isLoading, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess };
 }
 
 export function useFamilyMembers(groupId: string | undefined) {

@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
-import { useTheme } from '@/shared/theme';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme, cubicBezier } from '@/shared/theme';
 import type { AppTheme } from '@/shared/theme';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import type { CSSProperties } from 'react';
 
 import { FormErrorBanner } from './FormErrorBanner';
+import { FormSuccessBanner } from './FormSuccessBanner';
 import { getLoadingLabel } from '@/shared/utils/buttonLoadingLabel';
 
 export const FIELD_CONTROL_HEIGHT = 48;
@@ -19,52 +21,6 @@ function fieldBorderColor(theme: AppTheme, error?: boolean, focused?: boolean) {
 function fieldBackground(theme: AppTheme, focused?: boolean) {
   if (focused) return theme.colors.primarySoft;
   return theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg;
-}
-
-/** Shared single-line / multiline field sizing for inputs and selects. */
-export function fieldControlStyle(
-  theme: AppTheme,
-  options: {
-    error?: boolean;
-    focused?: boolean;
-    multiline?: boolean;
-    flex?: number;
-    borderRadius?: number;
-    fontSize?: number;
-  } = {},
-): CSSProperties {
-  const { error, focused, multiline, flex, borderRadius, fontSize = 16 } = options;
-  const innerHeight = FIELD_CONTROL_HEIGHT - FIELD_CONTROL_BORDER * 2;
-
-  const base: CSSProperties = {
-    boxSizing: 'border-box',
-    border: `${FIELD_CONTROL_BORDER}px solid ${fieldBorderColor(theme, error, focused)}`,
-    borderRadius: borderRadius ?? theme.radii.lg,
-    backgroundColor: fieldBackground(theme, focused),
-    color: theme.colors.text,
-    fontSize,
-    fontFamily: 'Inter, sans-serif',
-    outline: 'none',
-    transition: 'border-color 0.2s, background-color 0.2s',
-    ...(flex !== undefined ? { flex } : { width: '100%' }),
-  };
-
-  if (multiline) {
-    return {
-      ...base,
-      padding: '14px 12px',
-      lineHeight: '22px',
-      minHeight: 96,
-      resize: 'vertical',
-    };
-  }
-
-  return {
-    ...base,
-    height: FIELD_CONTROL_HEIGHT,
-    padding: '0 12px',
-    lineHeight: `${innerHeight}px`,
-  };
 }
 
 function cssProps(style: CSSProperties): string {
@@ -145,11 +101,14 @@ export function Button({
           : theme.colors.onPrimary;
 
   return (
-    <button
+    <motion.button
       type={type}
       onClick={onPress}
       disabled={isDisabled}
       aria-busy={loading || undefined}
+      whileHover={isDisabled ? undefined : { y: -1, boxShadow: theme.shadows.md }}
+      whileTap={isDisabled ? undefined : { scale: 0.97 }}
+      transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -163,15 +122,16 @@ export function Button({
         border: 'none',
         cursor: isDisabled ? 'not-allowed' : 'pointer',
         opacity: disabled && !loading ? 0.5 : 1,
-        transition: 'opacity 0.15s, transform 0.15s',
+        boxShadow: 'none',
+        outlineOffset: 2,
         ...buttonVariantStyle(theme, variant, size),
         ...style,
       }}
     >
       {loading ? <Spinner color={spinnerColor} /> : null}
-      {!loading && icon ? <AppIcon name={icon} size={18} color={spinnerColor} /> : null}
+      {!loading && icon ? <AppIcon name={icon} size="sm" color={spinnerColor} /> : null}
       {busyLabel}
-    </button>
+    </motion.button>
   );
 }
 
@@ -378,7 +338,29 @@ export function Card({ children, style, variant = 'default', onClick }: CardProp
     ...style,
   };
 
-  return <div style={baseStyle} onClick={onClick} role={onClick ? 'button' : undefined}>{children}</div>;
+  if (!onClick) {
+    return <div style={baseStyle}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      style={baseStyle}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      whileHover={{ backgroundColor: theme.colors.surfaceHover, boxShadow: theme.shadows.md }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 /* ── SummaryCard ── */
@@ -440,22 +422,11 @@ export function SummaryCard({ title, amount, color, subtitle, icon, onPress }: S
     </div>
   );
 
-  if (onPress) {
-    return (
-      <button
-        type="button"
-        onClick={onPress}
-        style={{
-          display: 'flex', width: '100%', height: '100%', background: 'none', border: 'none',
-          padding: 0, cursor: 'pointer', textAlign: 'left',
-        }}
-      >
-        <Card variant="elevated" style={{ height: '100%', width: '100%', boxSizing: 'border-box' }}>{content}</Card>
-      </button>
-    );
-  }
-
-  return <Card variant="elevated" style={{ height: '100%', boxSizing: 'border-box' }}>{content}</Card>;
+  return (
+    <Card variant="elevated" onClick={onPress} style={{ height: '100%', boxSizing: 'border-box' }}>
+      {content}
+    </Card>
+  );
 }
 
 /* ── EmptyState ── */
@@ -882,7 +853,10 @@ export function ListRow({
       <button
         type="button"
         onClick={onPress}
-        style={{ width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
+        style={{
+          width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left',
+          transition: `background-color ${theme.motion.duration.fast}ms ${cubicBezier(theme.motion.easing)}`,
+        }}
         onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.colors.surfaceHover; }}
         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
       >
@@ -899,18 +873,23 @@ export function ListRow({
 export function Toggle({
   value, onChange, disabled, label,
 }: {
-  value: boolean; onChange: (v: boolean) => void; disabled?: boolean; label?: string;
+  value: boolean; onChange: (v: boolean) => void; disabled?: boolean;
+  /** Required — this control renders no visible text of its own, so it's the only accessible name a screen reader gets. */
+  label: string;
 }) {
   const theme = useTheme();
 
   return (
-    <button
+    <motion.button
       type="button"
       role="switch"
       aria-checked={value}
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!value)}
+      whileHover={disabled ? undefined : { scale: 1.04 }}
+      whileTap={disabled ? undefined : { scale: 0.94 }}
+      transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
       style={{
         width: 44,
         height: 26,
@@ -924,7 +903,7 @@ export function Toggle({
         display: 'flex',
         alignItems: 'center',
         justifyContent: value ? 'flex-end' : 'flex-start',
-        transition: 'background-color 0.15s',
+        transition: `background-color ${theme.motion.duration.fast}ms ${cubicBezier(theme.motion.easing)}`,
       }}
     >
       <span style={{
@@ -934,7 +913,7 @@ export function Toggle({
         backgroundColor: '#fff',
         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
       }} />
-    </button>
+    </motion.button>
   );
 }
 
@@ -965,6 +944,7 @@ export function GroupedCard({ children, title, style }: { children: React.ReactN
 }
 
 export { FormErrorBanner };
+export { FormSuccessBanner };
 export { ActionSheet } from './ActionSheet';
 export type { ActionSheetItem } from './ActionSheet';
 export { OtpInput } from './OtpInput';

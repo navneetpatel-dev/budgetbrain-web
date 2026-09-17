@@ -23,7 +23,11 @@ export function AppShell() {
   }, [isDesktop, navigate]);
 
   if (!isDesktop) {
-    return <Outlet />;
+    return (
+      <div id="main-content" tabIndex={-1} style={{ height: '100%', outline: 'none' }}>
+        <Outlet />
+      </div>
+    );
   }
 
   return (
@@ -32,14 +36,16 @@ export function AppShell() {
       height: '100%',
       backgroundColor: theme.colors.background,
     }}>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <DesktopSidebar />
-      <main style={{
+      <main id="main-content" tabIndex={-1} style={{
         flex: 1,
         minWidth: 0,
         height: '100%',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        outline: 'none',
       }}>
         <Outlet />
       </main>

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Button, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Button, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -36,7 +37,7 @@ export function ExpenseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { txn, isLoading, isError, refetch, editing, error, setError, startEdit, cancelEdit, updateMutation, deleteMutation, duplicateMutation } = useExpenseDetail(id);
+  const { txn, isLoading, isError, refetch, editing, error, setError, startEdit, cancelEdit, updateMutation, deleteMutation, duplicateMutation, showSuccess } = useExpenseDetail(id);
   const { categories } = useCategories();
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
@@ -118,7 +119,7 @@ export function ExpenseDetailPage() {
             disabled={isPending}
             error={fieldErrors.date}
           />
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Payment Method</label>
+          <FormFieldLabel>Payment Method</FormFieldLabel>
           <OptionChips
             options={PAYMENT_METHODS.map((p) => p.id)}
             value={paymentMethod}
@@ -126,7 +127,7 @@ export function ExpenseDetailPage() {
             getLabel={(v) => PAYMENT_METHODS.find((p) => p.id === v)?.label ?? v}
             disabled={isPending}
           />
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Category</label>
+          <FormFieldLabel>Category</FormFieldLabel>
           <OptionChipList
             items={(categories ?? []).map((c) => ({ id: c.id, label: c.name, color: c.color ?? undefined }))}
             selectedId={categoryId}
@@ -155,6 +156,7 @@ export function ExpenseDetailPage() {
   return (
     <>
       <FormStackScreen title={title} eyebrow={txn.type === 'expense' ? 'Expense' : 'Income'}>
+        {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
           amount={`${amountPrefix}${formatCurrency(txn.amount, txn.currency)}`}
           amountColor={txn.type === 'expense' ? theme.colors.danger : theme.colors.success}

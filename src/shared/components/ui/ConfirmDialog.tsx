@@ -1,5 +1,8 @@
+import { useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useTheme } from '@/shared/theme';
 import { Button } from './index';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import type { ConfirmCopy } from '@/shared/constants/confirmations';
 
 export function ConfirmDialog({
@@ -16,14 +19,19 @@ export function ConfirmDialog({
   onConfirm: () => void;
 }) {
   const theme = useTheme();
-
-  if (!open || !copy) return null;
+  const transition = { duration: theme.motion.duration.base / 1000, ease: theme.motion.easing };
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!(open && copy), dialogRef, loading ? undefined : onCancel);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="confirm-dialog-title"
+    <AnimatePresence>
+      {open && copy && (
+    <motion.div
+      role="presentation"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={transition}
       style={{
         position: 'fixed',
         inset: 0,
@@ -36,8 +44,17 @@ export function ConfirmDialog({
       }}
       onClick={onCancel}
     >
-      <div
+      <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-dialog-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        transition={transition}
         style={{
           width: '100%',
           maxWidth: 420,
@@ -88,7 +105,9 @@ export function ConfirmDialog({
             size="lg"
           />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

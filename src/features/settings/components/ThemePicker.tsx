@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme, ACCENT_OPTIONS, type ThemeMode, type AccentPalette } from '@/shared/theme';
 
@@ -26,10 +27,14 @@ export function ThemePicker({
         {MODES.map(({ id, label, icon }) => {
           const active = mode === id;
           return (
-            <button
+            <motion.button
               key={id}
               type="button"
               onClick={() => onModeChange(id)}
+              aria-pressed={active}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.96 }}
+              transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
               style={{
                 flex: 1,
                 display: 'flex',
@@ -45,27 +50,31 @@ export function ThemePicker({
             >
               <AppIcon name={icon} size={20} color={active ? theme.colors.primary : theme.colors.textSecondary} />
               <span style={{
-                fontFamily: 'Inter, sans-serif', fontSize: 12,
+                fontFamily: 'Inter, sans-serif', fontSize: theme.typography.label.fontSize,
                 fontWeight: active ? 700 : 500,
                 color: active ? theme.colors.primary : theme.colors.textSecondary,
               }}>{label}</span>
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
       <span style={{
-        display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12,
+        display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.label.fontSize,
         color: theme.colors.textTertiary, marginTop: theme.spacing.lg, marginBottom: theme.spacing.sm,
       }}>Accent color</span>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: theme.spacing.sm }}>
         {ACCENT_OPTIONS.map((a) => {
           const active = accent === a.id;
           return (
-            <button
+            <motion.button
               key={a.id}
               type="button"
               onClick={() => onAccentChange(a.id)}
+              aria-pressed={active}
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -96,7 +105,7 @@ export function ThemePicker({
                 fontWeight: active ? 700 : 500,
                 color: active ? theme.colors.primary : theme.colors.textTertiary,
               }}>{a.label}</span>
-            </button>
+            </motion.button>
           );
         })}
       </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { ActionSheet } from '@/shared/components/ui/ActionSheet';
 import { useTheme } from '@/shared/theme';
@@ -138,6 +139,7 @@ function TabButton({ config, isFocused, onPress, theme }: {
   return (
     <button
       onClick={onPress}
+      aria-current={isFocused ? 'page' : undefined}
       style={{
         flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         padding: '2px 0', gap: 3, minHeight: 52,
@@ -167,9 +169,24 @@ function TabButton({ config, isFocused, onPress, theme }: {
 }
 
 export function TabLayout() {
+  const theme = useTheme();
+  const location = useLocation();
+  const reducedMotion = useReducedMotion();
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Outlet />
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={reducedMotion ? undefined : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
+          transition={{ duration: theme.motion.duration.base / 1000, ease: theme.motion.easing }}
+          style={{ flex: 1, minHeight: 0 }}
+        >
+          <Outlet />
+        </motion.div>
+      </AnimatePresence>
       <CustomTabBar />
     </div>
   );

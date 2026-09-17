@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateRecurringSeries } from '../hooks/useSubscriptions';
 import { maxLen, validateAmount, validateBoundedDate, validateText } from '@/shared/validation/fieldLimits';
@@ -18,7 +19,7 @@ type FieldErrors = { merchant?: string; amount?: string; nextDueDate?: string };
 
 export function AddSubscriptionPage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateRecurringSeries();
+  const { createMutation, error, setError, showSuccess } = useCreateRecurringSeries();
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
   const [cadence, setCadence] = useState<Cadence>('monthly');
@@ -64,7 +65,7 @@ export function AddSubscriptionPage() {
           disabled={isPending}
           error={fieldErrors.amount}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Cadence</label>
+        <FormFieldLabel>Cadence</FormFieldLabel>
         <OptionChips
           options={CADENCES.map((c) => c.id)}
           value={cadence}
@@ -83,7 +84,8 @@ export function AddSubscriptionPage() {
           error={fieldErrors.nextDueDate}
         />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Add Subscription" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Subscription added" /> : null}
+        <Button title="Add Subscription" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

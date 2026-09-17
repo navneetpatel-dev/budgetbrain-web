@@ -20,6 +20,7 @@ export function useIncomeDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: income, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['income', id],
@@ -35,6 +36,8 @@ export function useIncomeDetail(id: string | undefined) {
       void queryClient.invalidateQueries({ queryKey: ['income', id] });
       invalidateMoneyQueries(queryClient);
       setEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -69,6 +72,7 @@ export function useIncomeDetail(id: string | undefined) {
     updateMutation,
     deleteMutation,
     duplicateMutation,
+    showSuccess,
   };
 }
 
@@ -76,6 +80,7 @@ export function useCreateIncome() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async (data: Record<string, unknown>) => {
@@ -97,12 +102,13 @@ export function useCreateIncome() {
     },
     onSuccess: () => {
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to save income')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }
 
 export function useIncomeSources() {

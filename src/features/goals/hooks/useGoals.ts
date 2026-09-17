@@ -19,6 +19,7 @@ export function useGoalDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: goal, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['goal', id],
@@ -33,6 +34,8 @@ export function useGoalDetail(id: string | undefined) {
       queryClient.setQueryData(['goal', id], updated);
       invalidateGoalQueries(queryClient, id);
       setEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -57,6 +60,7 @@ export function useGoalDetail(id: string | undefined) {
     setEditing,
     updateMutation,
     deleteMutation,
+    showSuccess,
   };
 }
 
@@ -64,23 +68,26 @@ export function useCreateGoal() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<Goal>('/goals', data),
     onSuccess: () => {
       invalidateGoalQueries(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create goal')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }
 
 export function useContributeGoal(id: string | undefined) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: { amount: number; notes?: string }) =>
@@ -90,10 +97,11 @@ export function useContributeGoal(id: string | undefined) {
         queryClient.setQueryData(['goal', id], result.goal);
       }
       invalidateGoalQueries(queryClient, id);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Contribution failed')),
   });
 
-  return { contributeMutation: mutation, error, setError };
+  return { contributeMutation: mutation, error, setError, showSuccess };
 }

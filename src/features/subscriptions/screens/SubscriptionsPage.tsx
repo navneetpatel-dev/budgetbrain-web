@@ -63,16 +63,18 @@ export function SubscriptionsPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: theme.spacing.sm }}>
             <button
+              className="bb-interactive"
               onClick={() => dismissMutation.mutate(s.id)}
               disabled={dismissMutation.isPending}
-              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.surfaceHover, color: theme.colors.textSecondary, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
+              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.surfaceHover, color: theme.colors.textSecondary, border: 'none', cursor: 'pointer', fontSize: theme.typography.caption.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), fontFamily: 'Inter, sans-serif' }}
             >
               Not a bill
             </button>
             <button
+              className="bb-interactive"
               onClick={() => deleteMutation.mutate(s.id)}
               disabled={deleteMutation.isPending}
-              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}
+              style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: theme.typography.caption.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), fontFamily: 'Inter, sans-serif' }}
             >
               Delete
             </button>

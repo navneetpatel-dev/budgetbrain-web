@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips, OptionChipList } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateIncome, useIncomeSources } from '../hooks/useIncome';
 import {
@@ -22,7 +23,7 @@ type FieldErrors = { amount?: string; date?: string; notes?: string; selectedSou
 
 export function AddIncomePage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateIncome();
+  const { createMutation, error, setError, showSuccess } = useCreateIncome();
   const { data: sources, isLoading: sourcesLoading } = useIncomeSources();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -96,7 +97,7 @@ export function AddIncomePage() {
           disabled={isPending}
           error={fieldErrors.date}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Source</label>
+        <FormFieldLabel>Source</FormFieldLabel>
         <OptionChips
           options={['existing', 'new'] as const}
           value={sourceMode}
@@ -155,7 +156,8 @@ export function AddIncomePage() {
           error={fieldErrors.notes}
         />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Save Income" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Income saved" /> : null}
+        <Button title="Save Income" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

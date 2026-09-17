@@ -92,7 +92,7 @@ export function IntegrationsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.lg, marginBottom: theme.spacing.lg }}>
           {error ? <FormErrorBanner message={error} /> : null}
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Import bank statement</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>Import bank statement</span>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary }}>CSV with date, description, and amount columns</span>
             {csvError ? <FormErrorBanner message={csvError} /> : null}
             {csvSuccess ? (
@@ -108,7 +108,7 @@ export function IntegrationsPage() {
             <Button title="Choose CSV file" onPress={() => csvInputRef.current?.click()} loading={csvUploading} variant="outline" icon="upload" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Parse SMS</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>Parse SMS</span>
             <Input
               label="SMS content"
               value={smsContent}
@@ -121,7 +121,7 @@ export function IntegrationsPage() {
             <Button title="Parse SMS" onPress={handleParseSms} loading={parseSmsMutation.isPending} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 600, color: theme.colors.text }}>Parse email</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>Parse email</span>
             <Input
               label="Subject"
               value={emailSubject}
@@ -167,6 +167,7 @@ export function IntegrationsPage() {
                 error={categoryErrorById[item.id]}
               />
               <button
+                className="bb-interactive"
                 onClick={() => {
                   const categoryId = categoryById[item.id];
                   if (!categoryId) {
@@ -177,17 +178,18 @@ export function IntegrationsPage() {
                   setError(null);
                   confirmMutation.mutate({ id: item.id, categoryId });
                 }}
-                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.successSoft, color: theme.colors.success, border: 'none', cursor: 'pointer', fontSize: theme.typography.caption.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
               >
                 Confirm
               </button>
               <button
+                className="bb-interactive"
                 onClick={() => {
                   setError(null);
                   setCategoryErrorById((prev) => ({ ...prev, [item.id]: undefined }));
                   rejectMutation.mutate(item.id);
                 }}
-                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
+                style={{ padding: '6px 14px', borderRadius: theme.radii.lg, backgroundColor: theme.colors.dangerSoft, color: theme.colors.danger, border: 'none', cursor: 'pointer', fontSize: theme.typography.caption.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), fontFamily: theme.typography.caption.fontFamily ?? 'Inter' }}
               >
                 Reject
               </button>

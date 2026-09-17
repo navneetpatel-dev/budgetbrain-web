@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -28,6 +28,7 @@ export function IncomeDetailPage() {
     updateMutation,
     deleteMutation,
     duplicateMutation,
+    showSuccess,
   } = useIncomeDetail(id);
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -107,6 +108,7 @@ export function IncomeDetailPage() {
   return (
     <>
       <FormStackScreen title={income.merchant || 'Income'} eyebrow="Income">
+        {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
           amount={`+${formatCurrency(income.amount, income.currency)}`}
           amountColor={theme.colors.success}

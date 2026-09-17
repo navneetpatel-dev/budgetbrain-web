@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -27,7 +27,7 @@ export function GoalDetailPage() {
   const goBack = useStackBack('/goals');
   const theme = useTheme();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
-  const { goal, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation } = useGoalDetail(id);
+  const { goal, isLoading, isError, refetch, editing, error, setError, setEditing, updateMutation, deleteMutation, showSuccess } = useGoalDetail(id);
   const [name, setName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
@@ -159,6 +159,7 @@ export function GoalDetailPage() {
   return (
     <>
       <FormStackScreen title={goal.name} eyebrow={goal.type.replace(/_/g, ' ')} subtitle={`${pct}% achieved`} onBack={goBack}>
+        {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
           amount={formatCurrency(goal.currentAmount, goal.currency)}
           subtitle={`of ${formatCurrency(goal.targetAmount, goal.currency)}`}

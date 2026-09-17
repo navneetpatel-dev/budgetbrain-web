@@ -19,6 +19,7 @@ export function useLoanDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: loan, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['loan', id],
@@ -33,6 +34,8 @@ export function useLoanDetail(id: string | undefined) {
       queryClient.setQueryData(['loan', id], updated);
       invalidateLoanQueries(queryClient, id);
       setEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -57,6 +60,7 @@ export function useLoanDetail(id: string | undefined) {
     setEditing,
     updateMutation,
     deleteMutation,
+    showSuccess,
   };
 }
 
@@ -64,23 +68,26 @@ export function useCreateLoan() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<Loan>('/loans', data),
     onSuccess: () => {
       invalidateLoanQueries(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create loan')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }
 
 export function usePayLoan(id: string | undefined) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: { amount: number; notes?: string }) =>
@@ -90,10 +97,11 @@ export function usePayLoan(id: string | undefined) {
         queryClient.setQueryData(['loan', id], result.loan);
       }
       invalidateLoanQueries(queryClient, id);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Payment failed')),
   });
 
-  return { payMutation: mutation, error, setError };
+  return { payMutation: mutation, error, setError, showSuccess };
 }

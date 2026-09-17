@@ -101,3 +101,56 @@ textarea::placeholder {
   color: var(--bb-text-tertiary, #94A3B8);
   opacity: 1;
 }
+
+/* Shared interactive-surface polish: hover/press/focus feedback for chips, icon buttons,
+   and other small controls that don't warrant a bespoke Framer Motion treatment. */
+.bb-interactive {
+  transition:
+    background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 120ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bb-interactive:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.bb-interactive:active:not(:disabled) {
+  transform: scale(0.96);
+  filter: brightness(0.98);
+}
+
+.bb-interactive:focus-visible {
+  outline: 2px solid var(--bb-primary, #6366F1);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bb-interactive {
+    transition: none;
+  }
+  .bb-interactive:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Keyboard-only "skip to main content" link — off-screen until focused. */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 12px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--bb-primary, #6366F1);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 12px;
+}

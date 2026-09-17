@@ -19,6 +19,7 @@ export function useBudgetDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { data: budget, isLoading, isError, refetch, isPlaceholderData } = useQuery({
     queryKey: ['budget', id],
@@ -33,6 +34,8 @@ export function useBudgetDetail(id: string | undefined) {
       queryClient.setQueryData(['budget', id], updated);
       invalidateBudgetQueries(queryClient, id);
       setEditing(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
     },
     onError: (err) => setError(getApiErrorMessage(err)),
   });
@@ -57,6 +60,7 @@ export function useBudgetDetail(id: string | undefined) {
     setEditing,
     updateMutation,
     deleteMutation,
+    showSuccess,
   };
 }
 
@@ -64,15 +68,17 @@ export function useCreateBudget() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) => apiPost<Budget>('/budgets', data),
     onSuccess: () => {
       invalidateBudgetQueries(queryClient);
-      navigate(-1);
+      setShowSuccess(true);
+      setTimeout(() => navigate(-1), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create budget')),
   });
 
-  return { createMutation: mutation, error, setError };
+  return { createMutation: mutation, error, setError, showSuccess };
 }

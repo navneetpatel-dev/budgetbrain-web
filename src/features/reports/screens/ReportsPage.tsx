@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Card, Button, fieldControlStyle } from '@/shared/components/ui/index';
+import { Card, Button, Input } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useReports } from '@/features/shared/hooks/useFeatures';
 import { DateBounds } from '@/shared/utils/dateBounds';
@@ -24,32 +25,34 @@ export function ReportsPage() {
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="reports" subtitle="Export your data" />} inset="stack">
       <Button title="View monthly recap" onPress={() => navigate('/reports/recap')} variant="outline" icon="sparkles" size="lg" />
-      <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>Date Range</label>
-        <div style={{ display: 'flex', gap: theme.spacing.sm }}>
-          <input
-            type="date"
-            value={startDate}
-            min={fromBounds.min}
-            max={fromBounds.max}
-            onChange={(e) => {
-              const next = e.target.value;
-              setStartDate(next);
-              if (endDate && next && endDate < next) setEndDate(next);
-            }}
-            disabled={loading}
-            style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })}
-          />
-          <span style={{ alignSelf: 'center', color: theme.colors.textTertiary }}>to</span>
-          <input
-            type="date"
-            value={endDate}
-            min={toBounds.min}
-            max={toBounds.max}
-            onChange={(e) => setEndDate(e.target.value)}
-            disabled={loading}
-            style={fieldControlStyle(theme, { flex: 1, borderRadius: theme.radii.md, fontSize: 14 })}
-          />
+      <Card variant="elevated" style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+        <FormFieldLabel>Date Range</FormFieldLabel>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: theme.spacing.sm }}>
+          <div style={{ flex: 1 }}>
+            <Input
+              type="date"
+              value={startDate}
+              min={fromBounds.min}
+              max={fromBounds.max}
+              onChange={(e) => {
+                const next = e.target.value;
+                setStartDate(next);
+                if (endDate && next && endDate < next) setEndDate(next);
+              }}
+              disabled={loading}
+            />
+          </div>
+          <span style={{ alignSelf: 'center', marginTop: 12, color: theme.colors.textTertiary }}>to</span>
+          <div style={{ flex: 1 }}>
+            <Input
+              type="date"
+              value={endDate}
+              min={toBounds.min}
+              max={toBounds.max}
+              onChange={(e) => setEndDate(e.target.value)}
+              disabled={loading}
+            />
+          </div>
         </div>
       </Card>
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>

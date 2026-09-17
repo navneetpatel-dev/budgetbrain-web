@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { useContributeGoal } from '../hooks/useGoals';
 import { maxLen, validateAmount, validateOptionalText } from '@/shared/validation/fieldLimits';
@@ -9,7 +9,7 @@ import { maxLen, validateAmount, validateOptionalText } from '@/shared/validatio
 export function ContributeGoalPage() {
   const { id } = useParams<{ id: string }>();
   const theme = useTheme();
-  const { contributeMutation, error, setError } = useContributeGoal(id);
+  const { contributeMutation, error, setError, showSuccess } = useContributeGoal(id);
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [amountError, setAmountError] = useState<string>();
@@ -45,7 +45,8 @@ export function ContributeGoalPage() {
         />
         <Input label="Notes (optional)" value={notes} onChange={(e) => { setNotes(e.target.value); setNotesError(undefined); }} maxLength={maxLen('notes')} error={notesError} placeholder="Optional note" multiline disabled={isPending} />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Add Contribution" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Contribution added" /> : null}
+        <Button title="Add Contribution" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

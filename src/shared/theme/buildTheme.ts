@@ -1,4 +1,12 @@
-import type { AppTheme, ThemeRadii, ThemeShadows, ThemeSpacing, ThemeTypography } from './types';
+import type {
+  AppTheme,
+  ThemeIconSizes,
+  ThemeMotion,
+  ThemeRadii,
+  ThemeShadows,
+  ThemeSpacing,
+  ThemeTypography,
+} from './types';
 import { getThemeColors } from './palettes';
 import type { AccentPalette, ThemeMode } from './types';
 
@@ -21,16 +29,35 @@ export const radii: ThemeRadii = {
 };
 
 export const typography: ThemeTypography = {
-  display: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5, fontFamily: 'Inter' },
-  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3, fontFamily: 'Inter' },
-  titleSm: { fontSize: 17, fontWeight: '600', fontFamily: 'Inter' },
-  body: { fontSize: 16, fontWeight: '400', fontFamily: 'Inter' },
-  bodyMedium: { fontSize: 15, fontWeight: '500', fontFamily: 'Inter' },
-  bodySemibold: { fontSize: 15, fontWeight: '600', fontFamily: 'Inter' },
-  caption: { fontSize: 13, fontWeight: '500', fontFamily: 'Inter' },
-  label: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2, textTransform: 'none' as const, fontFamily: 'Inter' },
-  amount: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, fontFamily: 'Inter', fontVariantNumeric: 'tabular-nums' },
-  amountLg: { fontSize: 32, fontWeight: '700', letterSpacing: -1, fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums' },
+  display: { fontSize: 28, fontWeight: '800', letterSpacing: -0.5, fontFamily: 'Inter', lineHeight: 1.2 },
+  title: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3, fontFamily: 'Inter', lineHeight: 1.2 },
+  titleSm: { fontSize: 17, fontWeight: '600', fontFamily: 'Inter', lineHeight: 1.2 },
+  body: { fontSize: 16, fontWeight: '400', fontFamily: 'Inter', lineHeight: 1.4 },
+  bodyMedium: { fontSize: 15, fontWeight: '500', fontFamily: 'Inter', lineHeight: 1.4 },
+  bodySemibold: { fontSize: 15, fontWeight: '600', fontFamily: 'Inter', lineHeight: 1.4 },
+  caption: { fontSize: 13, fontWeight: '500', fontFamily: 'Inter', lineHeight: 1.4 },
+  label: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2, textTransform: 'none' as const, fontFamily: 'Inter', lineHeight: 1.4 },
+  amount: { fontSize: 22, fontWeight: '700', letterSpacing: -0.5, fontFamily: 'Inter', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 },
+  amountLg: { fontSize: 32, fontWeight: '700', letterSpacing: -1, fontFamily: 'Fraunces, Georgia, serif', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 },
+};
+
+/** Icon size scale (px) — AppIcon's `size` prop accepts these names alongside raw numbers. */
+export const iconSizes: ThemeIconSizes = {
+  xs: 14,
+  sm: 16,
+  md: 20,
+  lg: 24,
+  xl: 28,
+};
+
+/** Motion durations (ms) + a standard ease-out curve, for Framer Motion `transition` props. */
+export const motion: ThemeMotion = {
+  duration: {
+    fast: 120,
+    base: 200,
+    slow: 320,
+  },
+  easing: [0.4, 0, 0.2, 1],
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -74,6 +101,8 @@ export function buildTheme(
     spacing,
     radii,
     shadows: getShadows(isDark, colors.primary),
+    iconSizes,
+    motion,
   };
 }
 

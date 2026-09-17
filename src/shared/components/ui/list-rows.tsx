@@ -1,4 +1,5 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { useTheme } from '@/shared/theme';
 import { amountText, bodyMedium, caption } from '@/shared/theme/textStyles';
 import { formatCurrency } from '@/shared/utils/currency';
@@ -29,21 +30,37 @@ function Surface({
   style?: CSSProperties;
 }) {
   const theme = useTheme();
+  const baseStyle: CSSProperties = {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radii.lg,
+    padding: theme.spacing.lg,
+    border: `1px solid ${theme.colors.borderSubtle}`,
+    cursor: onClick ? 'pointer' : undefined,
+    ...style,
+  };
+
+  if (!onClick) {
+    return <div style={baseStyle}>{children}</div>;
+  }
+
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      style={{
-        backgroundColor: theme.colors.surface,
-        borderRadius: theme.radii.lg,
-        padding: theme.spacing.lg,
-        border: `1px solid ${theme.colors.borderSubtle}`,
-        cursor: onClick ? 'pointer' : undefined,
-        ...style,
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
       }}
+      whileHover={{ backgroundColor: theme.colors.surfaceHover, boxShadow: theme.shadows.md }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: theme.motion.duration.fast / 1000, ease: theme.motion.easing }}
+      style={baseStyle}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -283,6 +300,7 @@ export function ProgressEntityRow({
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }} onClick={stop}>
       {onEdit ? (
         <button
+          className="bb-interactive"
           type="button"
           onClick={onEdit}
           aria-label={`Edit ${title}`}
@@ -297,6 +315,7 @@ export function ProgressEntityRow({
       ) : null}
       {onDelete ? (
         <button
+          className="bb-interactive"
           type="button"
           onClick={onDelete}
           aria-label={`Delete ${title}`}

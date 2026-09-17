@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { Button, Input, GroupedCard, ListRow, FormActions, FormErrorBanner } from '@/shared/components/ui/index';
+import { Button, Input, GroupedCard, ListRow, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
 import { FormSection, FormFieldLabel } from '@/shared/components/ui/forms';
 import { OptionChips } from '@/shared/components/ui/feature-screen';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
@@ -28,6 +28,7 @@ export function SettingsPage() {
   const { deleteAccount, loading: deleteLoading } = useDeleteAccount();
   const { save: saveProfile, loading: profileLoading, submitError: profileError, clearSubmitError } = useEditProfile();
   const [editingProfile, setEditingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
   const [confirmCopy, setConfirmCopy] = useState<ConfirmCopy | null>(null);
   const [confirmAction, setConfirmAction] = useState<(() => Promise<void>) | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -74,7 +75,11 @@ export function SettingsPage() {
 
   const onSaveProfile = async (data: ProfileForm) => {
     const ok = await saveProfile(data);
-    if (ok) setEditingProfile(false);
+    if (ok) {
+      setEditingProfile(false);
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 2500);
+    }
   };
 
   return (
@@ -141,6 +146,11 @@ export function SettingsPage() {
           />
           {!editingProfile ? (
             <>
+              {profileSaved ? (
+                <div style={{ padding: theme.spacing.lg, paddingBottom: 0 }}>
+                  <FormSuccessBanner message="Profile updated" />
+                </div>
+              ) : null}
               <ListRow icon="wallet" label="Currency" value={user.currency ?? 'INR'} />
               <ListRow icon="profile" label="Country" value={user.country ?? '—'} isLast />
             </>

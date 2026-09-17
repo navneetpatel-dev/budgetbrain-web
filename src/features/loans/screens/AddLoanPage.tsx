@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateLoan } from '../hooks/useLoans';
 import {
@@ -25,7 +26,7 @@ type FieldErrors = { name?: string; principal?: string; interestRate?: string; e
 
 export function AddLoanPage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateLoan();
+  const { createMutation, error, setError, showSuccess } = useCreateLoan();
   const [name, setName] = useState('');
   const [type, setType] = useState<LoanType>('loan');
   const [principal, setPrincipal] = useState('');
@@ -80,7 +81,7 @@ export function AddLoanPage() {
           disabled={isPending}
           error={fieldErrors.name}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Type</label>
+        <FormFieldLabel>Type</FormFieldLabel>
         <OptionChips
           options={LOAN_TYPES.map((t) => t.id)}
           value={type}
@@ -136,7 +137,8 @@ export function AddLoanPage() {
           error={fieldErrors.notes}
         />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Add Loan" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Loan added" /> : null}
+        <Button title="Add Loan" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );

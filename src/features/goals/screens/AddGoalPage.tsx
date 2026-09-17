@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
-import { Input, Button, FormErrorBanner } from '@/shared/components/ui/index';
+import { Input, Button, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateGoal } from '../hooks/useGoals';
 import { GOAL_TYPES } from '@/shared/constants/config';
@@ -11,7 +12,7 @@ type FieldErrors = { name?: string; targetAmount?: string; targetDate?: string }
 
 export function AddGoalPage() {
   const theme = useTheme();
-  const { createMutation, error, setError } = useCreateGoal();
+  const { createMutation, error, setError, showSuccess } = useCreateGoal();
   const [name, setName] = useState('');
   const [type, setType] = useState('emergency_fund');
   const [targetAmount, setTargetAmount] = useState('');
@@ -47,7 +48,7 @@ export function AddGoalPage() {
           disabled={isPending}
           error={fieldErrors.name}
         />
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: theme.colors.textSecondary, marginBottom: theme.spacing.sm, fontFamily: 'Inter, sans-serif' }}>Type</label>
+        <FormFieldLabel>Type</FormFieldLabel>
         <OptionChips options={GOAL_TYPES.map((t) => t.id)} value={type} onChange={setType} getLabel={(v) => GOAL_TYPES.find((t) => t.id === v)?.label ?? v} disabled={isPending} />
         <Input
           label="Target Amount"
@@ -70,7 +71,8 @@ export function AddGoalPage() {
           error={fieldErrors.targetDate}
         />
         {error ? <FormErrorBanner message={error} /> : null}
-        <Button title="Create Goal" onPress={handleSubmit} loading={isPending} size="lg" />
+        {showSuccess ? <FormSuccessBanner message="Goal created" /> : null}
+        <Button title="Create Goal" onPress={handleSubmit} loading={isPending || showSuccess} disabled={showSuccess} size="lg" />
       </form>
     </FormStackScreen>
   );
