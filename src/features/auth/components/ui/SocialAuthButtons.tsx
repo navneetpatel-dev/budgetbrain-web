@@ -131,7 +131,7 @@ export function SocialAuthButtons({ disabled: formDisabled }: { disabled?: boole
     : Math.max(width, 240);
 
   return (
-    <div ref={wrapRef} style={{ marginTop: theme.spacing.lg }}>
+    <div ref={wrapRef} style={{ marginTop: 0 }}>
       <AuthDivider label="or sign in with" />
       <div style={{ display: 'flex', gap: theme.spacing.sm, width: '100%' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>

@@ -69,7 +69,7 @@ function AuthSplitLayout({
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
             {children}
           </div>
-          {footer && <div style={{ marginTop: theme.spacing.xl, paddingTop: theme.spacing.lg }}>{footer}</div>}
+          {footer && <div style={{ marginTop: theme.spacing.lg, display: 'flex', justifyContent: 'center' }}>{footer}</div>}
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@ function PhoneHeroLayout({
           <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
             {children}
           </div>
-          {footer && <div style={{ marginTop: theme.spacing.lg, paddingTop: theme.spacing.md }}>{footer}</div>}
+          {footer && <div style={{ marginTop: theme.spacing.lg, display: 'flex', justifyContent: 'center' }}>{footer}</div>}
         </div>
       </div>
     </div>

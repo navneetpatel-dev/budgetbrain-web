@@ -1,10 +1,11 @@
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Input } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
+import { AuthShell, AuthSuccessBanner, AuthForm, AuthErrorBanner } from '../components';
 import { authFieldRules, confirmPasswordRule } from '../utils/authValidation';
 import { maxLen } from '@/shared/validation/fieldLimits';
 import { useResetPassword } from '../hooks/useAuthHooks';
+import { useTheme } from '@/shared/theme';
 
 interface ResetForm {
   password: string;
@@ -12,6 +13,8 @@ interface ResetForm {
 }
 
 export function ResetPasswordPage() {
+  const navigate = useNavigate();
+  const theme = useTheme();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const { reset, loading, error, clearError, done } = useResetPassword(token);
@@ -26,15 +29,25 @@ export function ResetPasswordPage() {
     void reset(data.password);
   };
 
+  const handleBackToSignIn = () => {
+    navigate('/login');
+  };
+
   return (
     <AuthShell
       tagline={done ? 'You can now sign in with your new password.' : "Choose a strong password you haven't used before."}
       panelTitle="New password"
       backHref="/login"
-      footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
     >
       {done ? (
-        <AuthSuccessBanner message="Your password has been reset successfully." />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+          <AuthSuccessBanner message="Your password has been reset successfully." />
+          <Button
+            title="Back to Sign In"
+            onPress={handleBackToSignIn}
+            size="lg"
+          />
+        </div>
       ) : (
         <AuthForm onSubmit={handleSubmit(onSubmit)}>
           <Controller
@@ -54,7 +67,16 @@ export function ResetPasswordPage() {
             )}
           />
           {error ? <AuthErrorBanner message={error} /> : null}
-          <Button title="Update Password" onPress={handleSubmit(onSubmit)} loading={loading} disabled={!token} size="lg" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.xs }}>
+            <Button title="Update Password" onPress={handleSubmit(onSubmit)} loading={loading} disabled={!token} size="lg" />
+            <Button
+              title="Back to Sign In"
+              onPress={handleBackToSignIn}
+              variant="outline"
+              size="lg"
+              disabled={loading}
+            />
+          </div>
         </AuthForm>
       )}
     </AuthShell>
