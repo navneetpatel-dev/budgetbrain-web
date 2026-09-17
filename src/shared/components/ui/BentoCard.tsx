@@ -4,11 +4,14 @@ import { useTheme } from '@/shared/theme';
 
 export interface BentoCardProps {
   title: string;
-  amount: string;
+  amount?: string;
+  value?: string;
+  subtitle?: string;
   badgeText?: string;
   badgeColor?: string;
   icon: AppIconName;
   iconColor?: string;
+  accentColor?: string;
   onPress?: () => void;
   style?: React.CSSProperties;
 }
@@ -16,15 +19,19 @@ export interface BentoCardProps {
 export function BentoCard({
   title,
   amount,
+  value,
+  subtitle,
   badgeText,
   badgeColor,
   icon,
   iconColor,
+  accentColor,
   onPress,
   style,
 }: BentoCardProps) {
   const theme = useTheme();
-  const tint = iconColor ?? theme.colors.primary;
+  const displayAmount = amount ?? value ?? '';
+  const tint = iconColor ?? accentColor ?? theme.colors.primary;
   const tagColor = badgeColor ?? tint;
 
   const cardStyle: React.CSSProperties = {
@@ -34,7 +41,7 @@ export function BentoCard({
     minHeight: 124,
     padding: '16px',
     borderRadius: theme.radii.card,
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceContainer ?? theme.colors.surface,
     border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
     boxShadow: theme.shadows.sm,
     boxSizing: 'border-box',
@@ -87,20 +94,37 @@ export function BentoCard({
         }}>
           {title}
         </span>
-        <span style={{
-          display: 'block',
-          fontSize: 20,
-          fontWeight: 800,
-          fontFamily: 'Inter, sans-serif',
-          color: theme.colors.text,
-          fontVariantNumeric: 'tabular-nums',
-          letterSpacing: -0.4,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}>
-          {amount}
-        </span>
+        {displayAmount ? (
+          <span style={{
+            display: 'block',
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: 'Inter, sans-serif',
+            color: theme.colors.text,
+            fontVariantNumeric: 'tabular-nums',
+            letterSpacing: -0.4,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
+            {displayAmount}
+          </span>
+        ) : null}
+        {subtitle ? (
+          <span style={{
+            display: 'block',
+            fontSize: 11,
+            fontWeight: 500,
+            fontFamily: 'Inter, sans-serif',
+            color: theme.colors.textSecondary,
+            marginTop: 2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
+            {subtitle}
+          </span>
+        ) : null}
       </div>
     </>
   );

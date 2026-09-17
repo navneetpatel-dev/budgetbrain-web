@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Card, Button, SummaryCard } from '@/shared/components/ui/index';
+import { BentoCard } from '@/shared/components/ui/index';
+import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ScreenSkeleton } from '@/shared/components/ui/layout';
 import { useTheme } from '@/shared/theme';
 import { useAppSelector } from '@/shared/store/hooks';
@@ -53,7 +54,7 @@ export function RecapPage() {
       setShareState('copied');
       setTimeout(() => setShareState('idle'), 2000);
     } catch {
-      // clipboard unavailable — nothing more we can do
+      // clipboard unavailable
     }
   };
 
@@ -62,57 +63,125 @@ export function RecapPage() {
       {isLoading || !recap ? (
         <ScreenSkeleton rows={4} />
       ) : (
-        <>
-          <Card variant="elevated" style={{ textAlign: 'center', padding: theme.spacing.xl }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: theme.colors.textSecondary, letterSpacing: 0.4, textTransform: 'uppercase' }}>
-              {recap.periodStart} – {recap.periodEnd}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Celebration Recap Hero Card */}
+          <div
+            style={{
+              position: 'relative',
+              backgroundColor: theme.colors.surfaceContainer ?? theme.colors.surface,
+              borderRadius: theme.radii.card,
+              padding: '28px 20px',
+              textAlign: 'center',
+              border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+              overflow: 'hidden',
+              background: `linear-gradient(180deg, rgba(14, 165, 233, 0.14), rgba(139, 92, 246, 0.08), transparent)`,
+            }}
+          >
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                margin: '0 auto 12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.isDark ? 'rgba(14, 165, 233, 0.18)' : 'rgba(14, 165, 233, 0.25)',
+              }}
+            >
+              <AppIcon name="sparkles" size={24} color={theme.colors.primary} />
+            </div>
+
+            <span style={{ fontSize: 11, fontWeight: 600, color: theme.colors.textSecondary, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+              Total Spent This Month ({recap.periodStart} – {recap.periodEnd})
             </span>
-            <p style={{
-              fontFamily: theme.typography.amountLg.fontFamily ?? 'Inter, sans-serif',
-              fontSize: theme.typography.amountLg.fontSize,
-              fontWeight: Number(theme.typography.amountLg.fontWeight),
-              color: theme.colors.text,
-              margin: '8px 0 0',
-            }}>{formatCurrency(recap.totalSpent, currency)}</p>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 500, color: theme.colors.textTertiary }}>Total spent this month</span>
-          </Card>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
-            <SummaryCard
-              title="Top category"
-              amount={recap.topCategory ? formatCurrency(recap.topCategory.amount, currency) : '—'}
-              subtitle={recap.topCategory?.name ?? 'No spending yet'}
-              icon="chart"
-              color={theme.colors.primary}
-            />
-            <SummaryCard
-              title="Biggest expense"
-              amount={recap.biggestExpense ? formatCurrency(recap.biggestExpense.amount, currency) : '—'}
-              subtitle={recap.biggestExpense?.merchant ?? 'No spending yet'}
-              icon="activity"
-              color={theme.colors.danger}
-            />
-          </div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: theme.colors.text, margin: '8px 0 12px', letterSpacing: '-0.8px' }}>
+              {formatCurrency(recap.totalSpent, currency)}
+            </div>
 
-          {recap.noSpendStreak > 0 ? (
-            <Card variant="elevated" style={{ marginTop: theme.spacing.md, display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-              <span style={{ fontSize: 24 }}>🔥</span>
-              <div>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 700, color: theme.colors.text }}>{recap.noSpendStreak}-day no-spend streak</span>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, color: theme.colors.textTertiary }}>Keep it going!</span>
+            {recap.noSpendStreak > 0 && (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  backgroundColor: theme.isDark ? 'rgba(78, 222, 163, 0.12)' : theme.colors.secondaryContainer,
+                  padding: '6px 14px',
+                  borderRadius: 9999,
+                  border: `1px solid ${theme.isDark ? 'rgba(78, 222, 163, 0.25)' : 'transparent'}`,
+                  fontSize: 12,
+                  color: theme.colors.textSecondary,
+                }}
+              >
+                <AppIcon name="trendingUp" size={14} color={theme.colors.secondary} />
+                <span>
+                  <strong style={{ color: theme.colors.secondary }}>{recap.noSpendStreak} Days</strong> No-Spend Streak
+                </span>
               </div>
-            </Card>
-          ) : null}
+            )}
+          </div>
 
-          <div style={{ marginTop: theme.spacing.lg }}>
-            <Button
-              title={shareState === 'copied' ? 'Copied to clipboard' : 'Share recap'}
-              onPress={() => { void handleShare(); }}
-              icon="upload"
-              size="lg"
+          {/* Key Insights Grid */}
+          <div style={{ fontSize: 15, fontWeight: 700, color: theme.colors.text, marginTop: 4 }}>
+            Key Insights
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+            {recap.topCategory && (
+              <BentoCard
+                title="Top Category"
+                value={recap.topCategory.name}
+                subtitle={formatCurrency(recap.topCategory.amount, currency)}
+                accentColor={theme.colors.primary}
+                icon="category"
+              />
+            )}
+
+            {recap.biggestExpense && (
+              <BentoCard
+                title="Largest Single Outflow"
+                value={recap.biggestExpense.merchant ?? 'Unknown'}
+                subtitle={formatCurrency(recap.biggestExpense.amount, currency)}
+                accentColor={theme.colors.rose}
+                icon="expense"
+              />
+            )}
+
+            <BentoCard
+              title="Discipline Streak"
+              value={`${recap.noSpendStreak} Days`}
+              subtitle="Zero discretionary spending"
+              accentColor={theme.colors.secondary}
+              icon="shield"
             />
           </div>
-        </>
+
+          {/* Share CTA Button */}
+          <div style={{ marginTop: 8 }}>
+            <button
+              onClick={() => { void handleShare(); }}
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '14px 20px',
+                borderRadius: 14,
+                border: 'none',
+                background: `linear-gradient(90deg, ${theme.colors.primary}, ${theme.colors.ocean})`,
+                color: '#FFFFFF',
+                fontSize: 15,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              <AppIcon name="upload" size={18} color="#FFFFFF" />
+              <span>{shareState === 'copied' ? 'Copied to Clipboard! 🎉' : 'Share Monthly Recap'}</span>
+            </button>
+          </div>
+        </div>
       )}
     </FormStackScreen>
   );

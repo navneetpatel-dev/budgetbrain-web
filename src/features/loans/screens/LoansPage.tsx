@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { EmptyState } from '@/shared/components/ui/index';
+import { EmptyState, BentoCard } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ProgressEntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
@@ -23,6 +24,18 @@ export function LoansPage() {
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { data, isLoading, isError, refetch } = useLoans();
   const loans = data ?? [];
+
+  const { totalOutstanding, totalPrincipal, currency } = useMemo(() => {
+    let outstanding = 0;
+    let principal = 0;
+    let curr = 'INR';
+    loans.forEach((l) => {
+      curr = l.currency || curr;
+      outstanding += l.remainingBalance;
+      principal += l.principal;
+    });
+    return { totalOutstanding: outstanding, totalPrincipal: principal, currency: curr };
+  }, [loans]);
 
   const openLoan = (id: string) => navigate(`/loan/${id}`);
 
@@ -52,6 +65,33 @@ export function LoansPage() {
         inset="stack"
         data={isLoading ? [] : loans}
         keyExtractor={(l: Loan) => l.id}
+        ListHeaderComponent={
+          loans.length > 0 ? (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 14,
+              marginBottom: theme.spacing.lg,
+            }}>
+              <BentoCard
+                title="Total Outstanding"
+                amount={formatCurrency(totalOutstanding, currency)}
+                badgeText={`of ${formatCurrency(totalPrincipal, currency)}`}
+                badgeColor={theme.colors.danger}
+                icon="creditCard"
+                iconColor={theme.colors.danger}
+              />
+              <BentoCard
+                title="Active Loans"
+                amount={`${loans.filter(l => !l.closed).length}`}
+                badgeText={`${loans.filter(l => l.closed).length} paid off`}
+                badgeColor={theme.colors.secondary}
+                icon="target"
+                iconColor={theme.colors.secondary}
+              />
+            </div>
+          ) : null
+        }
         renderItem={(l) => {
           const paid = l.principal - l.remainingBalance;
           const pct = toSafePercent(paid, l.principal);

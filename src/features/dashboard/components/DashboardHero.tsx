@@ -13,6 +13,7 @@ type QuickAction = { label: string; icon: AppIconName; href: string; primary?: b
 const QUICK_ACTIONS: QuickAction[] = [
   { label: 'Log Expense', icon: 'receipt', href: '/expense/add', primary: true },
   { label: 'Add Income', icon: 'income', href: '/income/add' },
+  { label: 'Net Worth', icon: 'trendingUp', href: '/net-worth' },
 ];
 
 function getGreeting() {
@@ -61,9 +62,15 @@ export function DashboardHero({
         borderRadius: theme.radii.card,
         padding: isDesktop ? '24px 28px' : '20px',
         backgroundColor: theme.colors.surfaceElevated,
-        border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
-        boxShadow: theme.shadows.lg,
+        border: `1px solid ${theme.isDark ? 'rgba(14,165,233,0.18)' : theme.colors.borderSubtle}`,
+        boxShadow: theme.isDark ? '0 8px 32px rgba(0,0,0,0.45)' : theme.shadows.lg,
         overflow: 'hidden',
+        // Luminous top-edge gradient border
+        backgroundImage: theme.isDark
+          ? `linear-gradient(${theme.colors.surfaceElevated}, ${theme.colors.surfaceElevated}), linear-gradient(90deg, ${theme.colors.primary}44, ${theme.colors.secondary}44, ${theme.colors.primary}44)`
+          : undefined,
+        backgroundOrigin: 'border-box',
+        backgroundClip: theme.isDark ? 'padding-box, border-box' : undefined,
       }}>
         {/* Ambient background glow accents */}
         <div style={{
@@ -202,6 +209,10 @@ export function DashboardHero({
               <button
                 key={action.label}
                 onClick={() => navigate(action.href)}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px) scale(1.02)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0) scale(1)'; }}
+                onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}
+                onMouseUp={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px) scale(1.02)'; }}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -216,11 +227,11 @@ export function DashboardHero({
                     ? `linear-gradient(135deg, ${theme.colors.ocean}, ${theme.colors.primary})`
                     : theme.isDark ? theme.colors.surfaceContainerHigh : theme.colors.surface,
                   color: isPrimary ? '#FFFFFF' : theme.colors.text,
-                  boxShadow: isPrimary ? theme.shadows.sm : 'none',
+                  boxShadow: isPrimary ? `0 4px 12px ${theme.colors.primary}44` : 'none',
                   fontSize: 13,
                   fontWeight: 700,
                   fontFamily: 'Inter, sans-serif',
-                  transition: 'transform 0.15s ease, opacity 0.15s ease',
+                  transition: 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.15s ease',
                 }}
               >
                 <AppIcon name={action.icon} size={15} color={isPrimary ? '#FFFFFF' : theme.colors.primary} />

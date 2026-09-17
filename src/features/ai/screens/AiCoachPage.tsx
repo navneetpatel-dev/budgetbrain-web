@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { Card, FormErrorBanner } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
+import { BrandMark } from '@/shared/components/brand/BrandMark';
 import { AiChatSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
@@ -106,27 +107,74 @@ export function AiCoachPage() {
       <div style={{ flex: 1, overflowY: 'auto', ...frame, paddingTop: theme.spacing.md, paddingBottom: theme.spacing.md, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {historyLoading && <AiChatSkeleton />}
         {!historyLoading && messages.length === 0 && (
-          <Card variant="elevated" style={{ textAlign: 'center', padding: theme.spacing.xl }}>
-            <div style={{
-              width: 52,
-              height: 52,
-              borderRadius: 14,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: theme.colors.primarySoft,
-              border: `1px solid ${theme.colors.primary}28`,
-              margin: '0 auto 14px',
-            }}>
-              <AppIcon name="ai" size={24} color={theme.colors.primary} />
+          <div
+            style={{
+              position: 'relative',
+              backgroundColor: theme.colors.surfaceContainer ?? theme.colors.surface,
+              borderRadius: theme.radii.card,
+              padding: '36px 24px',
+              textAlign: 'center',
+              border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+              overflow: 'hidden',
+              background: `linear-gradient(180deg, rgba(14, 165, 233, 0.12), rgba(139, 92, 246, 0.08), transparent)`,
+              margin: 'auto 0',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <BrandMark size={56} />
             </div>
-            <h3 style={{ margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 700, color: theme.colors.text }}>
-              Ask your AI Coach
+            <h3 style={{ margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 18, fontWeight: 800, color: theme.colors.text, letterSpacing: '-0.3px' }}>
+              Autonomous Financial Intelligence
             </h3>
-            <p style={{ margin: '8px 0 0', fontSize: 13, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: '18px' }}>
-              Get insights on spending, savings, and budgets. Pick a suggestion below to start.
+            <p style={{ margin: '8px auto 20px', fontSize: 13, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: '20px', maxWidth: 360 }}>
+              Ask anything about your spending habits, cashflow trends, budget limits, or receive actionable wealth optimization tips.
             </p>
-          </Card>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                padding: '5px 12px',
+                borderRadius: 9999,
+                fontSize: 11,
+                fontWeight: 600,
+                color: theme.colors.textSecondary,
+              }}>
+                <AppIcon name="shield" size={13} color={theme.colors.secondary} />
+                <span>Budget Guard</span>
+              </div>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                padding: '5px 12px',
+                borderRadius: 9999,
+                fontSize: 11,
+                fontWeight: 600,
+                color: theme.colors.textSecondary,
+              }}>
+                <AppIcon name="trendingUp" size={13} color={theme.colors.primary} />
+                <span>Run-rate Analysis</span>
+              </div>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                backgroundColor: theme.isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
+                padding: '5px 12px',
+                borderRadius: 9999,
+                fontSize: 11,
+                fontWeight: 600,
+                color: theme.colors.textSecondary,
+              }}>
+                <AppIcon name="sparkles" size={13} color={theme.colors.violet} />
+                <span>Smart Forecasts</span>
+              </div>
+            </div>
+          </div>
         )}
         {messages.map((msg, i) => (
           <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>

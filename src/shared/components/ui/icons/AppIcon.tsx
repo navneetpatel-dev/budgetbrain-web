@@ -23,7 +23,7 @@ export type AppIconName =
   | 'close' | 'upload'
   | 'goals' | 'income' | 'expense' | 'ai' | 'netWorth' | 'wallet' | 'family'
   | 'link' | 'bell' | 'support' | 'document' | 'sun' | 'moon'
-  | 'auto' | 'personFill';
+  | 'auto' | 'personFill' | 'reports' | 'info';
 
 const ICON_MAP: Record<AppIconName, LucideIcon> = {
   home: Home,
@@ -83,6 +83,8 @@ const ICON_MAP: Record<AppIconName, LucideIcon> = {
   moon: Moon,
   auto: Monitor,
   personFill: User,
+  reports: FileText,
+  info: HelpCircle,
 };
 
 type IconSizeName = keyof ThemeIconSizes;
