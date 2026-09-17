@@ -12,6 +12,7 @@ export function OtpInput({
   label = 'Verification code',
   value,
   onChange,
+  onComplete,
   error,
   disabled,
   autoFocus,
@@ -19,6 +20,7 @@ export function OtpInput({
   label?: string;
   value: string;
   onChange: (value: string) => void;
+  onComplete?: (code: string) => void;
   error?: string;
   disabled?: boolean;
   autoFocus?: boolean;
@@ -39,7 +41,11 @@ export function OtpInput({
   const setDigit = (index: number, digit: string) => {
     const next = [...digits];
     next[index] = digit;
-    onChange(next.join('').slice(0, OTP_LENGTH));
+    const code = next.join('').slice(0, OTP_LENGTH);
+    onChange(code);
+    if (digit && code.length === OTP_LENGTH && onComplete) {
+      onComplete(code);
+    }
   };
 
   const focusAt = (index: number) => {
@@ -58,21 +64,31 @@ export function OtpInput({
       next[cursor] = ch;
       cursor += 1;
     }
-    onChange(next.join('').slice(0, OTP_LENGTH));
+    const code = next.join('').slice(0, OTP_LENGTH);
+    onChange(code);
     focusAt(Math.min(cursor, OTP_LENGTH - 1));
+    if (code.length === OTP_LENGTH && onComplete) {
+      onComplete(code);
+    }
   };
 
   const onKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (disabled) return;
 
-    if (e.key === 'Backspace') {
+    if (e.key === 'Backspace' || e.key === 'Delete') {
       e.preventDefault();
-      if (digits[index]) {
-        setDigit(index, '');
-        return;
-      }
-      if (index > 0) {
-        setDigit(index - 1, '');
+      const next = [...digits];
+      if (next[index]) {
+        // Current block has a digit: clear it and step back
+        next[index] = '';
+        onChange(next.join('').slice(0, OTP_LENGTH));
+        if (index > 0) {
+          focusAt(index - 1);
+        }
+      } else if (index > 0) {
+        // Current block is already empty: delete previous block and focus it
+        next[index - 1] = '';
+        onChange(next.join('').slice(0, OTP_LENGTH));
         focusAt(index - 1);
       }
       return;

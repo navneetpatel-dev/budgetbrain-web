@@ -16,7 +16,7 @@ export function OtpLoginPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { sendOtp, verifyOtp, loading, error, info, otpSent, clearError } = useOtpLogin();
-  const { control, handleSubmit, formState: { errors } } = useForm<OtpForm>({
+  const { control, handleSubmit, getValues, formState: { errors } } = useForm<OtpForm>({
     defaultValues: { email: '', otp: '' },
   });
 
@@ -29,6 +29,14 @@ export function OtpLoginPage() {
     clearError();
     void verifyOtp(data.email, data.otp);
   });
+
+  const handleOtpComplete = (code: string) => {
+    const email = getValues('email');
+    if (email && code.length === 6) {
+      clearError();
+      void verifyOtp(email, code);
+    }
+  };
 
   const handleBackToSignIn = () => {
     navigate('/login');
@@ -75,6 +83,7 @@ export function OtpLoginPage() {
                   label="Verification code"
                   value={field.value}
                   onChange={field.onChange}
+                  onComplete={handleOtpComplete}
                   autoFocus
                   disabled={loading}
                   error={errors.otp?.message}
@@ -82,7 +91,7 @@ export function OtpLoginPage() {
               )}
             />
             <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />
-            <Button title="Resend code" onPress={handleRequestOtp} variant="ghost" loading={loading} />
+            <Button title="Resend code" onPress={handleRequestOtp} variant="ghost" size="lg" loading={loading} />
             <Button
               title="Back to Sign In"
               onPress={handleBackToSignIn}
