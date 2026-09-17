@@ -44,7 +44,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty('--bb-primary', theme.colors.primary);
     root.style.setProperty('--bb-border', theme.colors.border);
     root.style.setProperty('--bb-input-bg', theme.colors.inputBg);
-    root.style.setProperty('--bb-surface', theme.colors.surface);
+    root.style.setProperty('--bb-surface-container-low', theme.colors.surfaceContainerLow);
+    root.style.setProperty('--bb-surface-container-high', theme.colors.surfaceContainerHigh);
+    root.style.setProperty('--bb-surface-container-highest', theme.colors.surfaceContainerHighest);
+    root.style.setProperty('--bb-surface-elevated', theme.colors.surfaceElevated);
+    root.style.setProperty('--bb-secondary', theme.colors.secondary);
+    root.style.setProperty('--bb-secondary-fixed', theme.colors.secondaryFixed);
+    root.style.setProperty('--bb-violet', theme.colors.violet);
+    root.style.setProperty('--bb-success', theme.colors.success);
+    root.style.setProperty('--bb-danger', theme.colors.danger);
+    root.style.setProperty('--bb-warning', theme.colors.warning);
   }, [theme]);
 
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;

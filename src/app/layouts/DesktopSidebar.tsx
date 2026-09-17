@@ -46,21 +46,15 @@ export function DesktopSidebar() {
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      borderRight: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.borderSubtle}`,
-      backgroundColor: theme.isDark ? theme.colors.surface : theme.colors.backgroundElevated,
-      padding: `${20}px ${16}px`,
+      borderRight: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+      backgroundColor: theme.isDark ? theme.colors.surfaceContainerLow : theme.colors.backgroundElevated,
+      padding: '20px 16px',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, paddingLeft: 8 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
-        }}>
-          <BrandMark size={20} color={theme.colors.onPrimary} strokeWidth={2} />
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingLeft: 8 }}>
+        <BrandMark size={36} showBackground={false} />
         <div>
-          <span style={textStyle(theme, 'bodySemibold', { color: theme.colors.text, fontWeight: 800, fontSize: 16, letterSpacing: -0.3, display: 'block' })}>budgetbrain</span>
-          <span style={{ ...caption(theme), fontSize: 11, fontWeight: 500 }}>{user?.name ?? 'Finance'}</span>
+          <span style={textStyle(theme, 'bodySemibold', { color: theme.colors.text, fontWeight: 800, fontSize: 17, letterSpacing: -0.3, display: 'block' })}>BudgetBrain</span>
+          <span style={{ ...caption(theme), fontSize: 11, fontWeight: 600, color: theme.colors.secondaryFixed }}>Luminous Wealth</span>
         </div>
       </div>
 
@@ -68,13 +62,14 @@ export function DesktopSidebar() {
         onClick={() => setSheetOpen(true)}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          margin: '0 8px 20px', padding: '12px 16px', borderRadius: theme.radii.lg,
-          background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
+          margin: '0 8px 20px', padding: '12px 16px', borderRadius: theme.radii.card,
+          background: `linear-gradient(135deg, ${theme.colors.ocean}, ${theme.colors.primary}, ${theme.colors.violet})`,
           border: 'none', cursor: 'pointer', boxShadow: theme.shadows.md,
+          transition: 'transform 0.15s ease',
         }}
       >
-        <AppIcon name="add" size={18} color={theme.colors.onPrimary} />
-        <span style={textStyle(theme, 'bodyMedium', { fontSize: 14, fontWeight: 700, color: theme.colors.onPrimary })}>Create</span>
+        <AppIcon name="add" size={18} color="#FFFFFF" />
+        <span style={textStyle(theme, 'bodyMedium', { fontSize: 14, fontWeight: 700, color: '#FFFFFF' })}>Create</span>
       </button>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>

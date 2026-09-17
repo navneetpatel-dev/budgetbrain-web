@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useTheme, cubicBezier } from '@/shared/theme';
 import type { AppTheme } from '@/shared/theme';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
@@ -23,11 +23,7 @@ function fieldBackground(theme: AppTheme, focused?: boolean) {
   return theme.isDark ? 'rgba(255,255,255,0.04)' : theme.colors.inputBg;
 }
 
-function cssProps(style: CSSProperties): string {
-  return Object.entries(style)
-    .map(([k, v]) => `${k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())}:${v}`)
-    .join(';');
-}
+
 
 /* ── Button ── */
 
@@ -330,7 +326,7 @@ export function Card({ children, style, variant = 'default', onClick }: CardProp
 
   const baseStyle: CSSProperties = {
     backgroundColor: variant === 'outline' ? 'transparent' : variant === 'glass' ? (theme.isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.72)') : theme.colors.surface,
-    borderRadius: theme.radii.lg,
+    borderRadius: theme.radii.card,
     padding: theme.spacing.lg,
     border: `1px solid ${variant === 'outline' ? theme.colors.border : variant === 'glass' ? (theme.isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.5)') : variant === 'elevated' ? 'transparent' : theme.colors.borderSubtle}`,
     boxShadow: variant === 'elevated' ? theme.shadows.md : 'none',
@@ -949,3 +945,17 @@ export { ActionSheet } from './ActionSheet';
 export type { ActionSheetItem } from './ActionSheet';
 export { OtpInput } from './OtpInput';
 export { TransactionRow, EntityRow, ProgressEntityRow, NotificationRow } from './list-rows';
+export { RingGauge } from './RingGauge';
+export type { RingGaugeProps } from './RingGauge';
+export { SegmentedMacroBar } from './SegmentedMacroBar';
+export type { SegmentedMacroBarProps, MacroCategoryItem } from './SegmentedMacroBar';
+export { FilterChipsRail } from './FilterChipsRail';
+export type { FilterChipsRailProps, FilterChipItem } from './FilterChipsRail';
+export { BentoCard } from './BentoCard';
+export type { BentoCardProps } from './BentoCard';
+export { StreakBanner } from './StreakBanner';
+export type { StreakBannerProps } from './StreakBanner';
+export { CashFlowHero } from './CashFlowHero';
+export type { CashFlowHeroProps } from './CashFlowHero';
+export { AppHeaderBar } from './AppHeaderBar';
+export type { AppHeaderBarProps } from './AppHeaderBar';

@@ -1,7 +1,8 @@
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { EmptyState } from '@/shared/components/ui/index';
+import { EmptyState, RingGauge, FilterChipsRail } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { ProgressEntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
@@ -37,6 +38,25 @@ export function BudgetsPage() {
     }
   };
 
+  const [activeFilter, setActiveFilter] = useState('active');
+
+  const { totalSpent, totalLimit, overallProgress, currency } = useMemo(() => {
+    let spent = 0;
+    let limit = 0;
+    let curr = 'INR';
+
+    budgets.forEach((b) => {
+      curr = b.currency || curr;
+      spent += b.spent ?? 0;
+      limit += Number(b.effectiveAmount ?? b.amount) || 0;
+    });
+
+    const prog = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
+    return { totalSpent: spent, totalLimit: limit, overallProgress: prog, currency: curr };
+  }, [budgets]);
+
+  const dailySafe = totalLimit > totalSpent ? (totalLimit - totalSpent) / 30 : 0;
+
   return (
     <>
       <StickyHeaderFlatScreen
@@ -50,6 +70,57 @@ export function BudgetsPage() {
             actionIcon="add"
             actionLabel="Create budget"
             onAction={() => navigate('/budget/add')}
+            footer={
+              <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+                <div style={{
+                  position: 'relative',
+                  borderRadius: theme.radii.card,
+                  padding: '20px',
+                  backgroundColor: theme.colors.surface,
+                  border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.06)' : theme.colors.borderSubtle}`,
+                  boxShadow: theme.shadows.md,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  overflow: 'hidden',
+                }}>
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: theme.colors.textSecondary, fontFamily: 'Inter, sans-serif' }}>
+                      Total Budget Consumed
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                      <span style={{ fontSize: 24, fontWeight: 800, color: theme.colors.text, fontVariantNumeric: 'tabular-nums', fontFamily: 'Inter, sans-serif' }}>
+                        {formatCurrency(totalSpent, currency)}
+                      </span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>
+                        / {formatCurrency(totalLimit, currency)}
+                      </span>
+                    </div>
+                    <span style={{ display: 'block', fontSize: 11, fontWeight: 600, color: theme.colors.secondaryFixed, marginTop: 6, fontFamily: 'Inter, sans-serif' }}>
+                      Safe daily spend: ~{formatCurrency(dailySafe, currency)}/day
+                    </span>
+                  </div>
+
+                  <RingGauge
+                    size={68}
+                    strokeWidth={5.5}
+                    progress={overallProgress}
+                    centerText={`${overallProgress}%`}
+                    gradientColors={overallProgress >= 100 ? [theme.colors.danger, theme.colors.warning] : [theme.colors.secondary, theme.colors.primary]}
+                  />
+                </div>
+
+                <FilterChipsRail
+                  chips={[
+                    { id: 'active', label: `Active (${budgets.length})` },
+                    { id: 'custom', label: 'Custom' },
+                    { id: 'archived', label: 'Archived' },
+                  ]}
+                  selectedId={activeFilter}
+                  onSelect={setActiveFilter}
+                />
+              </div>
+            }
           />
         }
         data={isLoading ? [] : budgets}

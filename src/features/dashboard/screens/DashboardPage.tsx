@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ScreenWrapper, SummaryMetricsGrid } from '@/shared/components/ui/layout';
-import { SummaryCard, SectionHeader, Card, EmptyState } from '@/shared/components/ui/index';
+import { SummaryCard, SectionHeader, Card, EmptyState, BentoCard, StreakBanner } from '@/shared/components/ui/index';
 import { EntityRow, ProgressEntityRow, TransactionRow } from '@/shared/components/ui/list-rows';
 import { DashboardContentSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -75,54 +75,59 @@ export function DashboardPage() {
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.section }}>
-          <SummaryMetricsGrid>
-            <SummaryCard
-              title="Income"
-              amount={formatCurrency(summary.totalIncome, summary.currency)}
-              subtitle="This month"
-              icon="trendingUp"
-              color={theme.colors.success}
-              onPress={() => navigate('/income')}
-            />
-            <SummaryCard
-              title="Expenses"
-              amount={formatCurrency(summary.totalExpenses, summary.currency)}
-              subtitle="This month"
-              icon="activity"
-              color={theme.colors.danger}
-              onPress={() => navigate('/expenses')}
-            />
-            <SummaryCard
-              title="Goals"
-              amount={goalsProgress != null ? `${goalsProgress}%` : '—'}
-              subtitle={goals.length > 0 ? `${goals.length} active goal${goals.length !== 1 ? 's' : ''}` : 'Set a savings target'}
-              icon="target"
-              color={theme.colors.primary}
-              onPress={() => navigate('/goals')}
-            />
-            <SummaryCard
-              title="Net Worth"
-              amount={netWorthAmount}
-              subtitle="Assets & liabilities"
-              icon="piggyBank"
-              color={theme.colors.primary}
-              onPress={() => navigate('/net-worth')}
-            />
-          </SummaryMetricsGrid>
-
           {data.noSpendStreak > 0 && (
-            <Card variant="elevated" style={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
-              <span style={{ fontSize: 28 }}>🔥</span>
-              <div>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 16, fontWeight: 700, color: theme.colors.text }}>
-                  {data.noSpendStreak}-day no-spend streak
-                </span>
-                <span style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 500, color: theme.colors.textTertiary }}>
-                  Keep it up!
-                </span>
-              </div>
-            </Card>
+            <StreakBanner
+              streakDays={data.noSpendStreak}
+              tier="Tier 2"
+              message="You are 4 days away from shattering your record!"
+            />
           )}
+
+          <div>
+            <SectionHeader title="Key Financials" action="Live Updates" />
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 14,
+            }}>
+              <BentoCard
+                title="Total Income"
+                amount={formatCurrency(summary.totalIncome, summary.currency)}
+                badgeText="+6.8%"
+                badgeColor={theme.colors.secondary}
+                icon="income"
+                iconColor={theme.colors.secondary}
+                onPress={() => navigate('/income')}
+              />
+              <BentoCard
+                title="Total Expenses"
+                amount={formatCurrency(summary.totalExpenses, summary.currency)}
+                badgeText={`${Math.round(toSafePercent(summary.totalExpenses, summary.totalIncome || 1))}% Used`}
+                badgeColor={theme.colors.danger}
+                icon="expense"
+                iconColor={theme.colors.danger}
+                onPress={() => navigate('/expenses')}
+              />
+              <BentoCard
+                title="Goal Progress"
+                amount={goals.length > 0 ? `${goals.length} Goals` : 'Set Target'}
+                badgeText={goalsProgress != null ? `${goalsProgress}%` : '—'}
+                badgeColor={theme.colors.primary}
+                icon="target"
+                iconColor={theme.colors.primary}
+                onPress={() => navigate('/goals')}
+              />
+              <BentoCard
+                title="Net Worth"
+                amount={netWorthAmount}
+                badgeText="+4.2%"
+                badgeColor={theme.colors.secondary}
+                icon="piggyBank"
+                iconColor={theme.colors.violet}
+                onPress={() => navigate('/net-worth')}
+              />
+            </div>
+          </div>
 
           {upcomingBills.length > 0 && (
             <div>

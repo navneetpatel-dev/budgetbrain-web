@@ -21,7 +21,7 @@ export type AppIconName =
   | 'download' | 'chevronRight' | 'trash' | 'edit' | 'more'
   | 'arrowUp' | 'arrowDown' | 'refresh' | 'logout' | 'lock'
   | 'close' | 'upload'
-  | 'goals' | 'income' | 'ai' | 'netWorth' | 'wallet' | 'family'
+  | 'goals' | 'income' | 'expense' | 'ai' | 'netWorth' | 'wallet' | 'family'
   | 'link' | 'bell' | 'support' | 'document' | 'sun' | 'moon'
   | 'auto' | 'personFill';
 
@@ -70,6 +70,7 @@ const ICON_MAP: Record<AppIconName, LucideIcon> = {
   upload: Upload,
   goals: Flag,
   income: CircleArrowDown,
+  expense: Receipt,
   ai: Sparkles,
   netWorth: Landmark,
   wallet: Wallet,

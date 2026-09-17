@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { FeatureHeader, HeaderIconButton, SearchField, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
-import { EmptyState } from '@/shared/components/ui/index';
+import { EmptyState, CashFlowHero, FilterChipsRail } from '@/shared/components/ui/index';
 import { TransactionRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
@@ -102,6 +102,49 @@ export function ExpensesPage() {
 
   const activeFilterCount = countActiveFilters(filters);
 
+  const { totalSpent, totalEarned, currency } = useMemo(() => {
+    let spent = 0;
+    let earned = 0;
+    let curr = 'INR';
+    transactions.forEach((t) => {
+      curr = t.currency || curr;
+      if (t.type === 'income') {
+        earned += Number(t.amount) || 0;
+      } else {
+        spent += Number(t.amount) || 0;
+      }
+    });
+    return { totalSpent: spent, totalEarned: earned, currency: curr };
+  }, [transactions]);
+
+  const activeChipId =
+    filters.type === 'expense'
+      ? 'expense'
+      : filters.type === 'income'
+        ? 'income'
+        : filters.datePreset === 'this_month'
+          ? 'this_month'
+          : 'all';
+
+  const filterChips = [
+    { id: 'all', label: `All (${total || 0})` },
+    { id: 'expense', label: 'Expenses', icon: 'expense' as const },
+    { id: 'income', label: 'Income', icon: 'income' as const },
+    { id: 'this_month', label: 'This Month' },
+  ];
+
+  const handleChipSelect = (id: string) => {
+    if (id === 'all') {
+      commitFilters({ ...filters, type: 'all', datePreset: 'all' });
+    } else if (id === 'expense') {
+      commitFilters({ ...filters, type: 'expense' });
+    } else if (id === 'income') {
+      commitFilters({ ...filters, type: 'income' });
+    } else if (id === 'this_month') {
+      commitFilters({ ...filters, datePreset: 'this_month' });
+    }
+  };
+
   return (
     <StickyHeaderFlatScreen
       header={
@@ -115,7 +158,21 @@ export function ExpensesPage() {
           actionLabel="Add expense"
           onAction={() => navigate('/expense/add')}
           footer={
-            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
+              <CashFlowHero
+                title="Monthly Flow"
+                totalSpent={totalSpent}
+                totalEarned={totalEarned}
+                currency={currency}
+                netRate={totalEarned > 0 ? Math.round(((totalEarned - totalSpent) / totalEarned) * 100) : undefined}
+              />
+
+              <FilterChipsRail
+                chips={filterChips}
+                selectedId={activeChipId}
+                onSelect={handleChipSelect}
+              />
+
               <SearchField
                 placeholder="Search transactions"
                 onPress={() => navigate('/search')}

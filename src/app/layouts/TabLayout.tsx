@@ -58,9 +58,9 @@ function CustomTabBar() {
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'space-between',
-          backgroundColor: theme.colors.tabBar,
-          borderRadius: theme.radii.xl + 4,
-          border: `1px solid ${theme.colors.tabBarBorder}`,
+          backgroundColor: theme.isDark ? 'rgba(27, 32, 42, 0.92)' : 'rgba(255, 255, 255, 0.92)',
+          borderRadius: theme.radii.nav,
+          border: `1px solid ${theme.isDark ? 'rgba(255,255,255,0.08)' : theme.colors.tabBarBorder}`,
           paddingLeft: theme.spacing.sm,
           paddingRight: theme.spacing.sm,
           paddingTop: theme.spacing.sm,
@@ -92,7 +92,7 @@ function CustomTabBar() {
               width: 56, height: 56,
               borderRadius: 28,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.gradientEnd})`,
+              background: `linear-gradient(135deg, ${theme.colors.ocean}, ${theme.colors.primary}, ${theme.colors.violet})`,
               border: `4px solid ${theme.colors.background}`,
               cursor: 'pointer',
               boxShadow: theme.shadows.lg,
@@ -100,7 +100,7 @@ function CustomTabBar() {
             }}
             aria-label="Create"
           >
-            <AppIcon name="add" size={28} color={theme.colors.onPrimary} />
+            <AppIcon name="add" size={28} color="#FFFFFF" />
           </button>
 
           <div style={{ flex: 1, display: 'flex' }}>
