@@ -3,7 +3,7 @@ import { Button, Input, FormErrorBanner } from '@/shared/components/ui/index';
 import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { OptionChips, MultiOptionChips, SheetSelect, StackNavHeader, StackScrollScreen } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
-import { useOnboarding } from '@/features/auth/hooks/useAuthHooks';
+import { useOnboarding, useSignOut } from '@/features/auth/hooks/useAuthHooks';
 import { useAppSelector } from '@/shared/store/hooks';
 import { COUNTRIES, CURRENCIES, FINANCIAL_GOALS, SALARY_RANGES } from '@/shared/constants/config';
 import { maxLen, validateAmount, validateText, ValidationMessages } from '@/shared/validation/fieldLimits';
@@ -14,6 +14,7 @@ export function OnboardingPage() {
   const theme = useTheme();
   const user = useAppSelector((s) => s.auth.user);
   const { submit, loading, error, clearError } = useOnboarding();
+  const { signOut } = useSignOut();
   const [name, setName] = useState(user?.name || '');
   const [country, setCountry] = useState('IN');
   const [currency, setCurrency] = useState('INR');
@@ -118,6 +119,7 @@ export function OnboardingPage() {
         />
         {error ? <FormErrorBanner message={error} /> : null}
         <Button title="Complete Setup" onPress={handleSubmit} loading={loading} size="lg" />
+        <Button title="Sign Out" variant="outline" onPress={signOut} disabled={loading} size="lg" />
       </form>
     </StackScrollScreen>
   );

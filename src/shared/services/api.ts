@@ -82,6 +82,13 @@ api.interceptors.response.use(
       }
     }
 
+    const code = (error.response?.data as { error?: { code?: string } })?.error?.code;
+    if (error.response?.status === 403 && code === 'ONBOARDING_REQUIRED') {
+      if (!window.location.pathname.startsWith('/onboarding')) {
+        window.location.replace('/onboarding');
+      }
+    }
+
     return Promise.reject(error);
   }
 );
