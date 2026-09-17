@@ -223,7 +223,7 @@ export function NetWorthPage() {
                       key={inv.id}
                       icon="chart"
                       label={inv.name}
-                      subtitle={`${inv.type.replace(/_/g, ' ')} · ${inv.gainLoss >= 0 ? '+' : ''}${formatCurrency(inv.gainLoss, currency)}`}
+                      subtitle={`${inv.type.replace(/_/g, ' ')} · ${(inv.gainLoss ?? 0) >= 0 ? '+' : ''}${formatCurrency(inv.gainLoss ?? 0, currency)}`}
                       value={formatCurrency(inv.currentValue, currency)}
                       onPress={() => navigate('/investments')}
                       isLast={i === investments.length - 1}

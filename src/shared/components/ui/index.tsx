@@ -64,7 +64,11 @@ function buttonVariantStyle(
     };
   }
   if (variant === 'secondary') {
-    return { backgroundColor: theme.colors.surfaceHover, color: theme.colors.text };
+    return {
+      backgroundColor: theme.colors.surfaceHover,
+      color: theme.colors.text,
+      width: size === 'lg' ? '100%' : undefined,
+    };
   }
   if (variant === 'outline') {
     return {
@@ -75,7 +79,11 @@ function buttonVariantStyle(
     };
   }
   if (variant === 'ghost') {
-    return { backgroundColor: theme.colors.primarySoft, color: theme.colors.primary };
+    return {
+      backgroundColor: theme.colors.primarySoft,
+      color: theme.colors.primary,
+      width: size === 'lg' ? '100%' : undefined,
+    };
   }
   return {};
 }

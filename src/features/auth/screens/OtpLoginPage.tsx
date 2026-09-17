@@ -1,9 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { Button, Input, OtpInput } from '@/shared/components/ui/index';
-import { AuthShell, AuthFooter, AuthForm, AuthInfoBanner, AuthErrorBanner } from '../components';
+import { AuthShell, AuthForm, AuthInfoBanner, AuthErrorBanner } from '../components';
 import { authFieldRules } from '../utils/authValidation';
 import { maxLen } from '@/shared/validation/fieldLimits';
 import { useOtpLogin } from '../hooks/useAuthHooks';
+import { useTheme } from '@/shared/theme';
 
 interface OtpForm {
   email: string;
@@ -11,6 +13,8 @@ interface OtpForm {
 }
 
 export function OtpLoginPage() {
+  const navigate = useNavigate();
+  const theme = useTheme();
   const { sendOtp, verifyOtp, loading, error, info, otpSent, clearError } = useOtpLogin();
   const { control, handleSubmit, formState: { errors } } = useForm<OtpForm>({
     defaultValues: { email: '', otp: '' },
@@ -26,12 +30,15 @@ export function OtpLoginPage() {
     void verifyOtp(data.email, data.otp);
   });
 
+  const handleBackToSignIn = () => {
+    navigate('/login');
+  };
+
   return (
     <AuthShell
       tagline="We'll send a 6-digit code to your email."
       panelTitle="OTP sign in"
       backHref="/login"
-      footer={<AuthFooter linkText="Back to Sign In" href="/login" />}
     >
       <AuthForm onSubmit={onSubmit}>
         <Controller
@@ -47,9 +54,18 @@ export function OtpLoginPage() {
         {error ? <AuthErrorBanner message={error} /> : null}
 
         {!otpSent ? (
-          <Button title="Send Code" onPress={handleRequestOtp} loading={loading} size="lg" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.xs }}>
+            <Button title="Send Code" onPress={handleRequestOtp} loading={loading} size="lg" />
+            <Button
+              title="Back to Sign In"
+              onPress={handleBackToSignIn}
+              variant="outline"
+              size="lg"
+              disabled={loading}
+            />
+          </div>
         ) : (
-          <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md, marginTop: theme.spacing.xs }}>
             <Controller
               control={control}
               name="otp"
@@ -67,7 +83,14 @@ export function OtpLoginPage() {
             />
             <Button title="Verify & Sign In" onPress={onSubmit} loading={loading} size="lg" />
             <Button title="Resend code" onPress={handleRequestOtp} variant="ghost" loading={loading} />
-          </>
+            <Button
+              title="Back to Sign In"
+              onPress={handleBackToSignIn}
+              variant="outline"
+              size="lg"
+              disabled={loading}
+            />
+          </div>
         )}
       </AuthForm>
     </AuthShell>
