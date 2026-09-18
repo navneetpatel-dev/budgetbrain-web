@@ -91,8 +91,10 @@ export interface Investment {
   currentPrice: number;
   currency: string;
   purchaseDate: string;
-  currentValue?: number;
-  gainLoss?: number;
+  /** Server-computed (quantity * currentPrice) — always present; never derive client-side. */
+  currentValue: number;
+  /** Server-computed — always present; never derive client-side. */
+  gainLoss: number;
 }
 
 export interface NotificationItem {
@@ -112,6 +114,8 @@ export interface Goal {
   currentAmount: number;
   currency: string;
   targetDate: string | null;
+  /** Server-computed (0-100, capped) — never derive this from currentAmount/targetAmount client-side. */
+  progressPercentage: number;
 }
 
 export interface Loan {

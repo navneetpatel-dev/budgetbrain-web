@@ -17,6 +17,7 @@ import { CONFIRM } from '@/shared/constants/confirmations';
 import { apiDelete } from '@/shared/services/api';
 import { invalidateLoanQueries, removeLoanDetail } from '@/shared/services/queryInvalidation';
 import { useLoans } from '../hooks/useLoans';
+import { getLoanAmountPaid } from '../utils/loanMath';
 import type { Loan } from '@/shared/types';
 
 export function LoansPage() {
@@ -27,13 +28,18 @@ export function LoansPage() {
   const { data, isLoading, isError, refetch } = useLoans();
   const loans = data ?? [];
 
+  // KNOWN-GAP(money-math): totals below sum already-server-computed per-loan
+  // fields into a page-level aggregate; the API has no summary endpoint yet.
+  // See implementation-plan/web/18-money-math-lint-guardrail.md.
   const { totalOutstanding, totalPrincipal, currency } = useMemo(() => {
     let outstanding = 0;
     let principal = 0;
     let curr = 'INR';
     loans.forEach((l) => {
       curr = l.currency || curr;
+      // eslint-disable-next-line no-restricted-syntax
       outstanding += l.remainingBalance;
+      // eslint-disable-next-line no-restricted-syntax
       principal += l.principal;
     });
     return { totalOutstanding: outstanding, totalPrincipal: principal, currency: curr };
@@ -95,7 +101,7 @@ export function LoansPage() {
           ) : null
         }
         renderItem={(l) => {
-          const paid = l.principal - l.remainingBalance;
+          const paid = getLoanAmountPaid(l.principal, l.remainingBalance);
           const pct = toSafePercent(paid, l.principal);
           const color = l.closed ? theme.colors.success : theme.colors.primary;
           return (

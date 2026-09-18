@@ -29,4 +29,32 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // NEXTJS-STRUCTURE-CONVENTIONS.md §8: client arithmetic on a money-named
+    // value is forbidden — the API must return any total/derived amount a
+    // page needs. See implementation-plan/web/18-money-math-lint-guardrail.md.
+    //
+    // usePaginatedList.ts is excluded: its `total` field is a pagination
+    // item-count (PaginationMeta), never a money amount, in every one of its
+    // generic, resource-agnostic call sites.
+    files: ['src/features/**/*.{ts,tsx}', 'src/shared/**/*.{ts,tsx}'],
+    ignores: ['src/shared/hooks/usePaginatedList.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "BinaryExpression[operator=/^[+\\-*/]$/] > :matches(Identifier[name=/^(?!.*(?:Pages|Count|Items|Length|Index|Steps|Percent|Percentage|Progress|People|Users|Members|Days|Months|Years|Weeks|Records|Rows|Entries)$).*(?:amount|balance|price|cost|remaining|spent|earned|contribution|principal|salary|networth|payout|fee|total|value).*$/i], MemberExpression[property.name=/^(?!.*(?:Pages|Count|Items|Length|Index|Steps|Percent|Percentage|Progress|People|Users|Members|Days|Months|Years|Weeks|Records|Rows|Entries)$).*(?:amount|balance|price|cost|remaining|spent|earned|contribution|principal|salary|networth|payout|fee|total|value).*$/i])",
+          message:
+            'Client-side arithmetic on a money-named value is forbidden — the API must return the computed total/derived amount instead of the page deriving it. See NEXTJS-STRUCTURE-CONVENTIONS.md §8.',
+        },
+        {
+          selector:
+            "AssignmentExpression[operator=/^[+\\-*/]=$/] > :matches(Identifier[name=/^(?!.*(?:Pages|Count|Items|Length|Index|Steps|Percent|Percentage|Progress|People|Users|Members|Days|Months|Years|Weeks|Records|Rows|Entries)$).*(?:amount|balance|price|cost|remaining|spent|earned|contribution|principal|salary|networth|payout|fee|total|value).*$/i], MemberExpression[property.name=/^(?!.*(?:Pages|Count|Items|Length|Index|Steps|Percent|Percentage|Progress|People|Users|Members|Days|Months|Years|Weeks|Records|Rows|Entries)$).*(?:amount|balance|price|cost|remaining|spent|earned|contribution|principal|salary|networth|payout|fee|total|value).*$/i])",
+          message:
+            'Client-side arithmetic on a money-named value is forbidden — the API must return the computed total/derived amount instead of the page deriving it. See NEXTJS-STRUCTURE-CONVENTIONS.md §8.',
+        },
+      ],
+    },
+  },
 ])

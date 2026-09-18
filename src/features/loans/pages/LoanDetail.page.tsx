@@ -12,6 +12,7 @@ import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useLoanDetail } from '../hooks/useLoans';
+import { getLoanAmountPaid } from '../utils/loanMath';
 import { maxLen, validateOptionalText, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; notes?: string };
@@ -129,7 +130,7 @@ export function LoanDetailPage({ id: propId }: LoanDetailPageProps = {}) {
     );
   }
 
-  const paid = loan.principal - loan.remainingBalance;
+  const paid = getLoanAmountPaid(loan.principal, loan.remainingBalance);
   const pct = toSafePercent(paid, loan.principal);
   const progressColor = loan.closed ? theme.colors.success : theme.colors.primary;
 

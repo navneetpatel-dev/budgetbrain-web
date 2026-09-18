@@ -36,6 +36,12 @@ export function SplitWithFamilyField({
   const otherMembers = (members ?? []).filter((m) => m.userId !== currentUser?.id);
   const selectedMembers = otherMembers.filter((m) => !excludedIds.includes(m.userId));
   const totalPeople = selectedMembers.length + 1;
+  // Not a money-math gap: the split-create API (backend family.service.ts)
+  // is designed to take an explicit, arbitrary shareAmount per participant
+  // (it validates the submitted amounts, it doesn't compute an equal split
+  // itself) — this is proposing a default equal-split value for the user to
+  // review/edit, not re-deriving a total the API should already return.
+  // eslint-disable-next-line no-restricted-syntax
   const shareAmount = totalPeople > 0 && amount > 0 ? Math.round((amount / totalPeople) * 100) / 100 : 0;
 
   useEffect(() => {

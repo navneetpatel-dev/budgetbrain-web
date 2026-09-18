@@ -12,8 +12,15 @@ import { useAppSelector } from '@/shared/store/hooks';
 import { useRecurringSeriesList, useDismissRecurringSeries, useDeleteRecurringSeries } from '../hooks/useSubscriptions';
 import type { RecurringSeries } from '@/shared/types';
 
+/**
+ * KNOWN-GAP(money-math): normalizes a recurring series' amount to a monthly
+ * equivalent by cadence — the API returns the raw amount + cadence, not a
+ * normalized monthly figure. See implementation-plan/web/18-money-math-lint-guardrail.md.
+ */
 function toMonthlyEquivalent(series: RecurringSeries): number {
+  // eslint-disable-next-line no-restricted-syntax
   if (series.cadence === 'weekly') return series.amount * 4.345;
+  // eslint-disable-next-line no-restricted-syntax
   if (series.cadence === 'yearly') return series.amount / 12;
   return series.amount;
 }
@@ -28,6 +35,7 @@ export function SubscriptionsPage() {
   const dismissMutation = useDismissRecurringSeries();
   const deleteMutation = useDeleteRecurringSeries();
 
+  // KNOWN-GAP(money-math): sums the client-derived monthly-equivalent above across the list.
   const totalMonthly = series.reduce((sum, s) => sum + toMonthlyEquivalent(s), 0);
 
   return (

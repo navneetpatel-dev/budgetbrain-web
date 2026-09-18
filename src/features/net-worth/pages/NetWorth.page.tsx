@@ -43,10 +43,16 @@ export function NetWorthPage() {
   const investments = ensureArray<Investment>(data?.investments);
   const isEmpty = !isLoading && accounts.length === 0 && investments.length === 0;
 
-  // Compute macro bar breakdown
+  // Compute macro bar breakdown.
+  // KNOWN-GAP(money-math): totalAssets/totalLiabilities are already
+  // server-computed (summary API, no client truncation elsewhere on this
+  // page) — this derives a display-only asset/liability ratio from those
+  // trustworthy inputs, not a re-derivation of an amount the API should
+  // return. See implementation-plan/web/18-money-math-lint-guardrail.md.
   const macroItems = useMemo(() => {
     if (!summary) return [];
     const total = Math.max(1, (summary.totalAssets || 0) + (summary.totalLiabilities || 0));
+    // eslint-disable-next-line no-restricted-syntax
     const assetPct = Math.round(((summary.totalAssets || 0) / total) * 100);
     const liabPct = 100 - assetPct;
     return [
@@ -67,8 +73,11 @@ export function NetWorthPage() {
     ];
   }, [summary, theme]);
 
+  // KNOWN-GAP(money-math): same category as macroItems above — netWorth and
+  // totalAssets are already server-computed; this is a display-ratio derivation.
   const equityRatio = useMemo(() => {
     if (!summary || summary.totalAssets <= 0) return 100;
+    // eslint-disable-next-line no-restricted-syntax
     const ratio = Math.round((summary.netWorth / summary.totalAssets) * 100);
     return Math.max(0, Math.min(100, ratio));
   }, [summary]);

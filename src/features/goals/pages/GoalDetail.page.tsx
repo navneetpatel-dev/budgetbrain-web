@@ -8,7 +8,6 @@ import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useGoalDetail } from '../hooks/useGoals';
@@ -99,7 +98,7 @@ function GoalDetailPageContent({ id: propId }: { id?: string } = {}) {
     if (await confirm(CONFIRM.deleteGoal)) deleteMutation.mutate();
   };
 
-  const pct = toSafePercent(goal.currentAmount, goal.targetAmount);
+  const pct = goal.progressPercentage;
 
   if (editing) {
     const isPending = updateMutation.isPending;

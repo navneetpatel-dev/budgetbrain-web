@@ -54,7 +54,11 @@ export function InvestmentsPage() {
     let val = 0;
     let gain = 0;
     investments.forEach((inv) => {
-      val += inv.currentValue ?? (inv.quantity * (inv.currentPrice ?? 0));
+      // KNOWN-GAP(money-math): both accumulators below sum already-server-computed
+      // per-item values into a page-level portfolio total; the API has no aggregate
+      // endpoint yet. See implementation-plan/web/18-money-math-lint-guardrail.md.
+      // eslint-disable-next-line no-restricted-syntax
+      val += inv.currentValue;
       gain += inv.gainLoss ?? 0;
     });
     return { totalValue: val, totalGain: gain };
@@ -176,7 +180,7 @@ export function InvestmentsPage() {
               ? `${inv.gainLoss >= 0 ? '+' : ''}${formatCurrency(inv.gainLoss, inv.currency)}`
               : null,
           ].filter(Boolean).join(' · ')}
-          value={formatCurrency(inv.currentValue ?? (inv.quantity * (inv.currentPrice ?? 0)), inv.currency)}
+          value={formatCurrency(inv.currentValue, inv.currency)}
         />
       )}
       ListEmptyComponent={

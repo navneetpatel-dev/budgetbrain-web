@@ -12,7 +12,6 @@ import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { apiDelete } from '@/shared/services/api';
@@ -197,7 +196,7 @@ export function GoalsPage() {
           </div>
         }
         renderItem={(g) => {
-          const pct = toSafePercent(g.currentAmount, g.targetAmount);
+          const pct = g.progressPercentage;
           const isCompleted = pct >= 100;
           return (
             <div

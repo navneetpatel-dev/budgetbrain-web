@@ -42,6 +42,11 @@ export function BudgetsPage() {
 
   const [activeFilter, setActiveFilter] = useState('active');
 
+  // KNOWN-GAP(money-math): this page-level spent/limit summary (and the
+  // overallProgress/dailySafe figures derived from it below) is computed
+  // client-side from the fetched budget list; the Budget model has no
+  // server-computed aggregate/percentage field (unlike Goal's
+  // progressPercentage). See implementation-plan/web/18-money-math-lint-guardrail.md.
   const { totalSpent, totalLimit, overallProgress, currency } = useMemo(() => {
     let spent = 0;
     let limit = 0;
@@ -49,14 +54,17 @@ export function BudgetsPage() {
 
     budgets.forEach((b) => {
       curr = b.currency || curr;
+      // eslint-disable-next-line no-restricted-syntax
       spent += b.spent ?? 0;
       limit += Number(b.effectiveAmount ?? b.amount) || 0;
     });
 
+    // eslint-disable-next-line no-restricted-syntax
     const prog = limit > 0 ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
     return { totalSpent: spent, totalLimit: limit, overallProgress: prog, currency: curr };
   }, [budgets]);
 
+  // eslint-disable-next-line no-restricted-syntax
   const dailySafe = totalLimit > totalSpent ? (totalLimit - totalSpent) / 30 : 0;
 
   return (
