@@ -12,6 +12,7 @@ export const PROFILE_FEATURE_LINKS: { label: string; href: string; icon: AppIcon
 ];
 
 export const PROFILE_ACCOUNT_LINKS: { label: string; href: string; icon: AppIconName }[] = [
+  { label: 'Upgrade to Premium', href: '/upgrade', icon: 'sparkles' },
   { label: 'Accounts', href: '/accounts', icon: 'wallet' },
   { label: 'Investments', href: '/investments', icon: 'chart' },
   { label: 'Family Groups', href: '/family', icon: 'family' },
