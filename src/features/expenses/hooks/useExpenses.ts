@@ -4,12 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import { useInfinitePaginatedList } from '@/shared/hooks/usePaginatedList';
-import type { Transaction } from '@/shared/types';
+import type { Transaction, TransactionsSummary } from '@/shared/types';
 import { toExpenseListParams, type TransactionListFilters } from '../utils/transactionFilters';
 
 export function useExpenses(filters: TransactionListFilters) {
   const params = toExpenseListParams(filters);
-  return useInfinitePaginatedList<Transaction>({
+  return useInfinitePaginatedList<Transaction, TransactionsSummary>({
     queryKey: ['expenses', 'filtered'],
     url: '/expenses',
     itemsKey: 'transactions',

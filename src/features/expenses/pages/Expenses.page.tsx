@@ -86,6 +86,7 @@ function ExpensesPageContent() {
   const {
     items: transactions,
     total,
+    summary,
     isLoading,
     isError,
     refetch,
@@ -104,25 +105,11 @@ function ExpensesPageContent() {
 
   const activeFilterCount = countActiveFilters(filters);
 
-  // KNOWN-GAP(money-math): this page-level spent/earned summary is derived from
-  // the current (filtered, possibly paginated) transaction list rather than
-  // returned by the API. See implementation-plan/web/18-money-math-lint-guardrail.md.
-  const { totalSpent, totalEarned, currency } = useMemo(() => {
-    let spent = 0;
-    let earned = 0;
-    let curr = 'INR';
-    transactions.forEach((t) => {
-      curr = t.currency || curr;
-      if (t.type === 'income') {
-        // eslint-disable-next-line no-restricted-syntax
-        earned += Number(t.amount) || 0;
-      } else {
-        // eslint-disable-next-line no-restricted-syntax
-        spent += Number(t.amount) || 0;
-      }
-    });
-    return { totalSpent: spent, totalEarned: earned, currency: curr };
-  }, [transactions]);
+  // Server-computed totals for the active filter set (SUM in SQL, not a client
+  // reduction over the loaded/paginated page) — see implementation-plan/web/19-wire-money-computed-fields.md.
+  const totalSpent = summary?.totalExpense ?? 0;
+  const totalEarned = summary?.totalIncome ?? 0;
+  const currency = transactions[0]?.currency || 'INR';
 
   const activeChipId =
     filters.type === 'expense'
@@ -171,7 +158,7 @@ function ExpensesPageContent() {
                 totalSpent={totalSpent}
                 totalEarned={totalEarned}
                 currency={currency}
-                // eslint-disable-next-line no-restricted-syntax -- KNOWN-GAP(money-math): derived from the already-flagged totalEarned/totalSpent above.
+                // eslint-disable-next-line no-restricted-syntax -- display ratio derived from server-computed totals above (not a gap, see implementation-plan/web/19-wire-money-computed-fields.md).
                 netRate={totalEarned > 0 ? Math.round(((totalEarned - totalSpent) / totalEarned) * 100) : undefined}
               />
 

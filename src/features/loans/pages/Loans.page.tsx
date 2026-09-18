@@ -11,13 +11,11 @@ import { ProgressEntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { apiDelete } from '@/shared/services/api';
 import { invalidateLoanQueries, removeLoanDetail } from '@/shared/services/queryInvalidation';
 import { useLoans } from '../hooks/useLoans';
-import { getLoanAmountPaid } from '../utils/loanMath';
 import type { Loan } from '@/shared/types';
 
 export function LoansPage() {
@@ -29,7 +27,9 @@ export function LoansPage() {
   const loans = data ?? [];
 
   // KNOWN-GAP(money-math): totals below sum already-server-computed per-loan
-  // fields into a page-level aggregate; the API has no summary endpoint yet.
+  // fields (principal, remainingBalance) into a page-level aggregate; the API
+  // has no summary endpoint for the loans list yet (unlike Expenses, per
+  // implementation-plan/backend/14 — that fix didn't add a loans equivalent).
   // See implementation-plan/web/18-money-math-lint-guardrail.md.
   const { totalOutstanding, totalPrincipal, currency } = useMemo(() => {
     let outstanding = 0;
@@ -101,8 +101,8 @@ export function LoansPage() {
           ) : null
         }
         renderItem={(l) => {
-          const paid = getLoanAmountPaid(l.principal, l.remainingBalance);
-          const pct = toSafePercent(paid, l.principal);
+          // Server-computed (implementation-plan/backend/14) — not derived client-side.
+          const pct = l.paidPercentage ?? 0;
           const color = l.closed ? theme.colors.success : theme.colors.primary;
           return (
             <ProgressEntityRow

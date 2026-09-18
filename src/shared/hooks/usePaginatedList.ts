@@ -36,7 +36,7 @@ export function flattenInfinitePages<T>(pages: Record<string, unknown>[] | undef
 }
 
 /** Infinite scroll for high-volume lists (expenses, income, search, notifications). */
-export function useInfinitePaginatedList<T>(config: {
+export function useInfinitePaginatedList<T, TSummary = undefined>(config: {
   queryKey: unknown[];
   url: string;
   itemsKey: string;
@@ -70,10 +70,14 @@ export function useInfinitePaginatedList<T>(config: {
   );
 
   const total = query.data?.pages[0]?.total as number | undefined;
+  // Server-computed aggregate for the active filter set (e.g. transaction totals) —
+  // never derived from `items`, which is only the loaded subset of pages so far.
+  const summary = query.data?.pages[0]?.summary as TSummary | undefined;
 
   return {
     items,
     total: total ?? items.length,
+    summary,
     isLoading: query.isLoading,
     isError: query.isError,
     isRefetching: query.isRefetching,

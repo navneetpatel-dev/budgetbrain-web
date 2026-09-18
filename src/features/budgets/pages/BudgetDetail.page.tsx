@@ -8,7 +8,6 @@ import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useBudgetDetail } from '../hooks/useBudgets';
@@ -150,7 +149,8 @@ function BudgetDetailPageContent({ id: propId }: { id?: string } = {}) {
   }
 
   const effectiveAmount = budget.effectiveAmount ?? budget.amount;
-  const pct = toSafePercent(budget.spent, effectiveAmount);
+  // Server-computed (implementation-plan/backend/14) — not derived client-side.
+  const pct = budget.spentPercentage ?? 0;
   const alertAt = budget.alertThreshold ?? 80;
   const barColor = pct >= 100 ? theme.colors.danger : pct >= alertAt ? theme.colors.warning : theme.colors.success;
   const rolloverAmount = budget.rolloverAmount ?? 0;

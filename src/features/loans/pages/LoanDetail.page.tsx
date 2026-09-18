@@ -8,11 +8,9 @@ import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useLoanDetail } from '../hooks/useLoans';
-import { getLoanAmountPaid } from '../utils/loanMath';
 import { maxLen, validateOptionalText, validateText } from '@/shared/validation/fieldLimits';
 
 type FieldErrors = { name?: string; notes?: string };
@@ -130,8 +128,8 @@ export function LoanDetailPage({ id: propId }: LoanDetailPageProps = {}) {
     );
   }
 
-  const paid = getLoanAmountPaid(loan.principal, loan.remainingBalance);
-  const pct = toSafePercent(paid, loan.principal);
+  // Server-computed (implementation-plan/backend/14) — not derived client-side.
+  const pct = loan.paidPercentage ?? 0;
   const progressColor = loan.closed ? theme.colors.success : theme.colors.primary;
 
   return (

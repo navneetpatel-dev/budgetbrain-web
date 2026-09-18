@@ -10,7 +10,6 @@ import { ProgressEntityRow } from '@/shared/components/ui/list-rows';
 import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
-import { toSafePercent } from '@/shared/utils/number';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { apiDelete } from '@/shared/services/api';
@@ -42,11 +41,13 @@ export function BudgetsPage() {
 
   const [activeFilter, setActiveFilter] = useState('active');
 
-  // KNOWN-GAP(money-math): this page-level spent/limit summary (and the
-  // overallProgress/dailySafe figures derived from it below) is computed
-  // client-side from the fetched budget list; the Budget model has no
-  // server-computed aggregate/percentage field (unlike Goal's
-  // progressPercentage). See implementation-plan/web/18-money-math-lint-guardrail.md.
+  // KNOWN-GAP(money-math), partially resolved: per-budget spentPercentage is now
+  // server-computed (implementation-plan/backend/14, used per-row below), but this
+  // page-level sum ACROSS all budgets (and the overallProgress/dailySafe figures
+  // derived from it) has no equivalent backend rollup — still a client-side
+  // aggregate. Lower severity than Expenses' old bug since this list isn't
+  // paginated (usePaginatedList fetches all pages), so the sum is complete, just
+  // in the wrong layer. See implementation-plan/web/18-money-math-lint-guardrail.md.
   const { totalSpent, totalLimit, overallProgress, currency } = useMemo(() => {
     let spent = 0;
     let limit = 0;
@@ -137,7 +138,8 @@ export function BudgetsPage() {
         keyExtractor={(b: Budget) => b.id}
         renderItem={(b) => {
           const effectiveAmount = b.effectiveAmount ?? b.amount;
-          const pct = toSafePercent(b.spent, effectiveAmount);
+          // Server-computed (implementation-plan/backend/14) — not derived client-side.
+          const pct = b.spentPercentage ?? 0;
           const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary;
           const rolloverAmount = b.rolloverAmount ?? 0;
           const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : rolloverAmount !== 0 ? `${rolloverAmount > 0 ? '+' : '-'}${formatCurrency(Math.abs(rolloverAmount), b.currency)} rollover` : undefined;

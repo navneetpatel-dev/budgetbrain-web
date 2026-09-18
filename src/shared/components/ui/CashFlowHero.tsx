@@ -20,13 +20,12 @@ export function CashFlowHero({
 }: CashFlowHeroProps) {
   const theme = useTheme();
 
-  // KNOWN-GAP(money-math): this component's only caller (Expenses.page.tsx)
-  // already computes totalSpent/totalEarned client-side from a paginated
-  // transaction list (a confirmed correctness bug, not just an architecture
-  // violation — see that page's own KNOWN-GAP comment). These derived ratios
-  // compound the same root gap rather than introduce a new one; a real fix
-  // requires the API to return spent/earned/split-ratio for the active filter.
-  // See implementation-plan/web/18-money-math-lint-guardrail.md.
+  // Not a gap: totalSpent/totalEarned are now the server-computed filtered
+  // totals (implementation-plan/backend/14, implementation-plan/web/19) —
+  // these are display ratios derived from already-correct, non-derived
+  // inputs, the same accepted pattern as NetWorth.page.tsx's macroItems.
+  // Still money-named arithmetic by the letter of §8, so kept disabled here
+  // rather than widening the lint rule's exclusion list.
   // eslint-disable-next-line no-restricted-syntax
   const totalFlow = totalSpent + totalEarned;
   // eslint-disable-next-line no-restricted-syntax

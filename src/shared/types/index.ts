@@ -58,6 +58,7 @@ export interface Budget {
   rolloverAmount?: number;
   effectiveAmount?: number;
   spent?: number;
+  spentPercentage?: number;
   category?: Category;
 }
 
@@ -132,6 +133,8 @@ export interface Loan {
   dueDayOfMonth: number | null;
   notes: string | null;
   closed: boolean;
+  amountPaid?: number;
+  paidPercentage?: number;
   payments?: LoanPayment[];
 }
 
@@ -215,8 +218,14 @@ export interface PaginationMeta {
   limit: number;
 }
 
+export interface TransactionsSummary {
+  totalExpense: number;
+  totalIncome: number;
+}
+
 export interface PaginatedTransactions extends PaginationMeta {
   transactions: Transaction[];
+  summary?: TransactionsSummary;
 }
 
 export type PaginatedList<K extends string, T> = PaginationMeta & Record<K, T[]>;
