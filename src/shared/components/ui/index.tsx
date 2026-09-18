@@ -967,3 +967,5 @@ export { CashFlowHero } from './CashFlowHero';
 export type { CashFlowHeroProps } from './CashFlowHero';
 export { AppHeaderBar } from './AppHeaderBar';
 export type { AppHeaderBarProps } from './AppHeaderBar';
+export { ErrorBoundary } from './ErrorBoundary';
+export type { ErrorBoundaryProps } from './ErrorBoundary';

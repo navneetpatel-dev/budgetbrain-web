@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/store/hooks';
 import { hydratePreferences } from '@/shared/store/settingsSlice';

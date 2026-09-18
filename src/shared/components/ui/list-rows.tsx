@@ -365,16 +365,19 @@ export function NotificationRow({
   body,
   date,
   unread,
+  onPress,
 }: {
   title: string;
   body: string;
   date: string;
   unread?: boolean;
+  onPress?: () => void;
 }) {
   const theme = useTheme();
 
   return (
     <Surface
+      onClick={onPress}
       style={{
         border: `1px solid ${unread ? `${theme.colors.primary}33` : theme.colors.borderSubtle}`,
         opacity: unread ? 1 : 0.75,

@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { BackButton } from '@/shared/components/ui/feature-screen';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
@@ -152,16 +153,16 @@ export function AuthShell({
   backHref?: string;
   panelTitle?: string;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { isTablet } = useResponsive();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
     } else if (backHref) {
-      navigate(backHref, { replace: true });
+      router.replace(backHref);
     } else {
-      navigate('/login', { replace: true });
+      router.replace('/login');
     }
   };
 
@@ -213,7 +214,7 @@ export function AuthFooter({
           {text}
         </span>
       )}
-      <Link to={href} style={{ fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>
+      <Link href={href} style={{ fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.primary, fontFamily: 'Inter, sans-serif' }}>
         {linkText}
       </Link>
     </div>
@@ -233,7 +234,7 @@ export function AuthLink({
 
   return (
     <Link
-      to={to}
+      href={to}
       style={{
         fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.primary,
         fontFamily: 'Inter, sans-serif',

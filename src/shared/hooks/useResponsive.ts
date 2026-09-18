@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo, useSyncExternalStore } from 'react';
 
 const BREAKPOINTS = {
@@ -55,8 +57,12 @@ function getSnapshot() {
   return window.innerWidth;
 }
 
+function getServerSnapshot() {
+  return 1280;
+}
+
 export function useResponsive() {
-  const width = useSyncExternalStore(subscribe, getSnapshot);
+  const width = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   return useMemo(() => {
     const isTablet = width >= BREAKPOINTS.tablet;

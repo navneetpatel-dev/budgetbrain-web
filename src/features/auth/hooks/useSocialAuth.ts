@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/shared/store/hooks';
 import { setUser } from '@/shared/store/authSlice';
 import { apiPost } from '@/shared/services/api';
@@ -11,7 +11,7 @@ import type { User } from '@/shared/types';
 
 export function useSocialAuth() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState<SocialAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +20,7 @@ export function useSocialAuth() {
   const completeSession = async (session: AuthSession) => {
     await persistAuthSession(session);
     dispatch(setUser(session.user as User));
-    navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
+    router.replace(session.user.onboardingCompleted ? '/dashboard' : '/onboarding');
   };
 
   const signInGoogle = async (idToken: string, name?: string) => {

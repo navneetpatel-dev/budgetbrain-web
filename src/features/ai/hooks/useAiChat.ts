@@ -1,7 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
 import type {
@@ -28,7 +27,7 @@ function asConversationList(data: unknown): AiConversationSummary[] {
 
 export function useAiChat() {
   const queryClient = useQueryClient();
-  const location = useLocation();
+  const pathname = usePathname();
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [isPending, setIsPending] = useState(false);
@@ -39,7 +38,9 @@ export function useAiChat() {
   const user = useAppSelector((s) => s.auth.user);
   const authenticated = !!user;
 
-  messagesCountRef.current = messages.length;
+  useEffect(() => {
+    messagesCountRef.current = messages.length;
+  }, [messages.length]);
 
   const loadLatestConversation = useCallback(async () => {
     if (!authenticated) {
@@ -81,10 +82,10 @@ export function useAiChat() {
 
   // Reload whenever the AI route is entered
   useEffect(() => {
-    if (location.pathname !== '/ai') return;
+    if (pathname !== '/ai') return;
     draftNewChat.current = false;
     void loadLatestConversation();
-  }, [location.pathname, loadLatestConversation]);
+  }, [pathname, loadLatestConversation]);
 
   const clearError = useCallback(() => setError(null), []);
 

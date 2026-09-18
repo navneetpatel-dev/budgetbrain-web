@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
@@ -19,7 +21,7 @@ export function useRecurringSeriesList() {
 }
 
 export function useCreateRecurringSeries() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -29,7 +31,7 @@ export function useCreateRecurringSeries() {
     onSuccess: () => {
       invalidate(queryClient);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to add subscription')),
   });

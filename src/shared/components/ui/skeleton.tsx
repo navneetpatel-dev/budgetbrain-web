@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, type CSSProperties, type ReactNode } from 'react';
 import { useTheme } from '@/shared/theme';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
@@ -248,7 +250,6 @@ function NotificationRowSkeleton() {
 }
 
 function AccountRowSkeleton() {
-  const theme = useTheme();
   return (
     <SurfaceCard>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -262,7 +263,6 @@ function AccountRowSkeleton() {
 }
 
 function TicketRowSkeleton() {
-  const theme = useTheme();
   return (
     <SurfaceCard>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>

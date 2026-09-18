@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateGoalQueries, removeGoalDetail } from '@/shared/services/queryInvalidation';
@@ -15,7 +15,7 @@ export function useGoals() {
 }
 
 export function useGoalDetail(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function useGoalDetail(id: string | undefined) {
     onSuccess: () => {
       if (id) removeGoalDetail(queryClient, id);
       invalidateGoalQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -65,7 +65,7 @@ export function useGoalDetail(id: string | undefined) {
 }
 
 export function useCreateGoal() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -75,7 +75,7 @@ export function useCreateGoal() {
     onSuccess: () => {
       invalidateGoalQueries(queryClient);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create goal')),
   });
@@ -84,7 +84,7 @@ export function useCreateGoal() {
 }
 
 export function useContributeGoal(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -98,7 +98,7 @@ export function useContributeGoal(id: string | undefined) {
       }
       invalidateGoalQueries(queryClient, id);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Contribution failed')),
   });

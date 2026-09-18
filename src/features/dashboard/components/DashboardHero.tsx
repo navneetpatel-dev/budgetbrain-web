@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { RingGauge } from '@/shared/components/ui/RingGauge';
 import { useTheme } from '@/shared/theme';
@@ -37,7 +37,7 @@ export function DashboardHero({
   loading?: boolean;
 }) {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { tabBarPaddingX, contentMaxWidth, isDesktop } = useResponsive();
   const animatedAmount = useCountUp(amount);
   const targetProgress = Math.min(100, Math.max(10, Math.round(savingsRate || 25)));
@@ -208,7 +208,7 @@ export function DashboardHero({
             return (
               <button
                 key={action.label}
-                onClick={() => navigate(action.href)}
+                onClick={() => router.push(action.href)}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px) scale(1.02)'; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0) scale(1)'; }}
                 onMouseDown={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.97)'; }}

@@ -5,7 +5,9 @@ import { useSocialAuth } from '@/features/auth/hooks/useSocialAuth';
 import { AuthDivider } from './AuthDivider';
 import { AuthErrorBanner } from './AuthBanners';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  process.env.VITE_GOOGLE_CLIENT_ID;
 const googleEnabled = Boolean(GOOGLE_CLIENT_ID?.trim());
 
 function GoogleMark() {

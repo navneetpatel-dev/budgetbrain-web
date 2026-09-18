@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { BrandMark } from '@/shared/components/brand/BrandMark';
 import { AppIcon } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
@@ -22,7 +22,7 @@ export function AppHeaderBar({
   rightAction,
 }: AppHeaderBarProps) {
   const theme = useTheme();
-  const navigate = useNavigate();
+  const router = useRouter();
   const user = useAppSelector((s) => s.auth.user);
   const userInitial = (user?.name?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase();
 
@@ -30,7 +30,7 @@ export function AppHeaderBar({
     if (onBack) {
       onBack();
     } else {
-      navigate(-1);
+      router.back();
     }
   };
 
@@ -104,7 +104,7 @@ export function AppHeaderBar({
           <>
             {showNotifications && (
               <button
-                onClick={() => navigate('/notifications')}
+                onClick={() => router.push('/notifications')}
                 style={{
                   width: 36,
                   height: 36,
@@ -134,7 +134,7 @@ export function AppHeaderBar({
             )}
 
             <button
-              onClick={() => navigate('/settings')}
+              onClick={() => router.push('/settings')}
               style={{
                 width: 36,
                 height: 36,

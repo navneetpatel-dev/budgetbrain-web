@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateBudgetQueries, removeBudgetDetail } from '@/shared/services/queryInvalidation';
@@ -15,7 +15,7 @@ export function useBudgets() {
 }
 
 export function useBudgetDetail(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export function useBudgetDetail(id: string | undefined) {
     onSuccess: () => {
       if (id) removeBudgetDetail(queryClient, id);
       invalidateBudgetQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -65,7 +65,7 @@ export function useBudgetDetail(id: string | undefined) {
 }
 
 export function useCreateBudget() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -75,7 +75,7 @@ export function useCreateBudget() {
     onSuccess: () => {
       invalidateBudgetQueries(queryClient);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create budget')),
   });

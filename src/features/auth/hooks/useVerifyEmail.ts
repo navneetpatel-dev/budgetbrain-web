@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getApiErrorMessage } from '@/shared/services/api';
 import { verifyEmailToken } from '../services/auth.service';
 
 export function useVerifyEmail(token: string) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export function useVerifyEmail(token: string) {
     }
   };
 
-  const goToLogin = () => navigate('/login', { replace: true });
+  const goToLogin = () => router.replace('/login');
 
   return { verify, loading, verified, error, clearError, goToLogin };
 }

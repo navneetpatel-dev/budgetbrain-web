@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { ActionSheet } from './ActionSheet';
 import { useTheme } from '@/shared/theme';
@@ -13,12 +15,12 @@ import type { CSSProperties } from 'react';
 /* ── Back Navigation ── */
 
 export function useStackBack(fallback = '/') {
-  const navigate = useNavigate();
+  const router = useRouter();
   return () => {
-    if (window.history.length > 1) {
-      navigate(-1);
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
     } else {
-      navigate(fallback, { replace: true });
+      router.replace(fallback);
     }
   };
 }

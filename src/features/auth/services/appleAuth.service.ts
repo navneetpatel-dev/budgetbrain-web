@@ -32,12 +32,13 @@ let sdkPromise: Promise<AppleIDAuth> | null = null;
 let initializedFor: string | null = null;
 
 function getAppleClientId(): string {
-  return (import.meta.env.VITE_APPLE_CLIENT_ID as string | undefined)?.trim() ?? '';
+  const val = process.env.NEXT_PUBLIC_APPLE_CLIENT_ID ?? process.env.VITE_APPLE_CLIENT_ID;
+  return val?.trim() ?? '';
 }
 
 function getAppleRedirectUri(): string {
-  const configured = (import.meta.env.VITE_APPLE_REDIRECT_URI as string | undefined)?.trim();
-  return configured || window.location.origin;
+  const configured = (process.env.NEXT_PUBLIC_APPLE_REDIRECT_URI ?? process.env.VITE_APPLE_REDIRECT_URI)?.trim();
+  return configured || (typeof window !== 'undefined' ? window.location.origin : '');
 }
 
 async function loadAppleSdk(): Promise<AppleIDAuth> {

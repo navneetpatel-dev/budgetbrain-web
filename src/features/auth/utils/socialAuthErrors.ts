@@ -45,7 +45,8 @@ export function getSocialAuthErrorMessage(
   const label = PROVIDER_LABEL[provider];
 
   if (isConfigError(err)) {
-    if (import.meta.env.DEV && err instanceof Error) {
+    const isDev = process.env.NODE_ENV !== 'production';
+    if (isDev && err instanceof Error) {
       return `Setup required: ${err.message}`;
     }
     return `${label} sign-in is temporarily unavailable. Please use email and password, or try again later.`;

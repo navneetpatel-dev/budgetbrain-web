@@ -23,6 +23,7 @@ export function useAccounts() {
       institution?: string;
       balance: number;
       accountNumberLast4?: string;
+      currency?: string;
     }) => apiPost('/accounts', d),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
@@ -62,6 +63,7 @@ export function useInvestments() {
       purchasePrice: number;
       currentPrice?: number;
       purchaseDate: string;
+      currency?: string;
     }) => apiPost('/investments', d),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['investments'] });
@@ -188,12 +190,19 @@ export function useCreateSplit() {
 }
 
 export function useNotifications() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = usePaginatedList<NotificationItem, 'notifications'>({
     queryKey: ['notifications'],
     url: '/notifications',
     itemsKey: 'notifications',
   });
-  return { notifications: data, isLoading };
+
+  const markAsReadMutation = useMutation({
+    mutationFn: (id: string) => apiPatch(`/notifications/${id}/read`, {}),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
+  });
+
+  return { notifications: data, isLoading, markAsRead: markAsReadMutation.mutate };
 }
 
 export function useSupportTickets() {
@@ -268,13 +277,14 @@ export function useReports() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const download = async (format: 'csv' | 'pdf', params?: Record<string, string>) => {
+  const download = async (format: 'csv' | 'pdf' | 'excel', params?: Record<string, string>) => {
     setLoading(true); setError(null);
     try {
       const blob = await apiDownloadBinary(`/reports/${format}`, params);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = `report.${format}`; a.click();
+      const ext = format === 'excel' ? 'xlsx' : format;
+      a.href = url; a.download = `report.${ext}`; a.click();
       URL.revokeObjectURL(url);
     } catch { setError('Download failed'); }
     finally { setLoading(false); }

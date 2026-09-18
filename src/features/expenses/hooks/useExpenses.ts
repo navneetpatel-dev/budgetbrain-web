@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
@@ -19,7 +19,7 @@ export function useExpenses(filters: TransactionListFilters) {
 }
 
 export function useExpenseDetail(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function useExpenseDetail(id: string | undefined) {
     onSuccess: () => {
       if (id) void queryClient.removeQueries({ queryKey: ['expense', id] });
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -58,7 +58,7 @@ export function useExpenseDetail(id: string | undefined) {
     mutationFn: () => apiPost(`/expenses/${id}/duplicate`),
     onSuccess: () => {
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -87,7 +87,7 @@ export function useExpenseDetail(id: string | undefined) {
 }
 
 export function useCreateExpense() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -98,7 +98,7 @@ export function useCreateExpense() {
       invalidateMoneyQueries(queryClient);
       setShowSuccess(true);
       // Brief confirmation before leaving, instead of an instant navigate-away.
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to add expense')),
   });

@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateLoanQueries, removeLoanDetail } from '@/shared/services/queryInvalidation';
@@ -15,7 +17,7 @@ export function useLoans() {
 }
 
 export function useLoanDetail(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export function useLoanDetail(id: string | undefined) {
     onSuccess: () => {
       if (id) removeLoanDetail(queryClient, id);
       invalidateLoanQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -65,7 +67,7 @@ export function useLoanDetail(id: string | undefined) {
 }
 
 export function useCreateLoan() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -75,7 +77,7 @@ export function useCreateLoan() {
     onSuccess: () => {
       invalidateLoanQueries(queryClient);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to create loan')),
   });
@@ -84,7 +86,7 @@ export function useCreateLoan() {
 }
 
 export function usePayLoan(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -98,7 +100,7 @@ export function usePayLoan(id: string | undefined) {
       }
       invalidateLoanQueries(queryClient, id);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Payment failed')),
   });

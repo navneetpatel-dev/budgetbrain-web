@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { apiPost, getApiErrorMessage, getRefreshToken } from '@/shared/services/api';
 import { useAppDispatch } from '@/shared/store/hooks';
@@ -10,7 +10,7 @@ import type { User } from '@/shared/types';
 
 export function useLogin() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const clearError = useCallback(() => setError(null), []);
@@ -18,7 +18,7 @@ export function useLogin() {
   const handleSuccess = async (session: AuthSession) => {
     await persistAuthSession(session);
     dispatch(setUser(session.user as User));
-    navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
+    router.replace(session.user.onboardingCompleted ? '/dashboard' : '/onboarding');
   };
 
   const login = async (credentials: LoginCredentials) => {
@@ -35,7 +35,7 @@ export function useLogin() {
 
 export function useRegister() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const clearError = useCallback(() => setError(null), []);
@@ -43,7 +43,7 @@ export function useRegister() {
   const handleSuccess = async (session: AuthSession) => {
     await persistAuthSession(session);
     dispatch(setUser(session.user as User));
-    navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
+    router.replace(session.user.onboardingCompleted ? '/dashboard' : '/onboarding');
   };
 
   const register = async (credentials: RegisterCredentials) => {
@@ -77,7 +77,6 @@ export function useForgotPassword() {
 }
 
 export function useResetPassword(token: string) {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -97,7 +96,7 @@ export function useResetPassword(token: string) {
 
 export function useOtpLogin() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
@@ -123,7 +122,7 @@ export function useOtpLogin() {
       const session = await apiPost<AuthSession>('/auth/otp/verify', { email, otp: code });
       await persistAuthSession(session);
       dispatch(setUser(session.user as User));
-      navigate(session.user.onboardingCompleted ? '/dashboard' : '/onboarding', { replace: true });
+      router.replace(session.user.onboardingCompleted ? '/dashboard' : '/onboarding');
     } catch (err) { setError(getApiErrorMessage(err, 'Invalid verification code')); }
     finally { setLoading(false); }
   };
@@ -134,7 +133,7 @@ export function useOtpLogin() {
 export function useSignOut() {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const signOut = async () => {
     try {
@@ -145,7 +144,7 @@ export function useSignOut() {
     localStorage.removeItem('refresh_token');
     dispatch(setUser(null));
     queryClient.clear();
-    navigate('/login', { replace: true });
+    router.replace('/login');
   };
 
   return { signOut };
@@ -153,7 +152,7 @@ export function useSignOut() {
 
 export function useOnboarding() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -167,7 +166,7 @@ export function useOnboarding() {
     try {
       const user = await apiPost<User>('/users/onboarding', data);
       dispatch(setUser(user));
-      navigate('/dashboard', { replace: true });
+      router.replace('/dashboard');
     } catch (err) { setError(getApiErrorMessage(err, 'Could not complete onboarding')); }
     finally { setLoading(false); }
   };

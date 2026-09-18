@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
@@ -16,7 +16,7 @@ export function useIncome() {
 }
 
 export function useIncomeDetail(id: string | undefined) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function useIncomeDetail(id: string | undefined) {
     onSuccess: () => {
       if (id) void queryClient.removeQueries({ queryKey: ['income', id] });
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
   });
 
@@ -55,7 +55,7 @@ export function useIncomeDetail(id: string | undefined) {
     mutationFn: () => apiPost(`/income/${id}/duplicate`),
     onSuccess: () => {
       invalidateMoneyQueries(queryClient);
-      navigate(-1);
+      router.back();
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Could not duplicate income')),
   });
@@ -77,7 +77,7 @@ export function useIncomeDetail(id: string | undefined) {
 }
 
 export function useCreateIncome() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -103,7 +103,7 @@ export function useCreateIncome() {
     onSuccess: () => {
       invalidateMoneyQueries(queryClient);
       setShowSuccess(true);
-      setTimeout(() => navigate(-1), 900);
+      setTimeout(() => router.back(), 900);
     },
     onError: (err) => setError(getApiErrorMessage(err, 'Failed to save income')),
   });

@@ -1,73 +1,75 @@
-# React + TypeScript + Vite
+# BudgetBrain Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Next.js App Router web application for BudgetBrain — AI-powered personal finance and expense tracking.
 
-Currently, two official plugins are available:
+**Related apps:** [backend](../backend) · [mobile](../mobile) · [admin](../admin)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Architecture & Conventions
 
-## React Compiler
+This web application strictly follows:
+- [`structure/web-admin/WEB-STRUCTURE-CONVENTIONS.md`](../../structure/web-admin/WEB-STRUCTURE-CONVENTIONS.md)
+- [`structure/web-admin/NEXTJS-STRUCTURE-CONVENTIONS.md`](../../structure/web-admin/NEXTJS-STRUCTURE-CONVENTIONS.md)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Hierarchy
+```
+src/
+├── app/                  # Route layer (thin page re-exports, layouts, error/loading boundaries)
+├── features/             # Feature domains (pages, components, hooks, api, styles, types)
+└── shared/               # Cross-feature reusable code (theme, store, services, containers, ui)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **Framework:** Next.js 15 (App Router), React 19, TypeScript
+- **Styling:** Tailwind CSS with centralized design tokens (`globals.css`, `tailwind.config.ts`)
+- **State Management:** Redux Toolkit + Redux Persist
+- **Server Cache & Async State:** TanStack React Query (v5)
+- **Forms:** React Hook Form + custom validation (`fieldLimits`)
+- **Icons & Motion:** Lucide React, Framer Motion
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Prerequisites
+
+- Node.js 18+ and npm
+- Running BudgetBrain API server (`backend/` on port 3002)
+
+## Quick Start
+
+```bash
+# 1. Clone & enter web directory
+cd web
+
+# 2. Copy environment template
+cp .env.example .env.local
+
+# 3. Install dependencies
+npm install
+
+# 4. Start local development server (port 3000)
+npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3002/api/v1` | BudgetBrain Backend API base URL |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | *(Optional)* | Google OAuth Web Client ID |
+| `NEXT_PUBLIC_APPLE_CLIENT_ID` | *(Optional)* | Apple Services ID for Sign in with Apple |
+| `NEXT_PUBLIC_APPLE_REDIRECT_URI` | `window.location.origin` | Return URL configured on Apple Services ID |
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Next.js development server (`next dev -p 3000`) |
+| `npm run build` | Compile production standalone bundle (`next build`) |
+| `npm run start` | Run production server (`next start -p 3000`) |
+| `npm run lint` | Run ESLint check across all files |
+
+## Deployment & Hosting
+
+The app is configured with `output: 'standalone'` in `next.config.ts`:
+- **Docker / EC2 / Node:** Run `node .next/standalone/server.js` behind Nginx or CloudFront.
+- **Vercel / Cloud Platforms:** Seamless deployment via standard Next.js build pipeline.
