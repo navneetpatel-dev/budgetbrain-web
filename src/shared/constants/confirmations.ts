@@ -62,4 +62,25 @@ export const CONFIRM = {
     cancelLabel: 'Cancel',
     destructive: true,
   }),
+  removeMember: (name: string): ConfirmCopy => ({
+    title: 'Remove member?',
+    message: `${name} will be removed from this family group and lose access to shared expenses. This action cannot be undone.`,
+    confirmLabel: 'Remove',
+    cancelLabel: 'Cancel',
+    destructive: true,
+  }),
+  leaveGroup: {
+    title: 'Leave family group?',
+    message: 'You will lose access to shared expenses and balances for this group.',
+    confirmLabel: 'Leave',
+    cancelLabel: 'Cancel',
+    destructive: true,
+  },
+  transferOwnership: (name: string): ConfirmCopy => ({
+    title: 'Transfer ownership?',
+    message: `${name} will become the group owner and you will be demoted to admin. This action cannot be undone by you alone.`,
+    confirmLabel: 'Transfer',
+    cancelLabel: 'Cancel',
+    destructive: true,
+  }),
 } as const;

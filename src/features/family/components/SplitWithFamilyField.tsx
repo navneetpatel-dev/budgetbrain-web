@@ -29,9 +29,15 @@ export function SplitWithFamilyField({
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const { data: members } = useFamilyMembers(groupId || undefined);
 
+  // Read-only members can't create splits (backend family.service.ts's
+  // createSplit rejects role === 'read_only') — only offer groups where the
+  // current user has a role that's actually allowed to split.
+  const splittableMemberships = memberships.filter((m) => m.role !== 'read_only');
+
   useEffect(() => {
-    if (memberships.length > 0 && !groupId) setGroupId(memberships[0].groupId);
-  }, [memberships, groupId]);
+    if (splittableMemberships.length > 0 && !groupId) setGroupId(splittableMemberships[0].groupId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [splittableMemberships.map((m) => m.groupId).join(','), groupId]);
 
   const otherMembers = (members ?? []).filter((m) => m.userId !== currentUser?.id);
   const selectedMembers = otherMembers.filter((m) => !excludedIds.includes(m.userId));
@@ -56,7 +62,7 @@ export function SplitWithFamilyField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, groupId, amount, shareAmount, excludedIds.join(',')]);
 
-  if (memberships.length === 0) return null;
+  if (splittableMemberships.length === 0) return null;
 
   return (
     <div style={{ marginBottom: theme.spacing.lg }}>
@@ -66,12 +72,12 @@ export function SplitWithFamilyField({
       </div>
       {enabled ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-          {memberships.length > 1 ? (
+          {splittableMemberships.length > 1 ? (
             <SheetSelect
               value={groupId}
-              options={memberships.map((m) => m.groupId)}
+              options={splittableMemberships.map((m) => m.groupId)}
               onChange={setGroupId}
-              getLabel={(id) => memberships.find((m) => m.groupId === id)?.group?.name ?? 'Group'}
+              getLabel={(id) => splittableMemberships.find((m) => m.groupId === id)?.group?.name ?? 'Group'}
               placeholder="Choose group"
               disabled={disabled}
             />

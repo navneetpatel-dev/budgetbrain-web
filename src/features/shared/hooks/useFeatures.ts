@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiDownloadBinary, apiGet, apiPatch, apiPost, getApiErrorMessage } from '@/shared/services/api';
+import { apiDelete, apiDownloadBinary, apiGet, apiPatch, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { invalidateMoneyQueries } from '@/shared/services/queryInvalidation';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { ensureArray } from '@/shared/utils/listData';
@@ -140,6 +140,29 @@ export function useFamilyMembers(groupId: string | undefined) {
     queryFn: () => apiGet<{ members: FamilyGroupMember[] }>(`/family/groups/${groupId}/members`),
     enabled: !!groupId,
     select: (d) => ensureArray<FamilyGroupMember>(d.members),
+  });
+}
+
+export function useRemoveMember(groupId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => apiDelete(`/family/groups/${groupId}/members/${userId}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['family-members', groupId] });
+      void queryClient.invalidateQueries({ queryKey: ['family'] });
+    },
+  });
+}
+
+export function useUpdateMemberRole(groupId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: 'owner' | 'admin' | 'contributor' | 'read_only' }) =>
+      apiPatch(`/family/groups/${groupId}/members/${userId}`, { role }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['family-members', groupId] });
+      void queryClient.invalidateQueries({ queryKey: ['family'] });
+    },
   });
 }
 

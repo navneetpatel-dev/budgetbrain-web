@@ -325,8 +325,21 @@ export function GoalsPage() {
 
               {/* Bottom Actions */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {/* KNOWN-GAP(money-math): targetAmount/currentAmount are
+                    already server-computed fields (same source as
+                    progressPercentage above) — this derives a display-only
+                    "amount remaining" from those trustworthy inputs for a
+                    single already-fetched goal, not a re-summed/paginated
+                    total. Same low-severity display-derivation category as
+                    NetWorth's macroItems/equityRatio. A trivial
+                    Goal.remainingAmount virtual field (mirroring
+                    progressPercentage's pattern) would close this properly
+                    but is out of scope for a web-only change — see
+                    implementation-plan/web/18-money-math-lint-guardrail.md. */}
                 <span style={{ fontSize: 12, color: theme.colors.textSecondary, fontWeight: 500 }}>
-                  {isCompleted ? 'Goal completed! 🎉' : `${formatCurrency(Math.max(0, Number(g.targetAmount) - Number(g.currentAmount)), g.currency)} remaining`}
+                  {isCompleted
+                    ? 'Goal completed! 🎉'
+                    : `${formatCurrency(Math.max(0, Number(g.targetAmount) - Number(g.currentAmount)), g.currency)} remaining`}
                 </span>
 
                 {!isCompleted ? (
