@@ -9,7 +9,6 @@ interface SettingsState {
   currency: string;
   biometricEnabled: boolean;
   appLockPin: string | null;
-  offlineQueue: Array<{ id: string; action: string; payload: unknown; timestamp: string }>;
 }
 
 const initialState: SettingsState = {
@@ -18,7 +17,6 @@ const initialState: SettingsState = {
   currency: 'INR',
   biometricEnabled: false,
   appLockPin: null,
-  offlineQueue: [],
 };
 
 const settingsSlice = createSlice({
@@ -40,15 +38,6 @@ const settingsSlice = createSlice({
     setAppLockPin(state, action: PayloadAction<string | null>) {
       state.appLockPin = action.payload;
     },
-    addToOfflineQueue(
-      state,
-      action: PayloadAction<{ id: string; action: string; payload: unknown }>
-    ) {
-      state.offlineQueue.push({ ...action.payload, timestamp: new Date().toISOString() });
-    },
-    clearOfflineQueue(state) {
-      state.offlineQueue = [];
-    },
     hydratePreferences(state, action: PayloadAction<{ theme?: string | null; accent?: string | null }>) {
       if (action.payload.theme) state.theme = resolveThemeMode(action.payload.theme);
       if (action.payload.accent) state.accent = resolveAccent(action.payload.accent);
@@ -63,7 +52,6 @@ const settingsSlice = createSlice({
         ...incoming,
         theme: resolveThemeMode(incoming.theme),
         accent: resolveAccent(incoming.accent),
-        offlineQueue: incoming.offlineQueue ?? [],
       };
     });
   },
@@ -75,8 +63,6 @@ export const {
   setCurrency,
   setBiometricEnabled,
   setAppLockPin,
-  addToOfflineQueue,
-  clearOfflineQueue,
   hydratePreferences,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;
