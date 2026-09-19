@@ -24,6 +24,8 @@ function statusMessage(status: UpgradeStatus, plan: SubscriptionPlan | null): st
       return 'Payment received — confirming your subscription…';
     case 'success':
       return `You're now on the ${plan ?? ''} plan. Welcome to Premium!`;
+    case 'confirming_delayed':
+      return "Payment received. Your access is being set up and should appear shortly — this can take a few minutes. If it still hasn't updated after that, contact support and we'll sort it out.";
     case 'cancelled':
       return 'Checkout cancelled — no charge was made.';
     default:
@@ -34,7 +36,7 @@ function statusMessage(status: UpgradeStatus, plan: SubscriptionPlan | null): st
 export function UpgradePage() {
   const theme = useTheme();
   const user = useAppSelector((s) => s.auth.user);
-  const { status, error, pendingPlan, startCheckout, reset } = useUpgrade();
+  const { status, error, pendingPlan, startCheckout, reset, recheckEntitlement } = useUpgrade();
 
   const alreadyPremium = user?.role === 'premium' || user?.role === 'lifetime';
   const busy = status === 'creating_order' || status === 'awaiting_payment' || status === 'confirming';
@@ -70,11 +72,20 @@ export function UpgradePage() {
           {info ? (
             <div style={{ padding: `0 ${theme.spacing.lg}px ${theme.spacing.md}px` }}>
               <p style={{
-                color: status === 'success' ? theme.colors.secondary : theme.colors.textSecondary,
+                color: status === 'success'
+                  ? theme.colors.secondary
+                  : status === 'confirming_delayed'
+                    ? theme.colors.warning
+                    : theme.colors.textSecondary,
                 fontWeight: 600, textAlign: 'center',
               }}>
                 {info}
               </p>
+              {status === 'confirming_delayed' ? (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: theme.spacing.sm }}>
+                  <Button title="Check again" onPress={recheckEntitlement} variant="outline" />
+                </div>
+              ) : null}
             </div>
           ) : null}
 

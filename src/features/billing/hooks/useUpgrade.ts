@@ -16,7 +16,15 @@ function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
-export type UpgradeStatus = 'idle' | 'creating_order' | 'awaiting_payment' | 'confirming' | 'success' | 'error' | 'cancelled';
+export type UpgradeStatus =
+  | 'idle'
+  | 'creating_order'
+  | 'awaiting_payment'
+  | 'confirming'
+  | 'success'
+  | 'confirming_delayed'
+  | 'error'
+  | 'cancelled';
 
 export function useUpgrade() {
   const dispatch = useAppDispatch();
@@ -77,8 +85,9 @@ export function useUpgrade() {
         themeColor: theme.colors.primary,
         onSuccess: () => {
           setStatus('confirming');
-          void confirmEntitlement(plan).finally(() => {
-            setStatus('success');
+          void confirmEntitlement(plan).then((confirmed) => {
+            setStatus(confirmed ? 'success' : 'confirming_delayed');
+          }).finally(() => {
             inFlight.current = false;
           });
         },
@@ -107,5 +116,15 @@ export function useUpgrade() {
     setPendingPlan(null);
   }, []);
 
-  return { status, error, pendingPlan, startCheckout, reset };
+  /** Manual re-check for a user stuck in 'confirming_delayed' — re-runs the same poll rather
+   * than a single one-off request, since the webhook may still land at any point. */
+  const recheckEntitlement = useCallback(() => {
+    if (!pendingPlan) return;
+    setStatus('confirming');
+    void confirmEntitlement(pendingPlan).then((confirmed) => {
+      setStatus(confirmed ? 'success' : 'confirming_delayed');
+    });
+  }, [pendingPlan, confirmEntitlement]);
+
+  return { status, error, pendingPlan, startCheckout, reset, recheckEntitlement };
 }
