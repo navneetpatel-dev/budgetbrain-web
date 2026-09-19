@@ -6,17 +6,24 @@ import { AuthShell, AuthFooter, AuthLink, AuthForm, AuthErrorBanner, SocialAuthB
 import { authFieldRules } from '../utils/authValidation';
 import { maxLen } from '@/shared/validation/fieldLimits';
 import { useLogin } from '../hooks/useAuthHooks';
+import { useWebauthnLogin } from '../hooks/useWebauthn';
 import type { LoginCredentials } from '../types/auth.types';
 
 export function LoginPage() {
   const { login, loading, error, clearError } = useLogin();
-  const { control, handleSubmit, formState: { errors } } = useForm<LoginCredentials>({
+  const passkey = useWebauthnLogin();
+  const { control, handleSubmit, getValues, formState: { errors } } = useForm<LoginCredentials>({
     defaultValues: { email: '', password: '' },
   });
 
   const onSubmit = (data: LoginCredentials) => {
     clearError();
     void login(data);
+  };
+
+  const onPasskeySignIn = () => {
+    passkey.clearError();
+    void passkey.loginWithPasskey(getValues('email'));
   };
 
   return (
@@ -60,10 +67,21 @@ export function LoginPage() {
           )}
         />
         {error ? <AuthErrorBanner message={error} /> : null}
+        {passkey.error ? <AuthErrorBanner message={passkey.error} /> : null}
         <AuthLink to="/forgot-password" align="right">
           Forgot password?
         </AuthLink>
         <Button title="Sign In" onPress={handleSubmit(onSubmit)} loading={loading} size="lg" />
+        {passkey.supported ? (
+          <Button
+            title="Sign in with a passkey"
+            onPress={onPasskeySignIn}
+            loading={passkey.loading}
+            variant="outline"
+            size="lg"
+            type="button"
+          />
+        ) : null}
         <SocialAuthButtons disabled={loading} />
         <AuthLink to="/otp-login" align="center">
           Sign in with OTP

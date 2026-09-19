@@ -2,11 +2,13 @@ import { ListRow, Toggle } from '@/shared/components/ui/index';
 import { useTheme } from '@/shared/theme';
 import { usePushTest } from '@/features/settings/hooks/usePushTest';
 import { useDigestPreference } from '@/features/settings/hooks/useDigestPreference';
+import { usePasskeys } from '@/features/settings/hooks/usePasskeys';
 
 export function SecurityPreferencesSection() {
   const theme = useTheme();
   const testPush = usePushTest();
   const { enabled: digestEnabled, pending: digestPending, toggle: toggleDigest } = useDigestPreference();
+  const passkeys = usePasskeys();
 
   return (
     <>
@@ -57,8 +59,29 @@ export function SecurityPreferencesSection() {
         icon="bell"
         label="Test push notification"
         onPress={() => { void testPush(); }}
-        isLast
       />
+      {passkeys.supported ? (
+        <>
+          {passkeys.passkeys.map((cred) => (
+            <ListRow
+              key={cred.id}
+              icon="shield"
+              label={cred.deviceLabel ?? 'Passkey'}
+              subtitle={`Added ${new Date(cred.createdAt).toLocaleDateString()}`}
+              onPress={() => { void passkeys.removePasskey(cred.id); }}
+              value="Remove"
+              destructive
+            />
+          ))}
+          <ListRow
+            icon="add"
+            label="Add a passkey"
+            subtitle="Sign in with Face ID, Touch ID, or a security key"
+            onPress={() => { void passkeys.addPasskey(); }}
+            isLast
+          />
+        </>
+      ) : null}
     </>
   );
 }
