@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useParams } from 'next/navigation';
 import { FormStackScreen, OptionChipList, OptionChips } from '@/shared/components/ui/feature-screen';
 import { Button, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
@@ -16,6 +16,8 @@ import { useCategories } from '@/features/categories/hooks/useCategories';
 import { TagInput } from '../components/TagInput';
 import { SplitWithFamilyField, type SplitPayload } from '@/features/family/components/SplitWithFamilyField';
 import { useCreateSplit } from '@/features/shared/hooks/useFeatures';
+import { ReceiptUploader } from '../components/ReceiptUploader.component';
+import { useReceiptAttachment, type Attachment } from '../hooks/useReceiptAttachment.hook';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -53,6 +55,39 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
   const [splitPayload, setSplitPayload] = useState<SplitPayload | null>(null);
   const [splitSaved, setSplitSaved] = useState(false);
   const createSplitMutation = useCreateSplit();
+
+  const { uploadReceipt, fetchAttachments, deleteReceipt } = useReceiptAttachment();
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      setLoadingAttachments(true);
+      fetchAttachments(id)
+        .then(setAttachments)
+        .finally(() => setLoadingAttachments(false));
+    }
+  }, [id, fetchAttachments]);
+
+  const handleUploadNew = async (file: File | null) => {
+    if (!file || !id) return;
+    try {
+      const uploaded = await uploadReceipt(id, file);
+      setAttachments((prev) => [...prev, uploaded]);
+    } catch {
+      // error handled in hook
+    }
+  };
+
+  const handleDeleteAttachment = async (attachmentId: string) => {
+    if (!id) return;
+    try {
+      await deleteReceipt(id, attachmentId);
+      setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+    } catch {
+      // error handled in hook
+    }
+  };
 
   if (isLoading) {
     return (
@@ -140,6 +175,12 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
           />
           <Input label="Notes" maxLength={maxLen('notes')} value={notes} onChange={(e) => { setNotes(e.target.value); setFieldErrors((f) => ({ ...f, notes: undefined })); }} multiline disabled={isPending} error={fieldErrors.notes} />
           <TagInput value={tags} onChange={setTags} disabled={isPending} />
+          <ReceiptUploader
+            existingAttachments={attachments}
+            onFileSelect={handleUploadNew}
+            onDeleteExisting={handleDeleteAttachment}
+            disabled={loadingAttachments || isPending}
+          />
           {error ? <FormErrorBanner message={error} /> : null}
           <FormActions
             primaryTitle="Save Changes"
@@ -175,6 +216,14 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
             { label: 'Tags', value: (txn.tags ?? []).join(', ') },
           ]}
         />
+        <div style={{ marginTop: theme.spacing.lg }}>
+          <ReceiptUploader
+            existingAttachments={attachments}
+            onFileSelect={handleUploadNew}
+            onDeleteExisting={handleDeleteAttachment}
+            disabled={loadingAttachments}
+          />
+        </div>
         <DetailActions
           primaryTitle="Edit"
           onPrimary={() => {

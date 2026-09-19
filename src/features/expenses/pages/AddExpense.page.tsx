@@ -12,6 +12,8 @@ import { fetchCategorySuggestion } from '../hooks/useCategorySuggestion';
 import { TagInput } from '../components/TagInput';
 import { SplitWithFamilyField, type SplitPayload } from '@/features/family/components/SplitWithFamilyField';
 import { useCreateSplit } from '@/features/shared/hooks/useFeatures';
+import { ReceiptUploader } from '../components/ReceiptUploader.component';
+import { useReceiptAttachment } from '../hooks/useReceiptAttachment.hook';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -45,7 +47,9 @@ export function AddExpensePage() {
   const { createMutation, error, setError, showSuccess } = useCreateExpense();
   const createSplitMutation = useCreateSplit();
   const { categories } = useCategories();
+  const { uploadReceipt } = useReceiptAttachment();
 
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [currencyIndex, setCurrencyIndex] = useState(0);
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
@@ -114,7 +118,14 @@ export function AddExpensePage() {
         tags: tags.length > 0 ? tags : undefined,
       },
       {
-        onSuccess: (savedTxn) => {
+        onSuccess: async (savedTxn) => {
+          if (receiptFile && savedTxn?.id) {
+            try {
+              await uploadReceipt(savedTxn.id, receiptFile);
+            } catch {
+              // upload error handled in hook
+            }
+          }
           if (splitPayload && savedTxn?.id) {
             createSplitMutation.mutate({
               groupId: splitPayload.groupId,
@@ -366,6 +377,13 @@ export function AddExpensePage() {
             error={fieldErrors.notes}
           />
         </div>
+
+        {/* Receipt Attachment */}
+        <ReceiptUploader
+          pendingFile={receiptFile}
+          onFileSelect={setReceiptFile}
+          disabled={isPending}
+        />
 
         {/* Family Split */}
         <SplitWithFamilyField amount={Number(amount) || 0} onSplitChange={setSplitPayload} disabled={isPending} />

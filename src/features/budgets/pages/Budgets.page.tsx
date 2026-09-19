@@ -15,6 +15,8 @@ import { CONFIRM } from '@/shared/constants/confirmations';
 import { apiDelete } from '@/shared/services/api';
 import { invalidateBudgetQueries, removeBudgetDetail } from '@/shared/services/queryInvalidation';
 import { useBudgets } from '../hooks/useBudgets';
+import { useIsPro } from '@/shared/hooks/useIsPro';
+import { ProPaywallModal } from '@/shared/components/ProPaywallModal.component';
 import type { Budget } from '@/shared/types';
 
 export function BudgetsPage() {
@@ -25,6 +27,16 @@ export function BudgetsPage() {
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const { data, isLoading, isError, refetch } = useBudgets();
   const budgets = data ?? [];
+  const isPro = useIsPro();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const handleCreateBudgetClick = () => {
+    if (!isPro && budgets.length >= 3) {
+      setShowPaywall(true);
+      return;
+    }
+    router.push('/budget/add');
+  };
 
   const goToEdit = (id: string) => router.push(`/budget/${id}?edit=1`);
 
@@ -80,7 +92,7 @@ export function BudgetsPage() {
             subtitle={isLoading ? 'Loading…' : `${budgets.length} active`}
             actionIcon="add"
             actionLabel="Create budget"
-            onAction={() => router.push('/budget/add')}
+            onAction={handleCreateBudgetClick}
             footer={
               <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.md }}>
                 <div style={{
@@ -164,11 +176,17 @@ export function BudgetsPage() {
           ) : isError ? (
             <EmptyState title="Couldn’t load budgets" subtitle="Check your connection and try again" icon="budgets" action="Retry" onAction={() => void refetch()} />
           ) : (
-            <EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={() => router.push('/budget/add')} />
+            <EmptyState title="No budgets yet" subtitle="Set spending limits to stay on track" icon="budgets" action="Create budget" onAction={handleCreateBudgetClick} />
           )
         }
       />
       <ConfirmDialog open={open} copy={copy} onCancel={cancel} onConfirm={accept} />
+      <ProPaywallModal
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title="Budget Limit Reached"
+        description="Free tier allows up to 3 budgets. Upgrade to Pro for unlimited budgets and advanced analytics."
+      />
     </>
   );
 }

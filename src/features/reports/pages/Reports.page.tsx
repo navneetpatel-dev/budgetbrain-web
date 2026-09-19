@@ -10,13 +10,27 @@ import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useReports } from '@/features/shared/hooks/useFeatures';
 import { DateBounds } from '@/shared/utils/dateBounds';
+import { useIsPro } from '@/shared/hooks/useIsPro';
+import { ProPaywallModal } from '@/shared/components/ProPaywallModal.component';
 
 export function ReportsPage() {
   const theme = useTheme();
   const router = useRouter();
+  const isPro = useIsPro();
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallFeature, setPaywallFeature] = useState('');
   const { download, loading, error } = useReports();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
+  const handleDownload = (format: 'csv' | 'excel' | 'pdf') => {
+    if (!isPro && (format === 'excel' || format === 'pdf')) {
+      setPaywallFeature(format === 'excel' ? 'Excel Export' : 'PDF Export');
+      setShowPaywall(true);
+      return;
+    }
+    void download(format, params);
+  };
 
   const params: Record<string, string> = {};
   if (startDate) params.startDate = startDate;
@@ -140,10 +154,31 @@ export function ReportsPage() {
 
       {/* Export Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-        <Button title="Download CSV" onPress={() => download('csv', params)} loading={loading} size="lg" icon="download" />
-        <Button title="Download Excel" onPress={() => download('excel', params)} loading={loading} variant="secondary" size="lg" icon="download" />
-        <Button title="Download PDF" onPress={() => download('pdf', params)} loading={loading} variant="outline" size="lg" icon="fileText" />
+        <Button title="Download CSV" onPress={() => handleDownload('csv')} loading={loading} size="lg" icon="download" />
+        <Button
+          title={`Download Excel ${!isPro ? '★ PRO' : ''}`}
+          onPress={() => handleDownload('excel')}
+          loading={loading}
+          variant="secondary"
+          size="lg"
+          icon="download"
+        />
+        <Button
+          title={`Download PDF ${!isPro ? '★ PRO' : ''}`}
+          onPress={() => handleDownload('pdf')}
+          loading={loading}
+          variant="outline"
+          size="lg"
+          icon="fileText"
+        />
       </div>
+
+      <ProPaywallModal
+        open={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        title={`${paywallFeature} is a Pro Feature`}
+        description={`Exporting your financial data as ${paywallFeature.replace(' Export', '')} is available exclusively to Pro subscribers. Upgrade now to unlock unlimited exports, receipt attachments, and custom categories.`}
+      />
     </ScreenWrapper>
   );
 }

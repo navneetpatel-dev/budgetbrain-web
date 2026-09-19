@@ -38,7 +38,7 @@ export default defineConfig([
     // item-count (PaginationMeta), never a money amount, in every one of its
     // generic, resource-agnostic call sites.
     files: ['src/features/**/*.{ts,tsx}', 'src/shared/**/*.{ts,tsx}'],
-    ignores: ['src/shared/hooks/usePaginatedList.ts'],
+    ignores: ['src/shared/hooks/usePaginatedList.ts', 'src/**/__tests__/**'],
     rules: {
       'no-restricted-syntax': [
         'error',
