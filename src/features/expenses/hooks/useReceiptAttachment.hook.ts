@@ -15,6 +15,13 @@ export interface Attachment {
   createdAt: string;
 }
 
+export interface ReceiptExtraction {
+  merchant?: string;
+  amount?: number;
+  date?: string;
+  confidence: number;
+}
+
 export function useReceiptAttachment() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +65,26 @@ export function useReceiptAttachment() {
     }
   }, []);
 
+  /**
+   * OCR extraction runs async server-side after upload — this is a manual, on-demand
+   * check (not a poll), so it never blocks the upload and never auto-applies anything.
+   * Returns null if extraction hasn't completed yet or found nothing usable.
+   */
+  const fetchSuggestion = useCallback(
+    async (txId: string, attachmentId: string): Promise<ReceiptExtraction | null> => {
+      try {
+        const res = await apiGet<{ extractedData: ReceiptExtraction | null }>(
+          `/expenses/${txId}/attachments/${attachmentId}/suggestion`
+        );
+        return res.extractedData ?? null;
+      } catch (err: unknown) {
+        console.warn('Failed to fetch receipt scan suggestion:', err);
+        return null;
+      }
+    },
+    []
+  );
+
   const deleteReceipt = useCallback(async (txId: string, attachmentId: string): Promise<void> => {
     try {
       await apiDelete(`/expenses/${txId}/attachments/${attachmentId}`);
@@ -79,6 +106,7 @@ export function useReceiptAttachment() {
     setError,
     uploadReceipt,
     fetchAttachments,
+    fetchSuggestion,
     deleteReceipt,
   };
 }

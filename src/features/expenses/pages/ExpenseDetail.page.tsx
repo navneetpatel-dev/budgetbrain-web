@@ -17,7 +17,7 @@ import { TagInput } from '../components/TagInput';
 import { SplitWithFamilyField, type SplitPayload } from '@/features/family/components/SplitWithFamilyField';
 import { useCreateSplit } from '@/features/shared/hooks/useFeatures';
 import { ReceiptUploader } from '../components/ReceiptUploader.component';
-import { useReceiptAttachment, type Attachment } from '../hooks/useReceiptAttachment.hook';
+import { useReceiptAttachment, type Attachment, type ReceiptExtraction } from '../hooks/useReceiptAttachment.hook';
 import { PAYMENT_METHODS } from '@/shared/constants/config';
 import {
   maxLen,
@@ -56,9 +56,11 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
   const [splitSaved, setSplitSaved] = useState(false);
   const createSplitMutation = useCreateSplit();
 
-  const { uploadReceipt, fetchAttachments, deleteReceipt } = useReceiptAttachment();
+  const { uploadReceipt, fetchAttachments, fetchSuggestion, deleteReceipt } = useReceiptAttachment();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [loadingAttachments, setLoadingAttachments] = useState(false);
+  const [checkingScan, setCheckingScan] = useState(false);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -86,6 +88,56 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
       setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
     } catch {
       // error handled in hook
+    }
+  };
+
+  const handleCheckScan = async () => {
+    if (!id || !txn || attachments.length === 0) return;
+    setCheckingScan(true);
+    setScanMessage(null);
+    try {
+      const latest = attachments[attachments.length - 1];
+      const suggestion: ReceiptExtraction | null = await fetchSuggestion(id, latest.id);
+
+      const diffs: string[] = [];
+      if (suggestion?.merchant && suggestion.merchant !== txn.merchant) {
+        diffs.push(`Merchant: "${suggestion.merchant}"`);
+      }
+      if (suggestion?.amount != null && Number(suggestion.amount) !== Number(txn.amount)) {
+        diffs.push(`Amount: ${formatCurrency(suggestion.amount, txn.currency)}`);
+      }
+      if (suggestion?.date && suggestion.date !== txn.date) {
+        diffs.push(`Date: ${suggestion.date}`);
+      }
+
+      if (!suggestion || diffs.length === 0) {
+        setScanMessage(
+          suggestion
+            ? 'Scanned details match what you already entered.'
+            : "No scan available yet — receipt scanning finishes shortly after upload. Try again in a moment."
+        );
+        return;
+      }
+
+      const shouldApply = await confirm({
+        title: 'Apply scanned details?',
+        message: `We scanned this receipt and found:\n${diffs.join('\n')}\n\nApply these to the expense?`,
+        confirmLabel: 'Apply',
+        cancelLabel: 'Not now',
+      });
+      if (!shouldApply) return;
+
+      updateMutation.mutate({
+        amount: suggestion.amount != null ? Number(suggestion.amount) : Number(txn.amount),
+        merchant: suggestion.merchant ?? txn.merchant ?? '',
+        date: suggestion.date ?? txn.date,
+        paymentMethod: txn.paymentMethod ?? 'cash',
+        categoryId: txn.categoryId ?? txn.category?.id ?? '',
+        notes: txn.notes ?? undefined,
+        tags: txn.tags ?? [],
+      });
+    } finally {
+      setCheckingScan(false);
     }
   };
 
@@ -223,6 +275,21 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
             onDeleteExisting={handleDeleteAttachment}
             disabled={loadingAttachments}
           />
+          {attachments.length > 0 ? (
+            <div style={{ marginTop: theme.spacing.sm }}>
+              <Button
+                title="Check for scanned details"
+                onPress={() => { void handleCheckScan(); }}
+                loading={checkingScan}
+                variant="outline"
+              />
+              {scanMessage ? (
+                <p style={{ marginTop: theme.spacing.xs, color: theme.colors.textSecondary, fontSize: 13 }}>
+                  {scanMessage}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         <DetailActions
           primaryTitle="Edit"
