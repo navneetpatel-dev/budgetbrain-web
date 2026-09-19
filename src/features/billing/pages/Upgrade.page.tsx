@@ -36,7 +36,7 @@ function statusMessage(status: UpgradeStatus, plan: SubscriptionPlan | null): st
 export function UpgradePage() {
   const theme = useTheme();
   const user = useAppSelector((s) => s.auth.user);
-  const { status, error, pendingPlan, startCheckout, reset, recheckEntitlement } = useUpgrade();
+  const { status, error, pendingPlan, startCheckout, startStripeCheckout, reset, recheckEntitlement } = useUpgrade();
 
   const alreadyPremium = user?.role === 'premium' || user?.role === 'lifetime';
   const busy = status === 'creating_order' || status === 'awaiting_payment' || status === 'confirming';
@@ -130,6 +130,13 @@ export function UpgradePage() {
                   disabled={busy && pendingPlan !== plan}
                   variant={badge ? 'primary' : 'outline'}
                   style={{ marginTop: theme.spacing.sm }}
+                />
+                <Button
+                  title="Pay with card (international)"
+                  onPress={() => { reset(); void startStripeCheckout(plan); }}
+                  loading={busy && pendingPlan === plan}
+                  disabled={busy && pendingPlan !== plan}
+                  variant="outline"
                 />
               </div>
             ))}
