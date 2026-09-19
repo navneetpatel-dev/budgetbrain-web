@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { EmptyState, RingGauge, FilterChipsRail } from '@/shared/components/ui/index';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
@@ -12,12 +12,13 @@ import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
-import { apiDelete } from '@/shared/services/api';
+import { apiGet, apiDelete } from '@/shared/services/api';
 import { invalidateBudgetQueries, removeBudgetDetail } from '@/shared/services/queryInvalidation';
 import { useBudgets } from '../hooks/useBudgets';
 import { useIsPro } from '@/shared/hooks/useIsPro';
 import { ProPaywallModal } from '@/shared/components/ProPaywallModal.component';
-import type { Budget } from '@/shared/types';
+import { AiBudgetRecommendationBanner } from '../components/AiBudgetRecommendationBanner';
+import type { Budget, AiInsight } from '@/shared/types';
 
 export function BudgetsPage() {
   const theme = useTheme();
@@ -29,6 +30,20 @@ export function BudgetsPage() {
   const budgets = data ?? [];
   const isPro = useIsPro();
   const [showPaywall, setShowPaywall] = useState(false);
+
+  const { data: aiInsightsData } = useQuery({
+    queryKey: ['ai-insights'],
+    queryFn: () => apiGet<AiInsight>('/ai/insights'),
+    retry: false,
+  });
+
+  const recommendations = useMemo(() => {
+    return (
+      aiInsightsData?.structuredInsights?.filter(
+        (s) => s.kind === 'budget_recommendation' || s.kind === 'saving_opportunity'
+      ) ?? []
+    );
+  }, [aiInsightsData]);
 
   const handleCreateBudgetClick = () => {
     if (!isPro && budgets.length >= 3) {
@@ -145,6 +160,11 @@ export function BudgetsPage() {
               </div>
             }
           />
+        }
+        ListHeaderComponent={
+          recommendations.length > 0 ? (
+            <AiBudgetRecommendationBanner recommendations={recommendations} />
+          ) : undefined
         }
         data={isLoading ? [] : budgets}
         keyExtractor={(b: Budget) => b.id}

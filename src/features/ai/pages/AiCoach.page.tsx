@@ -12,6 +12,9 @@ import { useScreenInsets } from '@/shared/hooks/useScreenInsets';
 import { useAiChat } from '../hooks/useAiChat';
 import { AiSuggestionChips } from '../components/AiSuggestionChips';
 import { AiRichReply } from '../components/AiRichReply';
+import { AiInsightCard } from '../components/AiInsightCard';
+import { AiAnomalyCard, AiAnomalyClear } from '../components/AiAnomalyCard';
+import { formatCurrency } from '@/shared/utils/currency';
 import { maxLen } from '@/shared/validation/fieldLimits';
 
 const SEND_SIZE = 36;
@@ -32,6 +35,9 @@ export function AiCoachPage() {
     clearError,
     historyLoading,
     startNewConversation,
+    insights,
+    anomalies,
+    currency,
   } = useAiChat();
   const [input, setInput] = useState('');
   const [focused, setFocused] = useState(false);
@@ -156,6 +162,66 @@ export function AiCoachPage() {
                 <AppIcon name="sparkles" size={13} color={theme.colors.violet} />
                 <span>Smart Forecasts</span>
               </div>
+            </div>
+          </div>
+        )}
+
+        {!historyLoading && messages.length === 0 && (
+          <div className="flex flex-col gap-4">
+            {insights && insights.insights.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    color: theme.colors.textSecondary,
+                    paddingLeft: 4,
+                  }}
+                >
+                  Spending Insights
+                </span>
+                <div className="flex flex-col gap-2">
+                  {insights.insights.map((text, i) => (
+                    <AiInsightCard key={i} text={text} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2">
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: theme.colors.textSecondary,
+                  paddingLeft: 4,
+                }}
+              >
+                Anomaly Detection
+              </span>
+              {anomalies && anomalies.anomalies.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  {anomalies.anomalies.map((a, i) => {
+                    const parts: string[] = [];
+                    if (a.merchant) parts.push(a.merchant);
+                    if (typeof a.amount === 'number') parts.push(formatCurrency(a.amount, currency));
+                    return (
+                      <AiAnomalyCard
+                        key={a.transactionId ?? a.recurringSeriesId ?? i}
+                        type={a.type}
+                        reason={a.reason}
+                        meta={parts.length > 0 ? parts.join(' · ') : undefined}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <AiAnomalyClear />
+              )}
             </div>
           </div>
         )}

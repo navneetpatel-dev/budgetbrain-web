@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef, useState, type FormEvent } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FormStackScreen, useStackBack } from '@/shared/components/ui/feature-screen';
 import { ProgressBar, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { EntityRow } from '@/shared/components/ui/list-rows';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
@@ -180,6 +181,48 @@ function GoalDetailPageContent({ id: propId }: { id?: string } = {}) {
             { label: 'Target date', value: goal.targetDate ?? '' },
           ]}
         />
+        <div style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.md }}>
+          <span
+            style={{
+              display: 'block',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 14,
+              fontWeight: 700,
+              color: theme.colors.text,
+              marginBottom: theme.spacing.sm,
+            }}
+          >
+            Contribution History
+          </span>
+          {goal.contributions && goal.contributions.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs }}>
+              {goal.contributions.map((c) => (
+                <EntityRow
+                  key={c.id}
+                  title={c.note || 'Contribution'}
+                  subtitle={new Date(c.createdAt).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                  value={`+${formatCurrency(c.amount, goal.currency)}`}
+                  valueColor={theme.colors.success}
+                />
+              ))}
+            </div>
+          ) : (
+            <p
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 13,
+                color: theme.colors.textSecondary,
+                margin: 0,
+              }}
+            >
+              No contributions recorded yet.
+            </p>
+          )}
+        </div>
         <DetailActions
           primaryTitle="Contribute"
           onPrimary={() => router.push(`/goal/${id}/contribute`)}

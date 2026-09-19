@@ -1,13 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
 import type {
+  AiAnomaly,
   AiChatMessage,
   AiChatResponse,
   AiConversation,
   AiConversationSummary,
+  AiInsight,
 } from '@/shared/types';
 
 const AI_CHAT_TIMEOUT_MS = 60000;
@@ -36,7 +38,22 @@ export function useAiChat() {
   const draftNewChat = useRef(false);
   const messagesCountRef = useRef(0);
   const user = useAppSelector((s) => s.auth.user);
+  const currency = user?.currency ?? 'INR';
   const authenticated = !!user;
+
+  const { data: insights, isLoading: insightsLoading } = useQuery({
+    queryKey: ['ai-insights'],
+    queryFn: () => apiGet<AiInsight>('/ai/insights'),
+    enabled: authenticated,
+    retry: false,
+  });
+
+  const { data: anomalies, isLoading: anomaliesLoading } = useQuery({
+    queryKey: ['ai-anomalies'],
+    queryFn: () => apiGet<{ anomalies: AiAnomaly[] }>('/ai/anomalies'),
+    enabled: authenticated,
+    retry: false,
+  });
 
   useEffect(() => {
     messagesCountRef.current = messages.length;
@@ -159,5 +176,10 @@ export function useAiChat() {
     clearError,
     historyLoading,
     startNewConversation,
+    insights,
+    anomalies,
+    insightsLoading,
+    anomaliesLoading,
+    currency,
   };
 }

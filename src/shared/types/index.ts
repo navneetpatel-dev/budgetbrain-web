@@ -26,6 +26,7 @@ export interface Category {
   color: string | null;
   isDefault: boolean;
   sortOrder: number;
+  archivedAt?: string | null;
 }
 
 export interface Transaction {
@@ -107,6 +108,16 @@ export interface NotificationItem {
   sentAt: string;
 }
 
+export interface GoalContribution {
+  id: string;
+  goalId: string;
+  userId: string;
+  amount: number;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Goal {
   id: string;
   name: string;
@@ -117,6 +128,7 @@ export interface Goal {
   targetDate: string | null;
   /** Server-computed (0-100, capped) — never derive this from currentAmount/targetAmount client-side. */
   progressPercentage: number;
+  contributions?: GoalContribution[];
 }
 
 export interface Loan {
@@ -196,6 +208,42 @@ export interface MonthlyRecap {
   noSpendStreak: number;
 }
 
+export interface SpendingTrendPoint {
+  label: string;
+  total: number;
+}
+
+export interface SpendingTrends {
+  daily: SpendingTrendPoint[];
+  weekly: SpendingTrendPoint[];
+  monthly: SpendingTrendPoint[];
+}
+
+export interface StructuredInsight {
+  kind: 'monthly_comparison' | 'top_category' | 'saving_opportunity' | 'budget_recommendation';
+  title: string;
+  message: string;
+  amount?: number;
+  category?: string;
+  changePercent?: number;
+}
+
+export interface AiInsight {
+  insights: string[];
+  structuredInsights?: StructuredInsight[];
+  summary: { current: number; previous: number; changePercent: number };
+}
+
+export interface AiAnomaly {
+  type: 'spending_spike' | 'duplicate_expense' | 'subscription_cost_increase' | 'unusual_transaction';
+  transactionId?: string;
+  recurringSeriesId?: string;
+  merchant?: string;
+  amount?: number;
+  severity: 'low' | 'medium' | 'high';
+  reason: string;
+}
+
 export interface DashboardData {
   summary: {
     totalIncome: number;
@@ -210,6 +258,7 @@ export interface DashboardData {
   categoryBreakdown: Array<{ categoryId: string; total: string; category?: Category }>;
   noSpendStreak: number;
   upcomingBills: RecurringSeries[];
+  spendingTrends?: SpendingTrends;
 }
 
 export interface PaginationMeta {

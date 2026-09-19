@@ -6,7 +6,7 @@ import { Controller } from 'react-hook-form';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings/components/ProfileStackHeader';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
-import { Input, EmptyState, FormErrorBanner, FormActions } from '@/shared/components/ui/index';
+import { Input, EmptyState, FormErrorBanner, FormActions, FilterChipsRail } from '@/shared/components/ui/index';
 import { EntityRow } from '@/shared/components/ui/list-rows';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
@@ -25,6 +25,8 @@ export function CategoriesPage() {
   const {
     categories,
     isLoading,
+    showArchived,
+    setShowArchived,
     editingId,
     showForm,
     setShowForm,
@@ -40,6 +42,7 @@ export function CategoriesPage() {
     openEdit,
     onSubmit,
     archiveCategory,
+    unarchiveCategory,
     moveCategory,
   } = useCategories();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
@@ -48,6 +51,10 @@ export function CategoriesPage() {
 
   const handleArchive = async (id: string, name: string) => {
     if (await confirm(CONFIRM.archiveCategory(name))) await archiveCategory(id);
+  };
+
+  const handleUnarchive = async (id: string) => {
+    await unarchiveCategory(id);
   };
 
   const items = categories ?? [];
@@ -65,28 +72,54 @@ export function CategoriesPage() {
           inset="stack"
           data={isLoading ? [] : items}
           keyExtractor={(item) => item.id}
-          ListHeaderComponent={listError ? <FormErrorBanner message={listError} /> : undefined}
+          ListHeaderComponent={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 16px 4px' }}>
+              {listError ? <FormErrorBanner message={listError} /> : null}
+              <FilterChipsRail
+                chips={[
+                  { id: 'active', label: 'Active Categories' },
+                  { id: 'all', label: 'Include Archived' },
+                ]}
+                selectedId={showArchived ? 'all' : 'active'}
+                onSelect={(id) => setShowArchived(id === 'all')}
+              />
+            </div>
+          }
           renderItem={(cat, index) => (
             <EntityRow
               title={cat.name}
+              subtitle={cat.archivedAt ? 'Archived' : undefined}
               accentColor={cat.color || theme.colors.primary}
               trailing={
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                  <button type="button" className="bb-interactive" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
-                    <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
+                cat.archivedAt ? (
+                  <button
+                    type="button"
+                    className="bb-interactive"
+                    aria-label="Unarchive"
+                    title="Unarchive category"
+                    onClick={() => { void handleUnarchive(cat.id); }}
+                    style={iconActionStyle(theme)}
+                  >
+                    <AppIcon name="refresh" size={16} color={theme.colors.success} />
                   </button>
-                  <button type="button" className="bb-interactive" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
-                    <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
-                  </button>
-                  <button type="button" className="bb-interactive" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
-                    <AppIcon name="edit" size={16} color={theme.colors.primary} />
-                  </button>
-                  {!cat.isDefault && (
-                    <button type="button" className="bb-interactive" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
-                      <AppIcon name="trash" size={16} color={theme.colors.danger} />
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                    <button type="button" className="bb-interactive" aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
+                      <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
                     </button>
-                  )}
-                </div>
+                    <button type="button" className="bb-interactive" aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
+                      <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
+                    </button>
+                    <button type="button" className="bb-interactive" aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>
+                      <AppIcon name="edit" size={16} color={theme.colors.primary} />
+                    </button>
+                    {!cat.isDefault && (
+                      <button type="button" className="bb-interactive" aria-label="Archive" onClick={() => { void handleArchive(cat.id, cat.name); }} style={iconActionStyle(theme)}>
+                        <AppIcon name="trash" size={16} color={theme.colors.danger} />
+                      </button>
+                    )}
+                  </div>
+                )
               }
             />
           )}

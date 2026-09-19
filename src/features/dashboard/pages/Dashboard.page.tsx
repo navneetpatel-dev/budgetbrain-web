@@ -11,6 +11,7 @@ import { useAppSelector } from '@/shared/store/hooks';
 import { useNetWorthSummary } from '@/features/net-worth';
 import { DashboardHero } from '../components/DashboardHero';
 import { CategoryChart } from '../components/CategoryChart';
+import { SpendingTrendChart } from '../components/SpendingTrendChart';
 import { useDashboard } from '../hooks/useDashboard';
 import { ensureArray } from '@/shared/utils/listData';
 import { toSafeNumber, toSafePercent } from '@/shared/utils/number';
@@ -129,6 +130,12 @@ export function DashboardPage() {
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {data.spendingTrends && (
+            <div>
+              <SpendingTrendChart trends={data.spendingTrends} currency={summary.currency} />
             </div>
           )}
 
