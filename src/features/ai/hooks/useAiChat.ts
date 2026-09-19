@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
+import axios from 'axios';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
 import type {
@@ -17,6 +18,13 @@ const AI_CHAT_TIMEOUT_MS = 60000;
 function visibleMessages(messages: AiChatMessage[] | null | undefined): AiChatMessage[] {
   if (!Array.isArray(messages)) return [];
   return messages.filter((m) => m.role === 'user' || m.role === 'assistant');
+}
+
+function apiErrorCode(err: unknown): string | undefined {
+  if (axios.isAxiosError(err)) {
+    return (err.response?.data as { error?: { code?: string } } | undefined)?.error?.code;
+  }
+  return undefined;
 }
 
 function asConversationList(data: unknown): AiConversationSummary[] {
@@ -154,7 +162,11 @@ export function useAiChat() {
       });
     } catch (err) {
       setMessages((prev) => prev.slice(0, -1));
-      setError(getApiErrorMessage(err, 'Could not send message'));
+      if (apiErrorCode(err) === 'AI_QUOTA_EXCEEDED') {
+        setError("You've used all your AI messages for this month. Upgrade for a higher monthly limit, or try again next month.");
+      } else {
+        setError(getApiErrorMessage(err, 'Could not send message'));
+      }
     } finally {
       setIsPending(false);
     }
