@@ -9,10 +9,6 @@ export interface RazorpayCheckoutResponse {
   subscriptionId?: string;
 }
 
-export interface StripeCheckoutResponse {
-  url: string;
-}
-
 export interface EntitlementStatus {
   isEntitled: boolean;
   plan: SubscriptionPlan | null;
