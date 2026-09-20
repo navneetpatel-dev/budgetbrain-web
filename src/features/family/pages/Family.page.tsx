@@ -14,6 +14,7 @@ import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { formatCurrency } from '@/shared/utils/currency';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import {
+  useCreateFamilyInvite,
   useFamily,
   useFamilyBalances,
   useFamilyMembers,
@@ -163,6 +164,106 @@ function GroupMembers({ groupId, currentUserRole }: { groupId: string; currentUs
   );
 }
 
+const INVITE_ROLE_OPTIONS: Array<{ role: 'admin' | 'contributor' | 'read_only'; label: string }> = [
+  { role: 'contributor', label: 'Contributor' },
+  { role: 'admin', label: 'Admin' },
+  { role: 'read_only', label: 'Read Only' },
+];
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Invite a non-member by email — additive alongside the existing invite-code sharing UI,
+ * for invitees who don't have an account yet. Owner/admin only, matching backend's
+ * assertCanInvite() permission rule. */
+function InviteByEmailForm({ groupId, currentUserRole }: { groupId: string; currentUserRole: string }) {
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<'admin' | 'contributor' | 'read_only'>('contributor');
+  const [emailError, setEmailError] = useState<string>();
+  const inviteMutation = useCreateFamilyInvite(groupId);
+
+  if (currentUserRole !== 'owner' && currentUserRole !== 'admin') return null;
+
+  const reset = () => {
+    setOpen(false);
+    setEmail('');
+    setRole('contributor');
+    setEmailError(undefined);
+    inviteMutation.reset();
+  };
+
+  const handleInvite = () => {
+    const trimmed = email.trim();
+    if (!EMAIL_PATTERN.test(trimmed)) {
+      setEmailError('Enter a valid email address');
+      return;
+    }
+    setEmailError(undefined);
+    inviteMutation.mutate({ invitedEmail: trimmed, role });
+  };
+
+  if (!open) {
+    return (
+      <Button title="Invite by Email" onPress={() => setOpen(true)} variant="outline" />
+    );
+  }
+
+  return (
+    <Card variant="elevated">
+      <SectionHeader title="Invite by Email" subtitle="Sends a signed link — works even if they don't have an account yet" />
+      <Input
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(e) => { setEmail(e.target.value); setEmailError(undefined); }}
+        placeholder="name@example.com"
+        disabled={inviteMutation.isPending}
+        error={emailError}
+      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: theme.colors.textSecondary }}>
+          Role
+        </span>
+        <div style={{ display: 'flex', gap: theme.spacing.xs }}>
+          {INVITE_ROLE_OPTIONS.map((opt) => (
+            <button
+              key={opt.role}
+              type="button"
+              className="bb-interactive"
+              onClick={() => setRole(opt.role)}
+              disabled={inviteMutation.isPending}
+              style={{
+                padding: '6px 12px',
+                borderRadius: theme.radii.lg,
+                border: `1px solid ${role === opt.role ? theme.colors.primary : theme.colors.borderSubtle}`,
+                backgroundColor: role === opt.role ? theme.colors.primarySoft : theme.colors.surface,
+                color: role === opt.role ? theme.colors.primary : theme.colors.textSecondary,
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {inviteMutation.isError ? (
+        <FormErrorBanner message={getApiErrorMessage(inviteMutation.error, 'Could not send invite')} />
+      ) : null}
+      {inviteMutation.isSuccess ? (
+        <FormSuccessBanner message={`Invite sent to ${inviteMutation.data?.invitedEmail}`} />
+      ) : null}
+      <div style={{ display: 'flex', gap: theme.spacing.sm }}>
+        <Button title="Send Invite" onPress={handleInvite} loading={inviteMutation.isPending} />
+        <Button title="Cancel" onPress={reset} variant="outline" disabled={inviteMutation.isPending} />
+      </div>
+    </Card>
+  );
+}
+
 function GroupBalances({ groupId, userRole }: { groupId: string; userRole: string }) {
   const theme = useTheme();
   const currentUser = useAppSelector((s) => s.auth.user);
@@ -265,6 +366,7 @@ export function FamilyPage() {
           <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
             <Card><span style={{ fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize, fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text }}>{m.group?.name ?? 'Group'}</span><span style={{ display: 'block', fontSize: theme.typography.caption.fontSize, fontWeight: 500, color: theme.colors.textTertiary, fontFamily: 'Inter, sans-serif' }}>Role: {ROLE_LABEL[m.role] ?? m.role} · Code: {m.group?.inviteCode ?? '-'}</span></Card>
             <GroupMembers groupId={m.groupId} currentUserRole={m.role} />
+            <InviteByEmailForm groupId={m.groupId} currentUserRole={m.role} />
             <GroupBalances groupId={m.groupId} userRole={m.role} />
           </div>
         ))

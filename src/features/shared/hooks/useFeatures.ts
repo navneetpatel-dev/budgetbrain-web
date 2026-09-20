@@ -166,6 +166,16 @@ export function useUpdateMemberRole(groupId: string | undefined) {
   });
 }
 
+export function useCreateFamilyInvite(groupId: string | undefined) {
+  return useMutation({
+    mutationFn: (d: { invitedEmail: string; role: 'admin' | 'contributor' | 'read_only' }) =>
+      apiPost<{ id: string; invitedEmail: string; role: string; expiresAt: string }>(
+        `/family/groups/${groupId}/invites`,
+        d
+      ),
+  });
+}
+
 export function useFamilyBalances(groupId: string | undefined) {
   return useQuery({
     queryKey: ['family-balances', groupId],
