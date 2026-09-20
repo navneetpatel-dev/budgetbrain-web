@@ -60,6 +60,22 @@ export function useIncomeDetail(id: string | undefined) {
     onError: (err) => setError(getApiErrorMessage(err, 'Could not duplicate income')),
   });
 
+  const allocateMutation = useMutation({
+    mutationFn: (allocations: { financialAccountId: string; amount: number }[]) =>
+      apiPost<{ id: string; financialAccountId: string; amount: number }[]>(
+        `/income/${id}/allocate`,
+        { allocations }
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['income', id] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      invalidateMoneyQueries(queryClient);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2000);
+    },
+    onError: (err) => setError(getApiErrorMessage(err, 'Could not save allocation')),
+  });
+
   return {
     income: isPlaceholderData ? undefined : income,
     isLoading,
@@ -72,6 +88,7 @@ export function useIncomeDetail(id: string | undefined) {
     updateMutation,
     deleteMutation,
     duplicateMutation,
+    allocateMutation,
     showSuccess,
   };
 }

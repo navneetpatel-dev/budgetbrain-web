@@ -29,6 +29,13 @@ export interface Category {
   archivedAt?: string | null;
 }
 
+export interface IncomeAllocation {
+  id: string;
+  financialAccountId: string;
+  amount: number;
+  financialAccount?: { id: string; name: string; currency: string };
+}
+
 export interface Transaction {
   id: string;
   type: 'expense' | 'income';
@@ -43,6 +50,8 @@ export interface Transaction {
   category?: Category;
   incomeSource?: IncomeSource;
   tags?: string[] | null;
+  /** Only present on income-type transactions that have been split across accounts. */
+  incomeAllocations?: IncomeAllocation[];
 }
 
 export interface Budget {

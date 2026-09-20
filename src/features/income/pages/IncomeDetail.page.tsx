@@ -2,17 +2,25 @@
 
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'next/navigation';
-import { FormStackScreen } from '@/shared/components/ui/feature-screen';
-import { Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormStackScreen, OptionChips } from '@/shared/components/ui/feature-screen';
+import { Button, Input, DetailActions, DetailHero, DetailMetaList, EmptyState, FormActions, FormErrorBanner, FormSuccessBanner } from '@/shared/components/ui/index';
+import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { DetailSkeleton } from '@/shared/components/ui/skeleton';
 import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
+import { useAccounts } from '@/features/shared/hooks/useFeatures';
 import { CONFIRM } from '@/shared/constants/confirmations';
 import { useIncomeDetail } from '../hooks/useIncome';
 import { maxLen, validateAmount, validateBoundedDate, validateOptionalText } from '@/shared/validation/fieldLimits';
 import { DateBounds } from '@/shared/utils/dateBounds';
+import {
+  allocationTotal,
+  eligibleAllocationAccounts,
+  isAllocationValid,
+  type AllocationRow,
+} from '../utils/allocation';
 
 export function IncomeDetailPage({ id: propId }: { id?: string } = {}) {
   const nextParams = useParams();
@@ -31,12 +39,17 @@ export function IncomeDetailPage({ id: propId }: { id?: string } = {}) {
     updateMutation,
     deleteMutation,
     duplicateMutation,
+    allocateMutation,
     showSuccess,
   } = useIncomeDetail(id);
+  const { accounts, isLoading: accountsLoading } = useAccounts();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ amount?: string; date?: string; notes?: string }>({});
+  const [showAllocate, setShowAllocate] = useState(false);
+  const [allocationRows, setAllocationRows] = useState<AllocationRow[]>([]);
+  const [allocationError, setAllocationError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -62,6 +75,47 @@ export function IncomeDetailPage({ id: propId }: { id?: string } = {}) {
 
   const handleDelete = async () => {
     if (await confirm(CONFIRM.deleteIncome)) deleteMutation.mutate();
+  };
+
+  const eligibleAccounts = eligibleAllocationAccounts(accounts, income.currency);
+
+  const openAllocate = () => {
+    setAllocationError(null);
+    setError(null);
+    const existing = income.incomeAllocations ?? [];
+    setAllocationRows(
+      existing.length > 0
+        ? existing.map((a) => ({ financialAccountId: a.financialAccountId, amount: String(a.amount) }))
+        : [{ financialAccountId: eligibleAccounts[0]?.id ?? '', amount: '' }]
+    );
+    setShowAllocate(true);
+  };
+
+  const addAllocationRow = () => {
+    setAllocationRows((rows) => [...rows, { financialAccountId: eligibleAccounts[0]?.id ?? '', amount: '' }]);
+  };
+
+  const removeAllocationRow = (index: number) => {
+    setAllocationRows((rows) => (rows.length > 1 ? rows.filter((_, i) => i !== index) : rows));
+  };
+
+  const updateAllocationRow = (index: number, patch: Partial<AllocationRow>) => {
+    setAllocationRows((rows) => rows.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  };
+
+  const allocationRunningTotal = allocationTotal(allocationRows);
+  const allocationMatches = isAllocationValid(allocationRows, income.amount);
+
+  const submitAllocation = () => {
+    setAllocationError(null);
+    if (!allocationMatches) {
+      setAllocationError('Each row needs an account and amount, and the total must equal the income amount.');
+      return;
+    }
+    allocateMutation.mutate(
+      allocationRows.map((r) => ({ financialAccountId: r.financialAccountId, amount: Number(r.amount) })),
+      { onSuccess: () => setShowAllocate(false) }
+    );
   };
 
   if (editing) {
@@ -124,6 +178,75 @@ export function IncomeDetailPage({ id: propId }: { id?: string } = {}) {
             { label: 'Notes', value: income.notes ?? '' },
           ]}
         />
+
+        {showAllocate ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm, marginTop: theme.spacing.md }}>
+            <FormFieldLabel>Split across accounts</FormFieldLabel>
+            {accountsLoading ? null : eligibleAccounts.length === 0 ? (
+              <FormErrorBanner
+                message={`No ${income.currency} accounts yet — add one on the Accounts page before splitting this income.`}
+              />
+            ) : (
+              <>
+                {allocationRows.map((row, index) => (
+                  <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.xs, paddingBottom: theme.spacing.xs, borderBottom: `1px solid ${theme.colors.border}` }}>
+                    <OptionChips
+                      options={eligibleAccounts.map((a) => a.id)}
+                      value={row.financialAccountId}
+                      onChange={(v) => updateAllocationRow(index, { financialAccountId: v })}
+                      getLabel={(v) => eligibleAccounts.find((a) => a.id === v)?.name ?? v}
+                      disabled={allocateMutation.isPending}
+                    />
+                    <div style={{ display: 'flex', gap: theme.spacing.xs, alignItems: 'center' }}>
+                      <div style={{ flex: 1 }}>
+                        <Input
+                          value={row.amount}
+                          onChange={(e) => updateAllocationRow(index, { amount: e.target.value })}
+                          type="number"
+                          leftIcon="dollar"
+                          placeholder="Amount"
+                          disabled={allocateMutation.isPending}
+                        />
+                      </div>
+                      {allocationRows.length > 1 ? (
+                        <Button
+                          title="Remove"
+                          variant="dangerGhost"
+                          onPress={() => removeAllocationRow(index)}
+                          disabled={allocateMutation.isPending}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+                <Button title="Add another account" variant="outline" onPress={addAllocationRow} disabled={allocateMutation.isPending} />
+                <DetailMetaList
+                  rows={[
+                    { label: 'Allocated', value: formatCurrency(allocationRunningTotal, income.currency) },
+                    { label: 'Income amount', value: formatCurrency(income.amount, income.currency) },
+                  ]}
+                />
+                {allocationError ? <FormErrorBanner message={allocationError} /> : null}
+                {error ? <FormErrorBanner message={error} /> : null}
+                <FormActions
+                  primaryTitle="Save Allocation"
+                  onPrimary={submitAllocation}
+                  primaryLoading={allocateMutation.isPending}
+                  secondaryTitle="Cancel"
+                  onSecondary={() => setShowAllocate(false)}
+                />
+              </>
+            )}
+          </div>
+        ) : (
+          <Button
+            title={income.incomeAllocations?.length ? 'Edit Account Split' : 'Allocate to Accounts'}
+            variant="outline"
+            onPress={openAllocate}
+            style={{ marginTop: theme.spacing.md }}
+          />
+        )}
+
         <DetailActions
           primaryTitle="Edit"
           onPrimary={() => { setAmount(String(income.amount)); setDate(income.date); setNotes(income.notes ?? ''); setEditing(true); }}
