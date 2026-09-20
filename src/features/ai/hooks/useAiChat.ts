@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
 import axios from 'axios';
-import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
+import { apiGet, apiPostStream, ApiStreamError, getApiErrorMessage } from '@/shared/services/api';
 import { useAppSelector } from '@/shared/store/hooks';
 import type {
   AiAnomaly,
@@ -13,14 +13,13 @@ import type {
   AiInsight,
 } from '@/shared/types';
 
-const AI_CHAT_TIMEOUT_MS = 60000;
-
 function visibleMessages(messages: AiChatMessage[] | null | undefined): AiChatMessage[] {
   if (!Array.isArray(messages)) return [];
   return messages.filter((m) => m.role === 'user' || m.role === 'assistant');
 }
 
 function apiErrorCode(err: unknown): string | undefined {
+  if (err instanceof ApiStreamError) return err.code;
   if (axios.isAxiosError(err)) {
     return (err.response?.data as { error?: { code?: string } } | undefined)?.error?.code;
   }
@@ -128,11 +127,25 @@ export function useAiChat() {
     draftNewChat.current = false;
     setMessages((prev) => [...prev, userMsg]);
 
+    // Placeholder assistant message that streamed deltas append into incrementally, mirroring
+    // mobile's useAiChat streaming pattern (both hit the same /ai/chat/stream contract).
+    const assistantTimestamp = new Date().toISOString();
+    setMessages((prev) => [...prev, { role: 'assistant', content: '', timestamp: assistantTimestamp }]);
+
     try {
-      const data = await apiPost<AiChatResponse>(
-        '/ai/chat',
+      const data = await apiPostStream<AiChatResponse>(
+        '/ai/chat/stream',
         { message: content, conversationId },
-        { timeout: AI_CHAT_TIMEOUT_MS },
+        (delta) => {
+          setMessages((prev) => {
+            const next = [...prev];
+            const last = next[next.length - 1];
+            if (last?.role === 'assistant') {
+              next[next.length - 1] = { ...last, content: last.content + delta };
+            }
+            return next;
+          });
+        },
       );
       const nextMessages = visibleMessages(data.messages);
       const now = new Date().toISOString();
@@ -161,7 +174,7 @@ export function useAiChat() {
         ];
       });
     } catch (err) {
-      setMessages((prev) => prev.slice(0, -1));
+      setMessages((prev) => prev.slice(0, -2));
       if (apiErrorCode(err) === 'AI_QUOTA_EXCEEDED') {
         setError("You've used all your AI messages for this month. Upgrade for a higher monthly limit, or try again next month.");
       } else {

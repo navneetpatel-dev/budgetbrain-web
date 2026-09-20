@@ -149,6 +149,82 @@ export function getApiErrorMessage(err: unknown, fallback = 'Something went wron
   return fallback;
 }
 
+/** Thrown by apiPostStream for a non-2xx response — carries the backend's error code the
+ *  same way an axios error would, so callers can check `.code` uniformly (e.g. AI_QUOTA_EXCEEDED). */
+export class ApiStreamError extends Error {
+  code?: string;
+  constructor(message: string, code?: string) {
+    super(message);
+    this.name = 'ApiStreamError';
+    this.code = code;
+  }
+}
+
+/**
+ * POSTs to an SSE streaming endpoint using the browser's native `fetch` + `ReadableStream`
+ * (fully supported, no polyfill needed). Calls `onDelta` per streamed token, then resolves
+ * with the final `{done: true, ...}` payload the backend sends as the last SSE event.
+ */
+export async function apiPostStream<T>(
+  url: string,
+  body: unknown,
+  onDelta: (delta: string) => void
+): Promise<T> {
+  const token = getAccessToken();
+
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok || !response.body) {
+    let message = `Request failed (${response.status})`;
+    let code: string | undefined;
+    try {
+      const errBody = (await response.json()) as { error?: { message?: string; code?: string } };
+      if (errBody.error?.message) message = errBody.error.message;
+      code = errBody.error?.code;
+    } catch {
+      // non-JSON error body — keep the generic message
+    }
+    throw new ApiStreamError(message, code);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let finalPayload: T | null = null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const events = buffer.split('\n\n');
+    buffer = events.pop() ?? '';
+
+    for (const event of events) {
+      const line = event.split('\n').find((l) => l.startsWith('data: '));
+      if (!line) continue;
+      const payload = JSON.parse(line.slice(6)) as { delta?: string; done?: boolean } & T;
+      if (payload.done) {
+        finalPayload = payload;
+      } else if (typeof payload.delta === 'string') {
+        onDelta(payload.delta);
+      }
+    }
+  }
+
+  if (!finalPayload) {
+    throw new ApiStreamError('Stream ended without a final response');
+  }
+  return finalPayload;
+}
+
 export async function apiDownloadText(url: string, params?: Record<string, string>): Promise<string> {
   const token = getAccessToken();
   const search = params ? `?${new URLSearchParams(params).toString()}` : '';
