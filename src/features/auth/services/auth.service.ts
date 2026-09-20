@@ -4,7 +4,9 @@ import type {
   OtpVerifyInput, RegisterCredentials, ResetPasswordInput,
 } from '../types/auth.types';
 
-export async function persistAuthSession(session: AuthSession): Promise<void> {
+export async function persistAuthSession(
+  session: Pick<AuthSession, 'accessToken' | 'refreshToken'>
+): Promise<void> {
   await setTokens(session.accessToken, session.refreshToken);
 }
 

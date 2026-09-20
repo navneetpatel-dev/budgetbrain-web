@@ -18,6 +18,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, user } = useAppSelector((s) => s.auth);
   const { isDesktop } = useResponsive();
   const theme = useTheme();
+  // Rendered even while unauthenticated — /privacy and /terms need to be readable by anyone,
+  // and /family/accept-invite must render its own accept flow for a brand-new invitee who
+  // has no session yet (the invite email links straight here).
+  const isPublic = pathname === '/privacy' || pathname === '/terms' || pathname === '/family/accept-invite';
 
   // Session bootstrap from /users/me
   useEffect(() => {
@@ -41,7 +45,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Auth gate checks
   useEffect(() => {
     if (isLoading) return;
-    const isPublic = pathname === '/privacy' || pathname === '/terms';
     if (!isAuthenticated && !isPublic) {
       router.replace('/login');
       return;
@@ -50,7 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       router.replace('/onboarding');
       return;
     }
-  }, [isAuthenticated, isLoading, user, pathname, router]);
+  }, [isAuthenticated, isLoading, user, pathname, router, isPublic]);
 
   // Desktop keyboard shortcuts ('n' / 'N' to add expense)
   useEffect(() => {
@@ -76,12 +79,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return <ColdStartSkeleton />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isPublic) {
     return <ColdStartSkeleton />;
   }
 
   if (user && !user.onboardingCompleted && pathname !== '/onboarding') {
     return <ColdStartSkeleton />;
+  }
+
+  if (!isAuthenticated && isPublic) {
+    return (
+      <div id="main-content" tabIndex={-1} className="h-full outline-none">
+        {children}
+      </div>
+    );
   }
 
   if (!isDesktop) {
