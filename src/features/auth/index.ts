@@ -4,6 +4,7 @@ export * from './pages/ForgotPassword.page';
 export * from './pages/ResetPassword.page';
 export * from './pages/OtpLogin.page';
 export * from './pages/VerifyEmail.page';
+export * from './pages/SsoHandoff.page';
 export * from './hooks/useAuthHooks';
 export * from './hooks/useSocialAuth';
 export * from './hooks/useVerifyEmail';

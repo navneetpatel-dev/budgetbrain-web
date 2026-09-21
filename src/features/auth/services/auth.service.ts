@@ -70,3 +70,13 @@ export async function verifyEmailToken(token: string): Promise<void> {
     throw new Error('This verification link is invalid or expired.');
   }
 }
+
+/** Exchanges a one-time mobile-to-web handoff token (see backend's ssoHandoff.service.ts)
+ *  for a real logged-in web session. */
+export async function exchangeSsoToken(token: string): Promise<AuthSession> {
+  try {
+    return await apiPost<AuthSession>('/auth/sso/exchange', { token });
+  } catch (err: unknown) {
+    throw new Error(getApiErrorMessage(err, 'This link is invalid or has expired'));
+  }
+}

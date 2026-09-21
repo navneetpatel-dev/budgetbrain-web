@@ -1,5 +1,6 @@
 'use client';
 
+import { useSearchParams } from 'next/navigation';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { Button, FormErrorBanner, GroupedCard } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
@@ -7,6 +8,10 @@ import { useAppSelector } from '@/shared/store/hooks';
 import { useTheme } from '@/shared/theme';
 import { useUpgrade, type UpgradeStatus } from '../hooks/useUpgrade';
 import type { SubscriptionPlan } from '../types/billing.types';
+
+/** The mobile app's own custom URL scheme (see mobile/app.json's "scheme") — used to bounce
+ * the user back into the app once a checkout started from there succeeds. */
+const MOBILE_APP_SCHEME_URL = 'budgetbrain://';
 
 /** Fixed marketing copy matching backend's PLAN_PRICES_INR — the actual amount charged always
  * comes from the /subscriptions/razorpay/checkout response, never recomputed here. */
@@ -37,6 +42,12 @@ export function UpgradePage() {
   const theme = useTheme();
   const user = useAppSelector((s) => s.auth.user);
   const { status, error, pendingPlan, startCheckout, reset, recheckEntitlement } = useUpgrade();
+  const searchParams = useSearchParams();
+
+  const preselectedPlan = searchParams.get('plan') as SubscriptionPlan | null;
+  // Only the mobile handoff sets `from=app` (see webHandoff.service.ts) — a plain web visit
+  // has nowhere to "return" to, so this action only ever shows when it'll actually work.
+  const cameFromApp = searchParams.get('from') === 'app';
 
   const alreadyPremium = user?.role === 'premium' || user?.role === 'lifetime';
   const busy = status === 'creating_order' || status === 'awaiting_payment' || status === 'confirming';
@@ -86,6 +97,15 @@ export function UpgradePage() {
                   <Button title="Check again" onPress={recheckEntitlement} variant="outline" />
                 </div>
               ) : null}
+              {status === 'success' && cameFromApp ? (
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: theme.spacing.sm }}>
+                  <Button
+                    title="Return to app"
+                    onPress={() => { window.location.href = MOBILE_APP_SCHEME_URL; }}
+                    variant="primary"
+                  />
+                </div>
+              ) : null}
             </div>
           ) : null}
 
@@ -95,12 +115,15 @@ export function UpgradePage() {
             gap: theme.spacing.md,
             padding: theme.spacing.lg,
           }}>
-            {PLANS.map(({ plan, label, price, cadence, badge }) => (
+            {PLANS.map(({ plan, label, price, cadence, badge }) => {
+              const isPreselected = plan === preselectedPlan;
+              const isHighlighted = Boolean(badge) || isPreselected;
+              return (
               <div
                 key={plan}
                 style={{
                   position: 'relative',
-                  border: `1.5px solid ${badge ? theme.colors.primary : theme.colors.borderSubtle}`,
+                  border: `1.5px solid ${isHighlighted ? theme.colors.primary : theme.colors.borderSubtle}`,
                   borderRadius: theme.radii.lg,
                   padding: theme.spacing.lg,
                   backgroundColor: theme.colors.surface,
@@ -117,6 +140,14 @@ export function UpgradePage() {
                   }}>
                     {badge}
                   </span>
+                ) : isPreselected ? (
+                  <span style={{
+                    position: 'absolute', top: -10, right: theme.spacing.md,
+                    backgroundColor: theme.colors.primary, color: theme.colors.onPrimary,
+                    fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: theme.radii.full,
+                  }}>
+                    Picked in app
+                  </span>
                 ) : null}
                 <span style={{ fontSize: 14, fontWeight: 700, color: theme.colors.textSecondary }}>{label}</span>
                 <span style={{ fontSize: 28, fontWeight: 800, color: theme.colors.text }}>
@@ -128,11 +159,12 @@ export function UpgradePage() {
                   onPress={() => { reset(); void startCheckout(plan); }}
                   loading={busy && pendingPlan === plan}
                   disabled={busy && pendingPlan !== plan}
-                  variant={badge ? 'primary' : 'outline'}
+                  variant={isHighlighted ? 'primary' : 'outline'}
                   style={{ marginTop: theme.spacing.sm }}
                 />
               </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

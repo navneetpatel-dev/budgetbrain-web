@@ -19,9 +19,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { isDesktop } = useResponsive();
   const theme = useTheme();
   // Rendered even while unauthenticated — /privacy and /terms need to be readable by anyone,
-  // and /family/accept-invite must render its own accept flow for a brand-new invitee who
-  // has no session yet (the invite email links straight here).
-  const isPublic = pathname === '/privacy' || pathname === '/terms' || pathname === '/family/accept-invite';
+  // /family/accept-invite must render its own accept flow for a brand-new invitee who
+  // has no session yet (the invite email links straight here), and /auth/handoff is the
+  // mobile-app "subscribe" redirect landing here with no session yet either.
+  const isPublic =
+    pathname === '/privacy' ||
+    pathname === '/terms' ||
+    pathname === '/family/accept-invite' ||
+    pathname === '/auth/handoff';
 
   // Session bootstrap from /users/me
   useEffect(() => {
