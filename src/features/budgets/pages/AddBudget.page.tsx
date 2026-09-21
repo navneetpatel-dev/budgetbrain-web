@@ -17,7 +17,7 @@ import {
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 type Period = 'monthly' | 'weekly' | 'custom';
 
@@ -36,7 +36,7 @@ export function AddBudgetPage() {
   const [name, setName] = useState('');
   const [type, setType] = useState<Period>('monthly');
   const [amount, setAmount] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(toIsoDate(new Date()));
   const [endDate, setEndDate] = useState('');
   const [alertThreshold, setAlertThreshold] = useState('80');
   const [categoryId, setCategoryId] = useState('__all__');

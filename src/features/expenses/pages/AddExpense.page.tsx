@@ -23,7 +23,7 @@ import {
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 type FieldErrors = {
   amount?: string;
@@ -53,7 +53,7 @@ export function AddExpensePage() {
   const [currencyIndex, setCurrencyIndex] = useState(0);
   const [amount, setAmount] = useState('');
   const [merchant, setMerchant] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(toIsoDate(new Date()));
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [categoryId, setCategoryId] = useState('');
   const [notes, setNotes] = useState('');

@@ -7,7 +7,7 @@ import { FormFieldLabel } from '@/shared/components/ui/forms';
 import { useTheme } from '@/shared/theme';
 import { useCreateRecurringSeries } from '../hooks/useSubscriptions';
 import { maxLen, validateAmount, validateBoundedDate, validateText } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 const CADENCES = [
   { id: 'weekly', label: 'Weekly' },
@@ -25,7 +25,7 @@ export function AddSubscriptionPage() {
   const [merchant, setMerchant] = useState('');
   const [amount, setAmount] = useState('');
   const [cadence, setCadence] = useState<Cadence>('monthly');
-  const [nextDueDate, setNextDueDate] = useState(new Date().toISOString().split('T')[0]);
+  const [nextDueDate, setNextDueDate] = useState(toIsoDate(new Date()));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const isPending = createMutation.isPending;

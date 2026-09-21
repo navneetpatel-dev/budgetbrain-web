@@ -17,7 +17,7 @@ import {
   validateQuantity,
   validateText,
 } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 const INVESTMENT_TYPES = [
   { id: 'stocks', label: 'Stocks' },
@@ -47,7 +47,7 @@ export function InvestmentsPage() {
   const [quantity, setQuantity] = useState('');
   const [purchasePrice, setPurchasePrice] = useState('');
   const [currentPrice, setCurrentPrice] = useState('');
-  const [purchaseDate, setPurchaseDate] = useState(new Date().toISOString().split('T')[0]);
+  const [purchaseDate, setPurchaseDate] = useState(toIsoDate(new Date()));
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const { totalValue, totalGain } = useMemo(() => {

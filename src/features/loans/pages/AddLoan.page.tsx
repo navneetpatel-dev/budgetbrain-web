@@ -13,7 +13,7 @@ import {
   validateOptionalText,
   validateText,
 } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 const LOAN_TYPES = [
   { id: 'loan', label: 'Loan' },
@@ -34,7 +34,7 @@ export function AddLoanPage() {
   const [principal, setPrincipal] = useState('');
   const [interestRate, setInterestRate] = useState('');
   const [emiAmount, setEmiAmount] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startDate, setStartDate] = useState(toIsoDate(new Date()));
   const [notes, setNotes] = useState('');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 

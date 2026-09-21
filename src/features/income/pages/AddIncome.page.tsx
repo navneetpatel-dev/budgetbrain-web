@@ -14,7 +14,7 @@ import {
   validateText,
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
-import { DateBounds } from '@/shared/utils/dateBounds';
+import { DateBounds, toIsoDate } from '@/shared/utils/dateBounds';
 
 const SOURCE_TYPES = [
   { id: 'salary', label: 'Salary' },
@@ -37,7 +37,7 @@ export function AddIncomePage() {
   const { createMutation, error, setError, showSuccess } = useCreateIncome();
   const { data: sources, isLoading: sourcesLoading } = useIncomeSources();
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(toIsoDate(new Date()));
   const [notes, setNotes] = useState('');
   const [sourceMode, setSourceMode] = useState<'existing' | 'new'>('new');
   const [selectedSource, setSelectedSource] = useState('');
