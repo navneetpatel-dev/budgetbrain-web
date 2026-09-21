@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiGet, apiPost, getApiErrorMessage } from '@/shared/services/api';
 import { useAppDispatch, useAppSelector } from '@/shared/store/hooks';
@@ -34,6 +34,10 @@ export function useUpgrade() {
   const [error, setError] = useState<string | null>(null);
   const [pendingPlan, setPendingPlan] = useState<SubscriptionPlan | null>(null);
   const inFlight = useRef(false);
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   const checkoutMutation = useMutation({
     mutationFn: (plan: SubscriptionPlan) =>
@@ -92,7 +96,7 @@ export function useUpgrade() {
           });
         },
         onDismiss: () => {
-          if (status !== 'confirming' && status !== 'success') {
+          if (statusRef.current !== 'confirming' && statusRef.current !== 'success') {
             setStatus('cancelled');
           }
           inFlight.current = false;
@@ -108,7 +112,7 @@ export function useUpgrade() {
       setStatus('error');
       inFlight.current = false;
     }
-  }, [checkoutMutation, user, theme, confirmEntitlement, status]);
+  }, [checkoutMutation, user, theme, confirmEntitlement]);
 
   const reset = useCallback(() => {
     setStatus('idle');
