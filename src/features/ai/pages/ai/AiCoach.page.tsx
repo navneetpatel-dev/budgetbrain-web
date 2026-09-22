@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, type CSSProperties, type KeyboardEvent } from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings';
 import { FormErrorBanner } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';

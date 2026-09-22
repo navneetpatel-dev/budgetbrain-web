@@ -1,3 +1,5 @@
+'use client';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiPatch } from '@/shared/services/api';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';

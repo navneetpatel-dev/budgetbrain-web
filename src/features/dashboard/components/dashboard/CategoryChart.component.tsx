@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+'use client';
+
+import { memo, useMemo } from 'react';
 import { ProgressBar } from '@/shared/components/ui/index';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
@@ -12,7 +14,7 @@ interface Props {
   onCategoryPress?: (categoryId: string) => void;
 }
 
-export function CategoryChart({ data, currency, onCategoryPress }: Props) {
+export const CategoryChart = memo(function CategoryChart({ data, currency, onCategoryPress }: Props) {
   const theme = useTheme();
   const items = useMemo(() => buildCategoryChartItems(data), [data]);
 
@@ -114,4 +116,4 @@ export function CategoryChart({ data, currency, onCategoryPress }: Props) {
       })}
     </div>
   );
-}
+});

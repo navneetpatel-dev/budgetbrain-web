@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useMemo, useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { useTheme } from '@/shared/theme';
 import type { CSSProperties } from 'react';

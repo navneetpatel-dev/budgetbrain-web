@@ -1,3 +1,5 @@
+'use client';
+
 import { StackNavHeader, useProfileBack } from '@/shared/components/ui/feature-screen';
 import type { AppIconName } from '@/shared/components/ui/icons/AppIcon';
 

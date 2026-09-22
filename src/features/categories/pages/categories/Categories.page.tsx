@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 import { useRef } from 'react';
 import { Controller } from 'react-hook-form';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import { ProfileStackHeader } from '@/features/settings';
 import { ActionFab, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, EmptyState, FormErrorBanner, FormActions, FilterChipsRail } from '@/shared/components/ui/index';

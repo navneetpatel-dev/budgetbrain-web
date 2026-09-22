@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 import { listPasskeys, removePasskey as deletePasskey, useWebauthnRegistration, type WebauthnCredentialSummary } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/services/api';

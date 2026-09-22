@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 
 /** Web safe-area helper — pairs with viewport-fit=cover in index.html */

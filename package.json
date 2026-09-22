@@ -8,13 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "TSX_TSCONFIG_PATH=./tsconfig.test.json node --import tsx --import ./src/testSetup.ts --test \"src/**/__tests__/**/*.test.{ts,tsx}\""
+    "test": "TSX_TSCONFIG_PATH=./tsconfig.test.json node --import tsx --import ./src/testSetup.ts --test \"src/**/__tests__/**/*.test.{ts,tsx}\"",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",
     "@reduxjs/toolkit": "^2.12.0",
     "@simplewebauthn/browser": "^14.0.0",
     "@tanstack/react-query": "^5.101.0",
+    "@tanstack/react-virtual": "^3.13.6",
     "axios": "^1.18.0",
     "framer-motion": "^13.2.0",
     "lucide-react": "^1.18.0",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@next/bundle-analyzer": "^15.5.25",
     "@testing-library/react": "^16.3.3",
     "@types/jsdom": "^30.0.0",
     "@types/node": "^24.12.3",

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { ActionSheet } from '@/shared/components/ui/ActionSheet';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';

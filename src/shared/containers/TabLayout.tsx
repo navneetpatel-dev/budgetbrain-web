@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, m as motion, useReducedMotion } from 'framer-motion';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { ActionSheet } from '@/shared/components/ui/ActionSheet';
 import { useTheme } from '@/shared/theme';

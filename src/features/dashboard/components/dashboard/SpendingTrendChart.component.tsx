@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Card } from '@/shared/components/ui';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
@@ -16,7 +16,7 @@ interface Props {
 
 type IntervalMode = 'daily' | 'weekly' | 'monthly';
 
-export function SpendingTrendChart({ trends, currency }: Props) {
+export const SpendingTrendChart = memo(function SpendingTrendChart({ trends, currency }: Props) {
   const theme = useTheme();
   const [mode, setMode] = useState<IntervalMode>('daily');
 
@@ -177,4 +177,4 @@ export function SpendingTrendChart({ trends, currency }: Props) {
       )}
     </Card>
   );
-}
+});

@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useState } from 'react';
 import type { ConfirmCopy } from '@/shared/constants/confirmations';
 

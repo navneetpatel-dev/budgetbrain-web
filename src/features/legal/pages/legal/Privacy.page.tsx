@@ -1,11 +1,15 @@
-'use client';
-
 import { ProfileStackHeader } from '@/features/settings';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { useTheme } from '@/shared/theme';
+import { buildTheme, DEFAULT_ACCENT } from '@/shared/theme';
 
+// No 'use client' here: this page has no interactivity of its own (its rendered children,
+// ScreenWrapper/ProfileStackHeader, are already client components with their own boundary
+// — see shared/components/ui/layout.tsx). Static content stays server-rendered instead of
+// hydrating. Trade-off: this page always renders the light/ocean theme regardless of the
+// signed-in user's dark-mode preference, since it can't read ThemeContext without becoming
+// a client component — acceptable for a cold, informational page.
 export function PrivacyPage() {
-  const theme = useTheme();
+  const theme = buildTheme('light', DEFAULT_ACCENT);
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="privacy" />} inset="stack">

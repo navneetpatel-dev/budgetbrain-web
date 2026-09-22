@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { apiDownloadBinary } from '@/shared/services/api';
 

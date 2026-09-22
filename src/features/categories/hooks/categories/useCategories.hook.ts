@@ -30,6 +30,10 @@ export function useCategories() {
     queryKey: ['categories', showArchived ? 'all' : 'active'],
     url: showArchived ? '/categories?includeArchived=true' : '/categories',
     itemsKey: 'categories',
+    // Categories change rarely (create/update/archive/reorder/merge), and every mutation
+    // here already calls invalidateCategoryConsumers — staleness is bounded by that, not
+    // by the timer, so a longer staleTime just avoids refetching unchanged data.
+    staleTime: 10 * 60 * 1000,
   });
 
   const { control, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CategoryForm>({

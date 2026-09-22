@@ -1,5 +1,5 @@
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { useTheme } from '@/shared/theme';
 import { amountText, bodyMedium, caption } from '@/shared/theme/textStyles';
 import { formatCurrency } from '@/shared/utils/currency';

@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';

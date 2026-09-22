@@ -196,6 +196,9 @@ function ExpensesPageContent() {
       }
       data={isLoading ? [] : transactions}
       keyExtractor={(item: Transaction) => item.id}
+      // TransactionRow is ~88px tall (18px vertical padding + 48px icon) — this list is
+      // infinite-scroll and can grow into the hundreds, so it's virtualized past 30 rows.
+      estimateItemHeight={88}
       onEndReached={() => {
         if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
       }}

@@ -1,11 +1,11 @@
-'use client';
-
 import { ProfileStackHeader } from '@/features/settings';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
-import { useTheme } from '@/shared/theme';
+import { buildTheme, DEFAULT_ACCENT } from '@/shared/theme';
 
+// No 'use client' here — see Privacy.page.tsx's comment for the rationale and the
+// light-theme-only trade-off this makes.
 export function TermsPage() {
-  const theme = useTheme();
+  const theme = buildTheme('light', DEFAULT_ACCENT);
 
   return (
     <ScreenWrapper header={<ProfileStackHeader screen="terms" />} inset="stack">

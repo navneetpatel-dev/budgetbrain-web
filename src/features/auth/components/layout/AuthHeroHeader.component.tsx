@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 import { BrandLogoBadge } from '@/shared/components/brand/BrandLogoBadge';
 import { useTheme } from '@/shared/theme';

@@ -1,5 +1,7 @@
+'use client';
+
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { useTheme, cubicBezier } from '@/shared/theme';
 import type { AppTheme } from '@/shared/theme';
 import { AppIcon, type AppIconName } from './icons/AppIcon';

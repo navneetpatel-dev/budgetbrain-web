@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 import { BrandMark } from '@/shared/components/brand/BrandMark';
 import { AppIcon } from './icons/AppIcon';

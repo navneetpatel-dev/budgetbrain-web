@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { apiGet } from '../services/api';
@@ -43,6 +45,11 @@ export function useInfinitePaginatedList<T, TSummary = undefined>(config: {
   params?: Record<string, unknown>;
   pageSize?: number;
   enabled?: boolean;
+  /** Overrides the global default (see shared/services/queryClient.ts) for callers whose
+   * data is either more static (e.g. categories: longer staleTime) or more live than the
+   * 2-minute default. */
+  staleTime?: number;
+  gcTime?: number;
 }) {
   const pageSize = config.pageSize ?? 20;
 
@@ -62,6 +69,8 @@ export function useInfinitePaginatedList<T, TSummary = undefined>(config: {
       return page * limit < total ? page + 1 : undefined;
     },
     enabled: config.enabled ?? true,
+    ...(config.staleTime !== undefined && { staleTime: config.staleTime }),
+    ...(config.gcTime !== undefined && { gcTime: config.gcTime }),
   });
 
   const items = useMemo(
@@ -96,6 +105,9 @@ export function usePaginatedList<T, K extends string>(config: {
   params?: Record<string, unknown>;
   pageSize?: number;
   enabled?: boolean;
+  /** Overrides the global default (see shared/services/queryClient.ts). */
+  staleTime?: number;
+  gcTime?: number;
 }) {
   const pageSize = config.pageSize ?? 100;
 
@@ -103,6 +115,8 @@ export function usePaginatedList<T, K extends string>(config: {
     queryKey: [...config.queryKey, config.params, pageSize],
     queryFn: () => fetchAllPages<T, K>(config.url, config.itemsKey, config.params, pageSize),
     enabled: config.enabled ?? true,
+    ...(config.staleTime !== undefined && { staleTime: config.staleTime }),
+    ...(config.gcTime !== undefined && { gcTime: config.gcTime }),
   });
 
   return {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { SectionHeader, Card, EmptyState, BentoCard, StreakBanner } from '@/shared/components/ui/index';
@@ -41,6 +42,13 @@ export function DashboardPage() {
     total: string;
     category?: import('@/shared/types').Category;
   }>(data?.categoryBreakdown);
+
+  // Stable reference so the memoized CategoryChart can actually skip re-rendering when
+  // unrelated Dashboard state changes.
+  const handleCategoryPress = useCallback(
+    (categoryId: string) => router.push(`/expenses?type=expense&categoryId=${encodeURIComponent(categoryId)}`),
+    [router]
+  );
 
   return (
     <ScreenWrapper
@@ -151,9 +159,7 @@ export function DashboardPage() {
                 <CategoryChart
                   data={categoryBreakdown}
                   currency={summary.currency}
-                  onCategoryPress={(categoryId) =>
-                    router.push(`/expenses?type=expense&categoryId=${encodeURIComponent(categoryId)}`)
-                  }
+                  onCategoryPress={handleCategoryPress}
                 />
               </Card>
             </div>

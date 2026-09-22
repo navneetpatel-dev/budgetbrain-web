@@ -10,6 +10,7 @@ import { queryClient } from '@/shared/services/queryClient';
 import { ThemeProvider } from '@/shared/theme';
 import { ColdStartSkeleton } from '@/shared/components/ui/skeleton';
 import { PreferencesHydrator } from '@/features/settings';
+import { MotionProvider } from './MotionProvider';
 
 const googleClientId =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
@@ -28,10 +29,12 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <PersistGate loading={<ColdStartSkeleton />} persistor={persistor}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <PreferencesHydrator />
-            <GoogleAuthProviderWrapper>
-              {children}
-            </GoogleAuthProviderWrapper>
+            <MotionProvider>
+              <PreferencesHydrator />
+              <GoogleAuthProviderWrapper>
+                {children}
+              </GoogleAuthProviderWrapper>
+            </MotionProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </PersistGate>

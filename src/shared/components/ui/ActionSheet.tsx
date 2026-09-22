@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';

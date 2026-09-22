@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m as motion } from 'framer-motion';
 import { useTheme } from '@/shared/theme';
 import { Button } from './index';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';

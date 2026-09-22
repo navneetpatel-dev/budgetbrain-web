@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { apiDelete } from '@/shared/services/api';
 import { useSignOut } from '@/features/auth';

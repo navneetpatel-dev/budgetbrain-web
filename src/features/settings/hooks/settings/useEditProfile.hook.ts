@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback } from 'react';
 import { apiPatch, getApiErrorMessage } from '@/shared/services/api';
 import { setUser } from '@/shared/store/authSlice';

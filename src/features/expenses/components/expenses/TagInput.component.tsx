@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, type KeyboardEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/services/api';

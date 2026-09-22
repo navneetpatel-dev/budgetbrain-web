@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { Toggle } from '@/shared/components/ui/index';
 import { MultiOptionChips, SheetSelect } from '@/shared/components/ui/feature-screen';

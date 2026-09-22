@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m as motion } from 'framer-motion';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme, ACCENT_OPTIONS, type ThemeMode, type AccentPalette } from '@/shared/theme';
 

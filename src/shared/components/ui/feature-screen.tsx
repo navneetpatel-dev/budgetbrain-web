@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRouter } from 'next/navigation';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { ActionSheet } from './ActionSheet';
@@ -718,6 +719,11 @@ export function FormStackScreen({
   );
 }
 
+/** Below this row count, a plain flex column costs nothing to render — virtualization
+ * only pays for itself (and its measurement/scroll-math overhead) on genuinely long,
+ * unbounded lists (expenses/income infinite scroll). */
+const VIRTUALIZE_THRESHOLD = 30;
+
 export function StickyHeaderFlatScreen<T>({
   header,
   data,
@@ -729,6 +735,7 @@ export function StickyHeaderFlatScreen<T>({
   contentContainerStyle,
   inset = 'tab',
   onEndReached,
+  estimateItemHeight,
 }: {
   header: React.ReactNode;
   data: T[];
@@ -740,16 +747,41 @@ export function StickyHeaderFlatScreen<T>({
   contentContainerStyle?: CSSProperties;
   inset?: 'tab' | 'stack' | 'none';
   onEndReached?: () => void;
+  /** Opts a long list into virtualized rendering once it exceeds VIRTUALIZE_THRESHOLD
+   * rows (approximate row height in px, including its own bottom gap — measureElement
+   * corrects it after first paint). Omit for small/bounded lists — see the 11 other
+   * callers of this component, none of which pass it. */
+  estimateItemHeight?: number;
 }) {
   const theme = useTheme();
   const { frame, stackGap } = useScreenInsets();
   const bottomPadding = useBottomInset(inset);
   const safeData = ensureArray<T>(data);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const shouldVirtualize = estimateItemHeight != null && safeData.length > VIRTUALIZE_THRESHOLD;
+
+  // Always called (rules of hooks) — count: 0 when not virtualizing makes this a no-op.
+  const virtualizer = useVirtualizer({
+    count: shouldVirtualize ? safeData.length : 0,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => estimateItemHeight ?? 80,
+    overscan: 6,
+  });
+
+  const handleScroll = onEndReached
+    ? (e: React.UIEvent<HTMLDivElement>) => {
+        const el = e.currentTarget;
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+          onEndReached();
+        }
+      }
+    : undefined;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: theme.colors.background }}>
       {header}
       <div
+        ref={scrollRef}
         style={{
           flex: 1,
           overflowY: 'auto',
@@ -758,18 +790,39 @@ export function StickyHeaderFlatScreen<T>({
           paddingBottom: bottomPadding,
           ...contentContainerStyle,
         }}
-        onScroll={(e) => {
-          if (!onEndReached) return;
-          const el = e.currentTarget;
-          if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
-            onEndReached();
-          }
-        }}
+        onScroll={handleScroll}
       >
         {safeData.length === 0 && ListEmptyComponent ? (
           <>
             {ListHeaderComponent}
             {ListEmptyComponent}
+          </>
+        ) : shouldVirtualize ? (
+          <>
+            {ListHeaderComponent}
+            <div style={{ position: 'relative', height: virtualizer.getTotalSize(), width: '100%' }}>
+              {virtualizer.getVirtualItems().map((virtualItem) => {
+                const item = safeData[virtualItem.index];
+                return (
+                  <div
+                    key={keyExtractor(item, virtualItem.index)}
+                    ref={virtualizer.measureElement}
+                    data-index={virtualItem.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualItem.start}px)`,
+                      paddingBottom: stackGap,
+                    }}
+                  >
+                    {renderItem(item, virtualItem.index)}
+                  </div>
+                );
+              })}
+            </div>
+            {ListFooterComponent}
           </>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: stackGap }}>

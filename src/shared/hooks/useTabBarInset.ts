@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';

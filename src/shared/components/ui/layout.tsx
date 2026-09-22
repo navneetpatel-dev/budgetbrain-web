@@ -1,3 +1,5 @@
+'use client';
+
 import { useTheme } from '@/shared/theme';
 import { useResponsive } from '@/shared/hooks/useResponsive';
 import { useScreenInsets } from '@/shared/hooks/useScreenInsets';

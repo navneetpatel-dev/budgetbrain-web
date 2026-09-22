@@ -1,3 +1,5 @@
+'use client';
+
 import { useMemo } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useTheme } from '@/shared/theme';

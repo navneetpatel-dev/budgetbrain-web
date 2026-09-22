@@ -87,6 +87,9 @@ export function IncomePage() {
       inset="tab"
       data={isLoading ? [] : filteredIncome}
       keyExtractor={(txn: Transaction) => txn.id}
+      // Same row shell as Expenses' TransactionRow — virtualized past 30 rows for
+      // accounts with a long income history.
+      estimateItemHeight={88}
       ListHeaderComponent={
         <div style={{ marginBottom: 16 }}>
           {/* Cash Flow Emerald Hero Banner */}
