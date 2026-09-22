@@ -1,4 +1,4 @@
-import { VerifyEmailPage } from '@/features/auth/pages/VerifyEmail.page';
+import { VerifyEmailPage } from '@/features/auth/pages/auth/VerifyEmail.page';
 
 export default function Page() {
   return <VerifyEmailPage />;

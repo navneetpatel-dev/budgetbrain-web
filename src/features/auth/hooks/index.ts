@@ -1,1 +1,1 @@
-export { useLogin, useRegister, useForgotPassword, useResetPassword, useOtpLogin, useSignOut, useOnboarding } from './useAuthHooks';
+export { useLogin, useRegister, useForgotPassword, useResetPassword, useOtpLogin, useSignOut, useOnboarding } from './auth/useAuthHooks.hook';

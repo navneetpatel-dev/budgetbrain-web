@@ -4,6 +4,60 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+const FEATURES = [
+  'accounts',
+  'ai',
+  'auth',
+  'billing',
+  'budgets',
+  'categories',
+  'dashboard',
+  'expenses',
+  'family',
+  'goals',
+  'income',
+  'integrations',
+  'investments',
+  'legal',
+  'loans',
+  'net-worth',
+  'notifications',
+  'onboarding',
+  'reports',
+  'search',
+  'settings',
+  'subscriptions',
+  'support',
+]
+
+const FEATURE_INTERNAL_SEGMENTS = ['api', 'hooks', 'services', 'components']
+
+function featureInternalImportGroups(excludedFeature) {
+  return FEATURES.filter((feature) => feature !== excludedFeature).flatMap((feature) =>
+    FEATURE_INTERNAL_SEGMENTS.flatMap((segment) => [
+      `@/features/${feature}/${segment}`,
+      `@/features/${feature}/${segment}/**`,
+    ]),
+  )
+}
+
+const barrelImportMessage =
+  'Cross-feature imports must go through the feature barrel (`@/features/<name>`). Do not reach into another feature\'s api, hooks, services, or components. See WEB-STRUCTURE-CONVENTIONS.md §6.'
+
+function noRestrictedFeatureImports(excludedFeature) {
+  return [
+    'error',
+    {
+      patterns: [
+        {
+          group: featureInternalImportGroups(excludedFeature),
+          message: barrelImportMessage,
+        },
+      ],
+    },
+  ]
+}
+
 export default defineConfig([
   globalIgnores(['dist', '.next', 'node_modules', 'next-env.d.ts']),
   {
@@ -57,4 +111,16 @@ export default defineConfig([
       ],
     },
   },
+  {
+    files: ['src/app/**/*.{ts,tsx}', 'src/shared/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': noRestrictedFeatureImports(null),
+    },
+  },
+  ...FEATURES.map((feature) => ({
+    files: [`src/features/${feature}/**/*.{ts,tsx}`],
+    rules: {
+      'no-restricted-imports': noRestrictedFeatureImports(feature),
+    },
+  })),
 ])

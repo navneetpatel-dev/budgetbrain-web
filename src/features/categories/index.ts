@@ -1,2 +1,2 @@
-export * from './pages/Categories.page';
-export * from './hooks/useCategories';
+export * from './pages/categories/Categories.page';
+export * from './hooks/categories/useCategories.hook';

@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { SpendingTrendChart } from '../SpendingTrendChart';
+import { SpendingTrendChart } from '../dashboard/SpendingTrendChart.component';
 import type { SpendingTrends } from '@/shared/types';
 
 afterEach(() => {

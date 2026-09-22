@@ -1,0 +1,87 @@
+import { ListRow, Toggle } from '@/shared/components/ui/index';
+import { useTheme } from '@/shared/theme';
+import { usePushTest } from '@/features/settings/hooks/settings/usePushTest.hook';
+import { useDigestPreference } from '@/features/settings/hooks/settings/useDigestPreference.hook';
+import { usePasskeys } from '@/features/settings/hooks/settings/usePasskeys.hook';
+
+export function SecurityPreferencesSection() {
+  const theme = useTheme();
+  const testPush = usePushTest();
+  const { enabled: digestEnabled, pending: digestPending, toggle: toggleDigest } = useDigestPreference();
+  const passkeys = usePasskeys();
+
+  return (
+    <>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '14px 16px',
+        minHeight: 52,
+        borderBottom: `1px solid ${theme.colors.borderSubtle}`,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize,
+            fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text,
+          }}>Weekly spending digest</span>
+          <span style={{
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize,
+            color: theme.colors.textTertiary, marginTop: 2,
+          }}>A Monday recap of last week's spending</span>
+        </div>
+        <Toggle value={digestEnabled} onChange={(v) => { void toggleDigest(v); }} disabled={digestPending} label="Weekly spending digest" />
+      </div>
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '14px 16px',
+        minHeight: 52,
+        borderBottom: `1px solid ${theme.colors.borderSubtle}`,
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.bodySemibold.fontSize,
+            fontWeight: Number(theme.typography.bodySemibold.fontWeight), color: theme.colors.text,
+          }}>Biometric lock</span>
+          <span style={{
+            display: 'block', fontFamily: 'Inter, sans-serif', fontSize: theme.typography.caption.fontSize,
+            color: theme.colors.textTertiary, marginTop: 2,
+          }}>Require auth when reopening</span>
+        </div>
+        <span style={{
+          fontFamily: 'Inter, sans-serif', fontSize: theme.typography.label.fontSize, fontWeight: Number(theme.typography.label.fontWeight),
+          color: theme.colors.textSecondary, flexShrink: 0, marginLeft: 12,
+        }}>Mobile app only</span>
+      </div>
+      <ListRow
+        icon="bell"
+        label="Test push notification"
+        onPress={() => { void testPush(); }}
+      />
+      {passkeys.supported ? (
+        <>
+          {passkeys.passkeys.map((cred) => (
+            <ListRow
+              key={cred.id}
+              icon="shield"
+              label={cred.deviceLabel ?? 'Passkey'}
+              subtitle={`Added ${new Date(cred.createdAt).toLocaleDateString()}`}
+              onPress={() => { void passkeys.removePasskey(cred.id); }}
+              value="Remove"
+              destructive
+            />
+          ))}
+          <ListRow
+            icon="add"
+            label="Add a passkey"
+            subtitle="Sign in with Face ID, Touch ID, or a security key"
+            onPress={() => { void passkeys.addPasskey(); }}
+            isLast
+          />
+        </>
+      ) : null}
+    </>
+  );
+}

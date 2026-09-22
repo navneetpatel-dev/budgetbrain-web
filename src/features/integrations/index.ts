@@ -1,1 +1,1 @@
-export * from './pages/Integrations.page';
+export * from './pages/integrations/Integrations.page';

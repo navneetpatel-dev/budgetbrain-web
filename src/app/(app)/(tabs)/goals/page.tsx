@@ -1,4 +1,4 @@
-import { GoalsPage } from '@/features/goals/pages/Goals.page';
+import { GoalsPage } from '@/features/goals/pages/goals/Goals.page';
 
 export default function Page() {
   return <GoalsPage />;

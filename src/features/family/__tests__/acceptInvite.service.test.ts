@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { performAcceptInvite, type AcceptInviteDeps } from '../services/acceptInvite.service';
+import { performAcceptInvite, type AcceptInviteDeps } from '../api/acceptInvite.api';
 
 const fakeUser = { id: 'u1', email: 'invitee@example.com', name: null, role: 'free', onboardingCompleted: false } as never;
 

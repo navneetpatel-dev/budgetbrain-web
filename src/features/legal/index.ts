@@ -1,2 +1,2 @@
-export * from './pages/Privacy.page';
-export * from './pages/Terms.page';
+export * from './pages/legal/Privacy.page';
+export * from './pages/legal/Terms.page';

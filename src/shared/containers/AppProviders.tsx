@@ -9,7 +9,7 @@ import { store, persistor } from '@/shared/store';
 import { queryClient } from '@/shared/services/queryClient';
 import { ThemeProvider } from '@/shared/theme';
 import { ColdStartSkeleton } from '@/shared/components/ui/skeleton';
-import { PreferencesHydrator } from '@/features/settings/components/PreferencesHydrator';
+import { PreferencesHydrator } from '@/features/settings';
 
 const googleClientId =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
