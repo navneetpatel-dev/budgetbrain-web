@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { FeatureHeader, HeaderIconButton, SearchField, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
@@ -111,6 +111,13 @@ function ExpensesPageContent() {
   const totalEarned = summary?.totalIncome ?? 0;
   const currency = transactions[0]?.currency || 'INR';
 
+  // TransactionRow is memoized — a fresh closure here every render would defeat that for
+  // every row, same bug already fixed for Dashboard.page.tsx's onCategoryPress.
+  const handleTransactionPress = useCallback(
+    (txn: Transaction) => router.push(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`),
+    [router]
+  );
+
   const activeChipId =
     filters.type === 'expense'
       ? 'expense'
@@ -205,12 +212,7 @@ function ExpensesPageContent() {
       ListFooterComponent={
         isFetchingNextPage ? <ListRowsSkeleton count={2} variant="transaction" /> : null
       }
-      renderItem={(txn) => (
-        <TransactionRow
-          transaction={txn}
-          onPress={() => router.push(txn.type === 'income' ? `/income/${txn.id}` : `/expense/${txn.id}`)}
-        />
-      )}
+      renderItem={(txn) => <TransactionRow transaction={txn} onPress={handleTransactionPress} />}
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={6} variant="transaction" />

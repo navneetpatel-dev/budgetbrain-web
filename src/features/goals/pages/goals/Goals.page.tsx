@@ -14,6 +14,7 @@ import { useTheme } from '@/shared/theme';
 import { formatCurrency } from '@/shared/utils/currency';
 import { useConfirmDialog } from '@/shared/hooks/useConfirmDialog';
 import { CONFIRM } from '@/shared/constants/confirmations';
+import { interactiveStyles } from '@/shared/styles/interactive/interactive.styles';
 import { apiDelete } from '@/shared/services/api';
 import { invalidateGoalQueries, removeGoalDetail } from '@/shared/services/queryInvalidation';
 import { useGoals } from '../../hooks/goals/useGoals.hook';
@@ -60,6 +61,12 @@ export function GoalsPage() {
       achievedCount: achieved,
     };
   }, [goals]);
+
+  // RingGauge is memoized — a fresh array literal here would defeat that on every render.
+  const gaugeGradientColors = useMemo<[string, string]>(
+    () => [theme.colors.secondary, theme.colors.primary],
+    [theme]
+  );
 
   // Filter goals
   const filteredGoals = useMemo(() => {
@@ -154,7 +161,7 @@ export function GoalsPage() {
                   progress={overallProgress || (totalTarget > 0 ? 0 : 50)}
                   variant="semi"
                   icon="goals"
-                  gradientColors={[theme.colors.secondary, theme.colors.primary]}
+                  gradientColors={gaugeGradientColors}
                 />
 
                 <div style={{ flex: 1, minWidth: 200 }}>
@@ -239,6 +246,8 @@ export function GoalsPage() {
 
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
+                    type="button"
+                    className={interactiveStyles.control}
                     onClick={() => openGoal(g.id)}
                     style={{
                       width: 34,
@@ -252,10 +261,13 @@ export function GoalsPage() {
                       cursor: 'pointer',
                     }}
                     title="Edit goal"
+                    aria-label={`Edit ${g.name}`}
                   >
                     <AppIcon name="edit" size={16} color={theme.colors.textSecondary} />
                   </button>
                   <button
+                    type="button"
+                    className={interactiveStyles.control}
                     onClick={() => void handleDelete(g)}
                     style={{
                       width: 34,
@@ -269,6 +281,7 @@ export function GoalsPage() {
                       cursor: 'pointer',
                     }}
                     title="Delete goal"
+                    aria-label={`Delete ${g.name}`}
                   >
                     <AppIcon name="trash" size={16} color={theme.colors.danger} />
                   </button>

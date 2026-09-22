@@ -108,6 +108,7 @@ export function ReceiptUploader({
                   rel="noopener noreferrer"
                   className={receiptStyles.viewLink}
                   title="View / Download"
+                  aria-label={`View or download ${att.fileName}`}
                 >
                   <AppIcon name="link" size={16} />
                 </a>
@@ -118,6 +119,7 @@ export function ReceiptUploader({
                     disabled={disabled}
                     className={receiptStyles.deleteButton}
                     title="Delete Receipt"
+                    aria-label={`Delete ${att.fileName}`}
                   >
                     <AppIcon name="trash" size={16} />
                   </button>
@@ -137,7 +139,15 @@ export function ReceiptUploader({
                 src={previewUrl}
                 alt="Receipt thumbnail"
                 className={receiptStyles.thumbnail}
+                role="button"
+                tabIndex={0}
                 onClick={() => setActiveModalUrl(previewUrl)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveModalUrl(previewUrl);
+                  }
+                }}
               />
             ) : (
               <div className={receiptStyles.fileIcon}>
@@ -156,6 +166,7 @@ export function ReceiptUploader({
             disabled={disabled}
             className={receiptStyles.clearButton}
             title="Remove selection"
+            aria-label="Remove selected file"
           >
             <AppIcon name="close" size={16} />
           </button>
@@ -205,6 +216,7 @@ export function ReceiptUploader({
               type="button"
               onClick={() => setActiveModalUrl(null)}
               className={receiptStyles.modalClose}
+              aria-label="Close preview"
             >
               <AppIcon name="close" size={18} />
             </button>

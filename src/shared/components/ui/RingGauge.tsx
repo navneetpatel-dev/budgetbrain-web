@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { memo, useId } from 'react';
 import { AppIcon, type AppIconName } from './icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 
@@ -12,7 +12,7 @@ export interface RingGaugeProps {
   gradientColors?: [string, string];
 }
 
-export function RingGauge({
+export const RingGauge = memo(function RingGauge({
   size = 56,
   strokeWidth = 5,
   progress = 0,
@@ -180,4 +180,4 @@ export function RingGauge({
       </div>
     </div>
   );
-}
+});

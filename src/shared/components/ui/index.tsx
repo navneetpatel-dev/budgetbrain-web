@@ -858,13 +858,9 @@ export function ListRow({
     return (
       <button
         type="button"
+        className="bb-interactive"
         onClick={onPress}
-        style={{
-          width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left',
-          transition: `background-color ${theme.motion.duration.fast}ms ${cubicBezier(theme.motion.easing)}`,
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = theme.colors.surfaceHover; }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+        style={{ width: '100%', background: 'none', border: 'none', padding: 0, textAlign: 'left' }}
       >
         {content}
       </button>

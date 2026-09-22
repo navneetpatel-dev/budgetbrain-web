@@ -32,7 +32,7 @@ interface NetWorthData {
 export function NetWorthPage() {
   const theme = useTheme();
   const router = useRouter();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['net-worth'],
     queryFn: () => apiGet<NetWorthData>('/net-worth'),
   });
@@ -98,7 +98,17 @@ export function NetWorthPage() {
       }
       inset="stack"
     >
-      {isLoading || !data || !summary ? (
+      {isLoading ? (
+        <NetWorthSkeleton />
+      ) : isError ? (
+        <EmptyState
+          title="Couldn’t load net worth"
+          subtitle="Check your connection and try again"
+          icon="netWorth"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
+      ) : !data || !summary ? (
         <NetWorthSkeleton />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

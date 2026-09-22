@@ -243,7 +243,7 @@ export function DashboardPage() {
                   <TransactionRow
                     key={txn.id}
                     transaction={txn}
-                    onPress={() => router.push(txn.type === 'income' ? `/income/${txn.id}` : `/expenses/${txn.id}`)}
+                    onPress={(t) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`)}
                   />
                 ))}
               </div>

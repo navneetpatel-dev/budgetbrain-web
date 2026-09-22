@@ -154,9 +154,15 @@ export function ReportsPage() {
 
       {/* Export Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-        <Button title="Download CSV" onPress={() => handleDownload('csv')} loading={loading} size="lg" icon="download" />
         <Button
-          title={`Download Excel ${!isPro ? '★ PRO' : ''}`}
+          title={loading ? 'Generating…' : 'Download CSV'}
+          onPress={() => handleDownload('csv')}
+          loading={loading}
+          size="lg"
+          icon="download"
+        />
+        <Button
+          title={loading ? 'Generating…' : `Download Excel ${!isPro ? '★ PRO' : ''}`}
           onPress={() => handleDownload('excel')}
           loading={loading}
           variant="secondary"
@@ -164,7 +170,7 @@ export function ReportsPage() {
           icon="download"
         />
         <Button
-          title={`Download PDF ${!isPro ? '★ PRO' : ''}`}
+          title={loading ? 'Generating…' : `Download PDF ${!isPro ? '★ PRO' : ''}`}
           onPress={() => handleDownload('pdf')}
           loading={loading}
           variant="outline"

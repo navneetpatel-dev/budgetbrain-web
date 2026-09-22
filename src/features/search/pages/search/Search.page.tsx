@@ -59,7 +59,7 @@ export function SearchPage() {
       renderItem={(txn) => (
         <TransactionRow
           transaction={txn}
-          onPress={() => router.push(txn.type === 'income' ? `/income/${txn.id}` : `/expenses/${txn.id}`)}
+          onPress={(t) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`)}
         />
       )}
       ListEmptyComponent={enabled && !searching ? <EmptyState title="No results" subtitle="Try a different search term" icon="search" /> : null}

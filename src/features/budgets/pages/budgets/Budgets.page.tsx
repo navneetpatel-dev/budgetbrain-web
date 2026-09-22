@@ -95,6 +95,15 @@ export function BudgetsPage() {
   // eslint-disable-next-line no-restricted-syntax
   const dailySafe = totalLimit > totalSpent ? (totalLimit - totalSpent) / 30 : 0;
 
+  // RingGauge is memoized — a fresh array literal here would defeat that on every render.
+  const gaugeGradientColors = useMemo<[string, string]>(
+    () =>
+      overallProgress >= 100
+        ? [theme.colors.danger, theme.colors.warning]
+        : [theme.colors.secondary, theme.colors.primary],
+    [overallProgress, theme]
+  );
+
   return (
     <>
       <StickyHeaderFlatScreen
@@ -144,7 +153,7 @@ export function BudgetsPage() {
                     strokeWidth={5.5}
                     progress={overallProgress}
                     centerText={`${overallProgress}%`}
-                    gradientColors={overallProgress >= 100 ? [theme.colors.danger, theme.colors.warning] : [theme.colors.secondary, theme.colors.primary]}
+                    gradientColors={gaugeGradientColors}
                   />
                 </div>
 

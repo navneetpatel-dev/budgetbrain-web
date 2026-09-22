@@ -224,7 +224,7 @@ export function IncomePage() {
         </div>
       }
       renderItem={(txn) => (
-        <TransactionRow transaction={txn} onPress={() => router.push(`/income/${txn.id}`)} />
+        <TransactionRow transaction={txn} onPress={(t) => router.push(`/income/${t.id}`)} />
       )}
       ListEmptyComponent={
         isLoading ? (

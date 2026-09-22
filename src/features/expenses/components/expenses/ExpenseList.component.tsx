@@ -75,7 +75,7 @@ export function ExpenseList({
         <TransactionRow
           key={txn.id}
           transaction={txn}
-          onPress={() => onSelectTransaction(txn)}
+          onPress={onSelectTransaction}
         />
       ))}
     </div>

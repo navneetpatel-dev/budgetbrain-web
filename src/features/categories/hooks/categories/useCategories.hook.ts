@@ -24,7 +24,10 @@ export function useCategories() {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [listError, setListError] = useState<string | null>(null);
+  const [moving, setMoving] = useState(false);
   const clearSubmitError = useCallback(() => setSubmitError(null), []);
+
+  const categoriesQueryKey = ['categories', showArchived ? 'all' : 'active', undefined, 100];
 
   const { data, isLoading } = usePaginatedList<Category, 'categories'>({
     queryKey: ['categories', showArchived ? 'all' : 'active'],
@@ -95,18 +98,30 @@ export function useCategories() {
   };
 
   const moveCategory = async (index: number, direction: -1 | 1) => {
-    if (!data) return;
+    if (!data || moving) return;
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= data.length) return;
     const ordered = [...data];
     const [item] = ordered.splice(index, 1);
     ordered.splice(newIndex, 0, item);
     setListError(null);
+    setMoving(true);
+
+    await queryClient.cancelQueries({ queryKey: categoriesQueryKey });
+    const previous = queryClient.getQueryData<{ items: Category[]; total: number }>(categoriesQueryKey);
+    queryClient.setQueryData(categoriesQueryKey, {
+      items: ordered,
+      total: previous?.total ?? ordered.length,
+    });
+
     try {
       await reorderCategories(ordered.map((c) => c.id));
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     } catch (err) {
+      if (previous) queryClient.setQueryData(categoriesQueryKey, previous);
       setListError(getApiErrorMessage(err, 'Could not reorder categories'));
+    } finally {
+      setMoving(false);
     }
   };
 
@@ -132,5 +147,6 @@ export function useCategories() {
     archiveCategory,
     unarchiveCategory,
     moveCategory,
+    moving,
   };
 }

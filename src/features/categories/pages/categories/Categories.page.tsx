@@ -45,6 +45,7 @@ export function CategoriesPage() {
     archiveCategory,
     unarchiveCategory,
     moveCategory,
+    moving,
   } = useCategories();
   const { confirm, accept, cancel, copy, open } = useConfirmDialog();
   const formDialogRef = useRef<HTMLDivElement>(null);
@@ -105,10 +106,10 @@ export function CategoriesPage() {
                   </button>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                    <button type="button" className={interactiveStyles.control} aria-label="Move up" onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
+                    <button type="button" className={interactiveStyles.control} aria-label="Move up" disabled={moving} onClick={() => { void moveCategory(index, -1); }} style={iconActionStyle(theme)}>
                       <AppIcon name="arrowUp" size={16} color={theme.colors.primary} />
                     </button>
-                    <button type="button" className={interactiveStyles.control} aria-label="Move down" onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
+                    <button type="button" className={interactiveStyles.control} aria-label="Move down" disabled={moving} onClick={() => { void moveCategory(index, 1); }} style={iconActionStyle(theme)}>
                       <AppIcon name="arrowDown" size={16} color={theme.colors.primary} />
                     </button>
                     <button type="button" className={interactiveStyles.control} aria-label="Edit" onClick={() => openEdit(cat)} style={iconActionStyle(theme)}>

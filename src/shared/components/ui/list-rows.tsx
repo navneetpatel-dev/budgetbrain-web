@@ -1,4 +1,4 @@
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
+import { memo, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { m as motion } from 'framer-motion';
 import { useTheme } from '@/shared/theme';
 import { amountText, bodyMedium, caption } from '@/shared/theme/textStyles';
@@ -78,13 +78,13 @@ function formatDate(dateStr: string) {
   }
 }
 
-export function TransactionRow({
+export const TransactionRow = memo(function TransactionRow({
   transaction,
   onPress,
   showBadge = true,
 }: {
   transaction: Transaction;
-  onPress?: () => void;
+  onPress?: (transaction: Transaction) => void;
   showBadge?: boolean;
 }) {
   const theme = useTheme();
@@ -101,7 +101,7 @@ export function TransactionRow({
 
   return (
     <Surface
-      onClick={onPress}
+      onClick={onPress ? () => onPress(transaction) : undefined}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -216,9 +216,9 @@ export function TransactionRow({
       </div>
     </Surface>
   );
-}
+});
 
-export function EntityRow({
+export const EntityRow = memo(function EntityRow({
   title,
   subtitle,
   value,
@@ -264,9 +264,9 @@ export function EntityRow({
       {children}
     </Surface>
   );
-}
+});
 
-export function ProgressEntityRow({
+export const ProgressEntityRow = memo(function ProgressEntityRow({
   title,
   subtitle,
   value,
@@ -358,9 +358,9 @@ export function ProgressEntityRow({
       </div>
     </EntityRow>
   );
-}
+});
 
-export function NotificationRow({
+export const NotificationRow = memo(function NotificationRow({
   title,
   body,
   date,
@@ -398,4 +398,4 @@ export function NotificationRow({
       </div>
     </Surface>
   );
-}
+});
