@@ -9,7 +9,7 @@ import type { Investment } from '@/shared/types';
 export function useInvestments() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const { data, isLoading } = usePaginatedList<Investment, 'investments'>({
+  const { data, isLoading, isError, refetch } = usePaginatedList<Investment, 'investments'>({
     queryKey: ['investments'],
     url: '/investments',
     itemsKey: 'investments',
@@ -49,5 +49,5 @@ export function useInvestments() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { investments: data, isLoading, createMutation, updateMutation, error, setError };
+  return { investments: data, isLoading, isError, refetch, createMutation, updateMutation, error, setError };
 }

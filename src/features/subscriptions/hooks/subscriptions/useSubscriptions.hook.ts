@@ -18,6 +18,9 @@ export function useRecurringSeriesList() {
     queryKey: ['recurring-series'],
     url: '/recurring-series',
     itemsKey: 'recurringSeries',
+    // Subscriptions change rarely (create/delete/dismiss), and every mutation above already
+    // invalidates this key — staleness is bounded by that, not the timer.
+    staleTime: 10 * 60 * 1000,
   });
 }
 

@@ -13,7 +13,7 @@ export function useFamily() {
   const [showCreateSuccess, setShowCreateSuccess] = useState(false);
   const [showJoinSuccess, setShowJoinSuccess] = useState(false);
 
-  const { data, isLoading } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
+  const { data, isLoading, isError, refetch } = usePaginatedList<{ id: string; groupId: string; role: string; group?: { id: string; name: string; inviteCode: string } }, 'memberships'>({
     queryKey: ['family'],
     url: '/family/groups',
     itemsKey: 'memberships',
@@ -38,7 +38,7 @@ export function useFamily() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { memberships: data, isLoading, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess };
+  return { memberships: data, isLoading, isError, refetch, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess };
 }
 
 export function useFamilyMembers(groupId: string | undefined) {

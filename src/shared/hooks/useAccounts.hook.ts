@@ -9,7 +9,7 @@ import type { FinancialAccount } from '@/shared/types';
 export function useAccounts() {
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const { data, isLoading } = usePaginatedList<FinancialAccount, 'accounts'>({
+  const { data, isLoading, isError, refetch } = usePaginatedList<FinancialAccount, 'accounts'>({
     queryKey: ['accounts'],
     url: '/accounts',
     itemsKey: 'accounts',
@@ -41,5 +41,5 @@ export function useAccounts() {
     onError: (err) => setError(getApiErrorMessage(err)),
   });
 
-  return { accounts: data, isLoading, createMutation, updateMutation, error, setError };
+  return { accounts: data, isLoading, isError, refetch, createMutation, updateMutation, error, setError };
 }

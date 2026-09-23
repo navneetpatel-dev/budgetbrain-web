@@ -13,6 +13,9 @@ export function useLoans() {
     queryKey: ['loans'],
     url: '/loans',
     itemsKey: 'loans',
+    // Every create/update/delete/pay mutation below already calls invalidateLoanQueries —
+    // staleness is bounded by that, not the timer.
+    staleTime: 5 * 60 * 1000,
   });
 }
 

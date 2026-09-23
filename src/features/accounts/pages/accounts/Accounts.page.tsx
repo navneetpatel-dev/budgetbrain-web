@@ -35,7 +35,7 @@ type FieldErrors = {
 
 export function AccountsPage() {
   const theme = useTheme();
-  const { accounts, isLoading, createMutation, error, setError } = useAccounts();
+  const { accounts, isLoading, isError, refetch, createMutation, error, setError } = useAccounts();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<(typeof ACCOUNT_TYPES)[number]['id']>('bank');
@@ -121,6 +121,14 @@ export function AccountsPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={4} variant="account" />
+        ) : isError ? (
+          <EmptyState
+            title="Couldn’t load accounts"
+            subtitle="Check your connection and try again"
+            icon="creditCard"
+            action="Retry"
+            onAction={() => void refetch()}
+          />
         ) : (
           showForm ? null : (
             <EmptyState

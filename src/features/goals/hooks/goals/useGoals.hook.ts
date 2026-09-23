@@ -13,6 +13,9 @@ export function useGoals() {
     queryKey: ['goals'],
     url: '/goals',
     itemsKey: 'goals',
+    // Every create/update/delete/contribute mutation below already calls
+    // invalidateGoalQueries — staleness is bounded by that, not the timer.
+    staleTime: 5 * 60 * 1000,
   });
 }
 

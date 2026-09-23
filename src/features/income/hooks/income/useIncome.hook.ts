@@ -135,5 +135,9 @@ export function useIncomeSources() {
     queryKey: ['income-sources'],
     url: '/income/sources',
     itemsKey: 'sources',
+    // Income sources change rarely (create-on-new-source, otherwise static), and the
+    // create-income mutation above already invalidates this key on the rare occasion
+    // a new source is added — staleness is bounded by that, not the timer.
+    staleTime: 10 * 60 * 1000,
   });
 }

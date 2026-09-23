@@ -7,7 +7,7 @@ import type { NotificationItem } from '@/shared/types';
 
 export function useNotifications() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = usePaginatedList<NotificationItem, 'notifications'>({
+  const { data, isLoading, isError, refetch } = usePaginatedList<NotificationItem, 'notifications'>({
     queryKey: ['notifications'],
     url: '/notifications',
     itemsKey: 'notifications',
@@ -18,5 +18,5 @@ export function useNotifications() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
-  return { notifications: data, isLoading, markAsRead: markAsReadMutation.mutate };
+  return { notifications: data, isLoading, isError, refetch, markAsRead: markAsReadMutation.mutate };
 }

@@ -39,7 +39,7 @@ type FieldErrors = {
 
 export function InvestmentsPage() {
   const theme = useTheme();
-  const { investments, isLoading, createMutation, error, setError } = useInvestments();
+  const { investments, isLoading, isError, refetch, createMutation, error, setError } = useInvestments();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<(typeof INVESTMENT_TYPES)[number]['id']>('stocks');
@@ -186,6 +186,14 @@ export function InvestmentsPage() {
       ListEmptyComponent={
         isLoading ? (
           <ListRowsSkeleton count={4} variant="account" />
+        ) : isError ? (
+          <EmptyState
+            title="Couldn’t load investments"
+            subtitle="Check your connection and try again"
+            icon="chart"
+            action="Retry"
+            onAction={() => void refetch()}
+          />
         ) : showForm ? null : (
           <EmptyState
             title="No investments yet"

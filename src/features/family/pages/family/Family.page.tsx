@@ -328,7 +328,7 @@ function GroupBalances({ groupId, userRole }: { groupId: string; userRole: strin
 
 export function FamilyPage() {
   const theme = useTheme();
-  const { memberships, isLoading, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess } = useFamily();
+  const { memberships, isLoading, isError, refetch, createMutation, joinMutation, error, setError, showCreateSuccess, showJoinSuccess } = useFamily();
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [groupName, setGroupName] = useState('');
@@ -362,6 +362,14 @@ export function FamilyPage() {
     <ScreenWrapper header={<ProfileStackHeader screen="family" subtitle="Manage expenses together" />} inset="stack">
       {isLoading ? (
         <FamilySkeleton />
+      ) : isError ? (
+        <EmptyState
+          title="Couldn’t load family groups"
+          subtitle="Check your connection and try again"
+          icon="users"
+          action="Retry"
+          onAction={() => void refetch()}
+        />
       ) : memberships.length > 0 ? (
         memberships.map((m) => (
           <div key={m.id} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
