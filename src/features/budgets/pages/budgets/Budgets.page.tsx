@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
@@ -19,6 +19,42 @@ import { useIsPro } from '@/shared/hooks/useIsPro';
 import { ProPaywallModal } from '@/shared/components/ProPaywallModal.component';
 import { AiBudgetRecommendationBanner } from '../../components/budgets/AiBudgetRecommendationBanner.component';
 import type { Budget, AiInsight } from '@/shared/types';
+
+const BudgetProgressRow = memo(function BudgetProgressRow({
+  budget: b,
+  theme,
+  onEdit,
+  onDelete,
+}: {
+  budget: Budget;
+  theme: ReturnType<typeof useTheme>;
+  onEdit: (id: string) => void;
+  onDelete: (budget: Budget) => void;
+}) {
+  const effectiveAmount = b.effectiveAmount ?? b.amount;
+  // Server-computed (implementation-plan/backend/14) — not derived client-side.
+  const pct = b.spentPercentage ?? 0;
+  const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary;
+  const rolloverAmount = b.rolloverAmount ?? 0;
+  const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : rolloverAmount !== 0 ? `${rolloverAmount > 0 ? '+' : '-'}${formatCurrency(Math.abs(rolloverAmount), b.currency)} rollover` : undefined;
+  const handleEdit = useCallback(() => onEdit(b.id), [onEdit, b.id]);
+  const handleDeletePress = useCallback(() => onDelete(b), [onDelete, b]);
+
+  return (
+    <ProgressEntityRow
+      title={b.name}
+      subtitle={`${b.type.charAt(0).toUpperCase()}${b.type.slice(1)}${b.category?.name ? ` · ${b.category.name}` : ' · All spending'}`}
+      value={formatCurrency(b.spent ?? 0, b.currency)}
+      secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
+      progress={pct}
+      progressColor={color}
+      footerLeft={`${pct}% used`}
+      footerRight={status}
+      onEdit={handleEdit}
+      onDelete={handleDeletePress}
+    />
+  );
+});
 
 export function BudgetsPage() {
   const theme = useTheme();
@@ -53,18 +89,22 @@ export function BudgetsPage() {
     router.push('/budget/add');
   };
 
-  const goToEdit = (id: string) => router.push(`/budget/${id}?edit=1`);
+  const goToEdit = useCallback((id: string) => router.push(`/budget/${id}?edit=1`), [router]);
 
-  const handleDelete = async (budget: Budget) => {
-    if (!(await confirm(CONFIRM.deleteBudget(budget.name)))) return;
-    try {
-      await apiDelete(`/budgets/${budget.id}`);
-      removeBudgetDetail(queryClient, budget.id);
-      invalidateBudgetQueries(queryClient);
-    } catch {
-      // list refetch will surface stale errors on next load
-    }
-  };
+  const handleDelete = useCallback(
+    async (budget: Budget) => {
+      if (!(await confirm(CONFIRM.deleteBudget(budget.name)))) return;
+      try {
+        await apiDelete(`/budgets/${budget.id}`);
+        removeBudgetDetail(queryClient, budget.id);
+        invalidateBudgetQueries(queryClient);
+      } catch {
+        // list refetch will surface stale errors on next load
+      }
+    },
+    [confirm, queryClient]
+  );
+  const onDeleteBudget = useCallback((budget: Budget) => { void handleDelete(budget); }, [handleDelete]);
 
   const [activeFilter, setActiveFilter] = useState('active');
 
@@ -177,28 +217,9 @@ export function BudgetsPage() {
         }
         data={isLoading ? [] : budgets}
         keyExtractor={(b: Budget) => b.id}
-        renderItem={(b) => {
-          const effectiveAmount = b.effectiveAmount ?? b.amount;
-          // Server-computed (implementation-plan/backend/14) — not derived client-side.
-          const pct = b.spentPercentage ?? 0;
-          const color = pct >= 100 ? theme.colors.danger : pct >= (b.alertThreshold ?? 80) ? theme.colors.warning : theme.colors.primary;
-          const rolloverAmount = b.rolloverAmount ?? 0;
-          const status = pct >= 100 ? 'Over budget' : pct >= (b.alertThreshold ?? 80) ? 'Near limit' : rolloverAmount !== 0 ? `${rolloverAmount > 0 ? '+' : '-'}${formatCurrency(Math.abs(rolloverAmount), b.currency)} rollover` : undefined;
-          return (
-            <ProgressEntityRow
-              title={b.name}
-              subtitle={`${b.type.charAt(0).toUpperCase()}${b.type.slice(1)}${b.category?.name ? ` · ${b.category.name}` : ' · All spending'}`}
-              value={formatCurrency(b.spent ?? 0, b.currency)}
-              secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
-              progress={pct}
-              progressColor={color}
-              footerLeft={`${pct}% used`}
-              footerRight={status}
-              onEdit={() => goToEdit(b.id)}
-              onDelete={() => { void handleDelete(b); }}
-            />
-          );
-        }}
+        renderItem={(b) => (
+          <BudgetProgressRow budget={b} theme={theme} onEdit={goToEdit} onDelete={onDeleteBudget} />
+        )}
         ListEmptyComponent={
           isLoading ? (
             <ListRowsSkeleton count={4} variant="budget" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { FeatureHeader, StickyHeaderFlatScreen, useStackBack } from '@/shared/components/ui/feature-screen';
@@ -22,6 +22,10 @@ export function IncomePage() {
   const { data, total, isLoading, isError, refetch } = useIncome();
   const incomeList = data ?? [];
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const handleTransactionPress = useCallback(
+    (t: Transaction) => router.push(`/income/${t.id}`),
+    [router]
+  );
 
   const { data: sources } = useQuery({
     queryKey: ['income-sources'],
@@ -224,7 +228,7 @@ export function IncomePage() {
         </div>
       }
       renderItem={(txn) => (
-        <TransactionRow transaction={txn} onPress={(t) => router.push(`/income/${t.id}`)} />
+        <TransactionRow transaction={txn} onPress={handleTransactionPress} />
       )}
       ListEmptyComponent={
         isLoading ? (

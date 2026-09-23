@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { AppIcon, type AppIconName } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 import type { AiAnomaly } from '@/shared/types';
@@ -11,7 +12,7 @@ const ANOMALY_LABELS: Record<AiAnomaly['type'], { label: string; icon: AppIconNa
   unusual_transaction: { label: 'Unusual transaction', icon: 'shield' },
 };
 
-export function AiAnomalyCard({
+export const AiAnomalyCard = memo(function AiAnomalyCard({
   type,
   reason,
   meta,
@@ -88,7 +89,7 @@ export function AiAnomalyCard({
       </div>
     </div>
   );
-}
+});
 
 export function AiAnomalyClear() {
   const theme = useTheme();

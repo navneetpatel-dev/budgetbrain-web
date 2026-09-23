@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProfileStackHeader } from '@/features/settings';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
@@ -42,6 +42,10 @@ export function NetWorthPage() {
   const accounts = ensureArray<FinancialAccount>(data?.accounts);
   const investments = ensureArray<Investment>(data?.investments);
   const isEmpty = !isLoading && accounts.length === 0 && investments.length === 0;
+
+  // ListRow is memoized — a fresh closure per row here would defeat that for every row.
+  const goToAccounts = useCallback(() => router.push('/accounts'), [router]);
+  const goToInvestments = useCallback(() => router.push('/investments'), [router]);
 
   // Compute macro bar breakdown.
   // KNOWN-GAP(money-math): totalAssets/totalLiabilities are already
@@ -230,7 +234,7 @@ export function NetWorthPage() {
                       label={acc.name}
                       subtitle={`${acc.type.replace(/_/g, ' ')}${acc.institution ? ` · ${acc.institution}` : ''}`}
                       value={formatCurrency(acc.balance, currency)}
-                      onPress={() => router.push('/accounts')}
+                      onPress={goToAccounts}
                       isLast={i === accounts.length - 1}
                     />
                   ))}
@@ -246,7 +250,7 @@ export function NetWorthPage() {
                       label={inv.name}
                       subtitle={`${inv.type.replace(/_/g, ' ')} · ${(inv.gainLoss ?? 0) >= 0 ? '+' : ''}${formatCurrency(inv.gainLoss ?? 0, currency)}`}
                       value={formatCurrency(inv.currentValue, currency)}
-                      onPress={() => router.push('/investments')}
+                      onPress={goToInvestments}
                       isLast={i === investments.length - 1}
                     />
                   ))}

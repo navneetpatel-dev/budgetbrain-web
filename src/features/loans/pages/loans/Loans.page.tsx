@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { ProfileStackHeader } from '@/features/settings';
@@ -17,6 +17,39 @@ import { apiDelete } from '@/shared/services/api';
 import { invalidateLoanQueries, removeLoanDetail } from '@/shared/services/queryInvalidation';
 import { useLoans } from '../../hooks/loans/useLoans.hook';
 import type { Loan } from '@/shared/types';
+
+const LoanProgressRow = memo(function LoanProgressRow({
+  loan: l,
+  theme,
+  onOpen,
+  onDelete,
+}: {
+  loan: Loan;
+  theme: ReturnType<typeof useTheme>;
+  onOpen: (id: string) => void;
+  onDelete: (loan: Loan) => void;
+}) {
+  // Server-computed (implementation-plan/backend/14) — not derived client-side.
+  const pct = l.paidPercentage ?? 0;
+  const color = l.closed ? theme.colors.success : theme.colors.primary;
+  const handlePress = useCallback(() => onOpen(l.id), [onOpen, l.id]);
+  const handleDeletePress = useCallback(() => onDelete(l), [onDelete, l]);
+
+  return (
+    <ProgressEntityRow
+      title={l.name}
+      subtitle={`${l.type.replace(/_/g, ' ')}${l.interestRate ? ` · ${l.interestRate}% APR` : ''}`}
+      value={formatCurrency(l.remainingBalance, l.currency)}
+      secondaryValue={`remaining of ${formatCurrency(l.principal, l.currency)}`}
+      progress={pct}
+      progressColor={color}
+      footerLeft={`${pct}% paid off`}
+      footerRight={l.closed ? 'Paid off' : undefined}
+      onPress={handlePress}
+      onDelete={handleDeletePress}
+    />
+  );
+});
 
 export function LoansPage() {
   const theme = useTheme();
@@ -45,18 +78,22 @@ export function LoansPage() {
     return { totalOutstanding: outstanding, totalPrincipal: principal, currency: curr };
   }, [loans]);
 
-  const openLoan = (id: string) => router.push(`/loans/${id}`);
+  const openLoan = useCallback((id: string) => router.push(`/loans/${id}`), [router]);
 
-  const handleDelete = async (loan: Loan) => {
-    if (!(await confirm(CONFIRM.deleteLoan))) return;
-    try {
-      await apiDelete(`/loans/${loan.id}`);
-      removeLoanDetail(queryClient, loan.id);
-      invalidateLoanQueries(queryClient);
-    } catch {
-      // list refetch will surface stale errors on next load
-    }
-  };
+  const handleDelete = useCallback(
+    async (loan: Loan) => {
+      if (!(await confirm(CONFIRM.deleteLoan))) return;
+      try {
+        await apiDelete(`/loans/${loan.id}`);
+        removeLoanDetail(queryClient, loan.id);
+        invalidateLoanQueries(queryClient);
+      } catch {
+        // list refetch will surface stale errors on next load
+      }
+    },
+    [confirm, queryClient]
+  );
+  const onDeleteLoan = useCallback((loan: Loan) => { void handleDelete(loan); }, [handleDelete]);
 
   return (
     <>
@@ -100,25 +137,9 @@ export function LoansPage() {
             </div>
           ) : null
         }
-        renderItem={(l) => {
-          // Server-computed (implementation-plan/backend/14) — not derived client-side.
-          const pct = l.paidPercentage ?? 0;
-          const color = l.closed ? theme.colors.success : theme.colors.primary;
-          return (
-            <ProgressEntityRow
-              title={l.name}
-              subtitle={`${l.type.replace(/_/g, ' ')}${l.interestRate ? ` · ${l.interestRate}% APR` : ''}`}
-              value={formatCurrency(l.remainingBalance, l.currency)}
-              secondaryValue={`remaining of ${formatCurrency(l.principal, l.currency)}`}
-              progress={pct}
-              progressColor={color}
-              footerLeft={`${pct}% paid off`}
-              footerRight={l.closed ? 'Paid off' : undefined}
-              onPress={() => openLoan(l.id)}
-              onDelete={() => { void handleDelete(l); }}
-            />
-          );
-        }}
+        renderItem={(l) => (
+          <LoanProgressRow loan={l} theme={theme} onOpen={openLoan} onDelete={onDeleteLoan} />
+        )}
         ListEmptyComponent={
           isLoading ? (
             <ListRowsSkeleton count={3} variant="goal" />

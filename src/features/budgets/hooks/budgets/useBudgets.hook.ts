@@ -13,6 +13,9 @@ export function useBudgets() {
     queryKey: ['budgets'],
     url: '/budgets',
     itemsKey: 'budgets',
+    // Every create/update/delete mutation below already calls invalidateBudgetQueries —
+    // staleness is bounded by that, not the timer (parity with goals/loans/subscriptions).
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -28,6 +31,8 @@ export function useBudgetDetail(id: string | undefined) {
     queryFn: () => apiGet<Budget>(`/budgets/${id}`),
     enabled: !!id,
     placeholderData: undefined,
+    // Invalidated on its own update mutation below — staleness is bounded by that.
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateMutation = useMutation({

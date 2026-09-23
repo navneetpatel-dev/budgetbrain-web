@@ -31,6 +31,8 @@ export function useGoalDetail(id: string | undefined) {
     queryFn: () => apiGet<Goal>(`/goals/${id}`),
     enabled: !!id,
     placeholderData: undefined,
+    // Invalidated on its own update/contribute mutations below — staleness is bounded by that.
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateMutation = useMutation({

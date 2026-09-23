@@ -31,6 +31,8 @@ export function useLoanDetail(id: string | undefined) {
     queryFn: () => apiGet<Loan>(`/loans/${id}`),
     enabled: !!id,
     placeholderData: undefined,
+    // Invalidated on its own update/pay mutations below — staleness is bounded by that.
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateMutation = useMutation({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { StackNavHeader, useStackBack, StickyHeaderFlatScreen } from '@/shared/components/ui/feature-screen';
 import { Input, EmptyState } from '@/shared/components/ui/index';
@@ -25,6 +25,10 @@ export function SearchPage() {
   const searching = enabled && (isLoading || isFetching);
 
   const goBack = useStackBack('/expenses');
+  const handleTransactionPress = useCallback(
+    (t: Transaction) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`),
+    [router]
+  );
 
   return (
     <StickyHeaderFlatScreen
@@ -56,12 +60,7 @@ export function SearchPage() {
           </p>
         ) : null
       }
-      renderItem={(txn) => (
-        <TransactionRow
-          transaction={txn}
-          onPress={(t) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`)}
-        />
-      )}
+      renderItem={(txn) => <TransactionRow transaction={txn} onPress={handleTransactionPress} />}
       ListEmptyComponent={enabled && !searching ? <EmptyState title="No results" subtitle="Try a different search term" icon="search" /> : null}
     />
   );

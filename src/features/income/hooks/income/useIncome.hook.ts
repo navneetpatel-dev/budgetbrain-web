@@ -29,6 +29,8 @@ export function useIncomeDetail(id: string | undefined) {
     queryFn: () => apiGet<Transaction>(`/income/${id}`),
     enabled: !!id,
     placeholderData: undefined,
+    // Invalidated on its own update mutations below — staleness is bounded by that.
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateMutation = useMutation({

@@ -32,6 +32,8 @@ export function useExpenseDetail(id: string | undefined) {
     queryFn: () => apiGet<Transaction>(`/expenses/${id}`),
     enabled: !!id,
     placeholderData: undefined,
+    // Invalidated on its own update mutation below — staleness is bounded by that.
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateMutation = useMutation({

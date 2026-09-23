@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { m as motion } from 'framer-motion';
 import { useTheme, cubicBezier } from '@/shared/theme';
 import type { AppTheme } from '@/shared/theme';
@@ -804,7 +804,7 @@ export function ProgressBar({ progress, color, height = 8 }: { progress: number;
 
 /* ── ListRow ── */
 
-export function ListRow({
+export const ListRow = memo(function ListRow({
   icon, label, subtitle, value, onPress, chevron, destructive, isLast,
 }: {
   icon?: AppIconName; label: string; subtitle?: string; value?: string;
@@ -868,7 +868,7 @@ export function ListRow({
   }
 
   return <div>{content}</div>;
-}
+});
 
 /* ── Toggle ── */
 

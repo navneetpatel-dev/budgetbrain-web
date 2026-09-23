@@ -39,6 +39,8 @@ export function RecapPage() {
   const { data: recap, isLoading } = useQuery({
     queryKey: ['recap'],
     queryFn: () => apiGet<MonthlyRecap>('/reports/recap'),
+    // Recap covers the previous, already-closed calendar month — effectively immutable.
+    staleTime: 30 * 60 * 1000,
   });
 
   const handleShare = async () => {

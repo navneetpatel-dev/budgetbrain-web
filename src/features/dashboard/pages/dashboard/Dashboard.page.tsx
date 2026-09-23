@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ScreenWrapper } from '@/shared/components/ui/layout';
 import { SectionHeader, Card, EmptyState, BentoCard, StreakBanner } from '@/shared/components/ui/index';
@@ -18,6 +18,63 @@ import { ensureArray } from '@/shared/utils/listData';
 import { toSafeNumber, toSafePercent } from '@/shared/utils/number';
 import type { Budget, Goal, Transaction } from '@/shared/types';
 import { dashboardPageStyles } from '../../styles/dashboard/dashboard.styles';
+
+const BudgetProgressRow = memo(function BudgetProgressRow({
+  budget: b,
+  currency,
+  theme,
+}: {
+  budget: Budget;
+  currency: string;
+  theme: ReturnType<typeof useTheme>;
+}) {
+  const router = useRouter();
+  const effectiveAmount = b.effectiveAmount ?? b.amount;
+  const pct = toSafePercent(b.spent, effectiveAmount);
+  const color =
+    pct >= 100
+      ? theme.colors.danger
+      : pct >= (b.alertThreshold ?? 80)
+      ? theme.colors.warning
+      : theme.colors.primary;
+  const onPress = useCallback(() => router.push(`/budgets/${b.id}`), [router, b.id]);
+
+  return (
+    <ProgressEntityRow
+      title={b.name}
+      value={formatCurrency(b.spent ?? 0, currency)}
+      secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
+      progress={pct}
+      progressColor={color}
+      footerRight={`${pct}%`}
+      onPress={onPress}
+    />
+  );
+});
+
+const GoalProgressRow = memo(function GoalProgressRow({
+  goal: g,
+  theme,
+}: {
+  goal: Goal;
+  theme: ReturnType<typeof useTheme>;
+}) {
+  const router = useRouter();
+  const pct = toSafePercent(g.currentAmount, g.targetAmount);
+  const onPress = useCallback(() => router.push(`/goals/${g.id}`), [router, g.id]);
+
+  return (
+    <ProgressEntityRow
+      title={g.name}
+      value={formatCurrency(g.currentAmount, g.currency)}
+      secondaryValue={`/ ${formatCurrency(g.targetAmount, g.currency)}`}
+      progress={pct}
+      progressColor={theme.colors.success}
+      footerRight={`${pct}%`}
+      onPress={onPress}
+    />
+  );
+});
 
 export function DashboardPage() {
   const theme = useTheme();
@@ -47,6 +104,13 @@ export function DashboardPage() {
   // unrelated Dashboard state changes.
   const handleCategoryPress = useCallback(
     (categoryId: string) => router.push(`/expenses?type=expense&categoryId=${encodeURIComponent(categoryId)}`),
+    [router]
+  );
+  // All upcoming-bill rows navigate to the same place, unlike budgets/goals/transactions
+  // below which need a per-row id — one stable callback is enough here.
+  const handleBillPress = useCallback(() => router.push('/subscriptions'), [router]);
+  const handleTransactionPress = useCallback(
+    (t: Transaction) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`),
     [router]
   );
 
@@ -135,7 +199,7 @@ export function DashboardPage() {
                     title={bill.merchant}
                     subtitle={`Due ${bill.nextDueDate}`}
                     value={formatCurrency(bill.amount, bill.currency)}
-                    onPress={() => router.push('/subscriptions')}
+                    onPress={handleBillPress}
                   />
                 ))}
               </div>
@@ -169,28 +233,9 @@ export function DashboardPage() {
             <div>
               <SectionHeader title="Budget Progress" action="See all" onAction={() => router.push('/budgets')} />
               <div className={dashboardPageStyles.section}>
-                {budgets.map((b) => {
-                  const effectiveAmount = b.effectiveAmount ?? b.amount;
-                  const pct = toSafePercent(b.spent, effectiveAmount);
-                  const color =
-                    pct >= 100
-                      ? theme.colors.danger
-                      : pct >= (b.alertThreshold ?? 80)
-                      ? theme.colors.warning
-                      : theme.colors.primary;
-                  return (
-                    <ProgressEntityRow
-                      key={b.id}
-                      title={b.name}
-                      value={formatCurrency(b.spent ?? 0, summary.currency)}
-                      secondaryValue={`/ ${formatCurrency(effectiveAmount, b.currency)}`}
-                      progress={pct}
-                      progressColor={color}
-                      footerRight={`${pct}%`}
-                      onPress={() => router.push(`/budgets/${b.id}`)}
-                    />
-                  );
-                })}
+                {budgets.map((b) => (
+                  <BudgetProgressRow key={b.id} budget={b} currency={summary.currency} theme={theme} />
+                ))}
               </div>
             </div>
           )}
@@ -199,21 +244,9 @@ export function DashboardPage() {
             <div>
               <SectionHeader title="Goal Progress" action="See all" onAction={() => router.push('/goals')} />
               <div className={dashboardPageStyles.section}>
-                {goals.map((g) => {
-                  const pct = toSafePercent(g.currentAmount, g.targetAmount);
-                  return (
-                    <ProgressEntityRow
-                      key={g.id}
-                      title={g.name}
-                      value={formatCurrency(g.currentAmount, g.currency)}
-                      secondaryValue={`/ ${formatCurrency(g.targetAmount, g.currency)}`}
-                      progress={pct}
-                      progressColor={theme.colors.success}
-                      footerRight={`${pct}%`}
-                      onPress={() => router.push(`/goals/${g.id}`)}
-                    />
-                  );
-                })}
+                {goals.map((g) => (
+                  <GoalProgressRow key={g.id} goal={g} theme={theme} />
+                ))}
               </div>
             </div>
           )}
@@ -240,11 +273,7 @@ export function DashboardPage() {
             ) : (
               <div className={dashboardPageStyles.section}>
                 {recentTransactions.map((txn) => (
-                  <TransactionRow
-                    key={txn.id}
-                    transaction={txn}
-                    onPress={(t) => router.push(t.type === 'income' ? `/income/${t.id}` : `/expenses/${t.id}`)}
-                  />
+                  <TransactionRow key={txn.id} transaction={txn} onPress={handleTransactionPress} />
                 ))}
               </div>
             )}

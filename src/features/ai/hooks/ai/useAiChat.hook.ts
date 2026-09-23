@@ -55,6 +55,9 @@ export function useAiChat() {
     queryFn: () => apiGet<AiInsight>('/ai/insights'),
     enabled: authenticated,
     retry: false,
+    // Backend already caches this response for 5 min (getOrSetCache) — matching
+    // staleTime here avoids a refetch against a server response that hasn't changed.
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: anomalies, isLoading: anomaliesLoading } = useQuery({
@@ -62,6 +65,9 @@ export function useAiChat() {
     queryFn: () => apiGet<{ anomalies: AiAnomaly[] }>('/ai/anomalies'),
     enabled: authenticated,
     retry: false,
+    // Backend already caches this response for 5 min (getOrSetCache) — matching
+    // staleTime here avoids a refetch against a server response that hasn't changed.
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {

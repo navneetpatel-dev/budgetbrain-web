@@ -1,9 +1,10 @@
 'use client';
 
+import { memo } from 'react';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import { useTheme } from '@/shared/theme';
 
-export function AiInsightCard({ text }: { text: string }) {
+export const AiInsightCard = memo(function AiInsightCard({ text }: { text: string }) {
   const theme = useTheme();
 
   return (
@@ -58,4 +59,4 @@ export function AiInsightCard({ text }: { text: string }) {
       </p>
     </div>
   );
-}
+});
