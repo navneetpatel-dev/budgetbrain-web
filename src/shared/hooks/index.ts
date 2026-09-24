@@ -15,5 +15,4 @@ export {
 export type { PendingSplit } from './useFamily.hook';
 export { useNotifications } from './useNotifications.hook';
 export { useSupportTickets } from './useSupportTickets.hook';
-export { useIntegrations } from './useIntegrations.hook';
 export { useReports } from './useReports.hook';

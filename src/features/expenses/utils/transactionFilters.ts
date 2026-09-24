@@ -17,6 +17,8 @@ export type TransactionListFilters = {
   startDate?: string;
   endDate?: string;
   tag?: string;
+  /** `detected`: added by auto-tracking or a statement import (plan T6.4). */
+  source?: 'detected' | 'manual';
 };
 
 export const DEFAULT_TRANSACTION_FILTERS: TransactionListFilters = {
@@ -56,6 +58,7 @@ export function toExpenseListParams(filters: TransactionListFilters): Record<str
   if (filters.incomeSourceId) params.incomeSourceId = filters.incomeSourceId;
   if (filters.paymentMethod) params.paymentMethod = filters.paymentMethod;
   if (filters.tag) params.tag = filters.tag;
+  if (filters.source) params.source = filters.source;
 
   const range = resolveDateRange(filters);
   if (range.startDate) params.startDate = range.startDate;
@@ -71,6 +74,7 @@ export function countActiveFilters(filters: TransactionListFilters): number {
   if (filters.paymentMethod) n += 1;
   if (filters.datePreset !== 'all') n += 1;
   if (filters.tag) n += 1;
+  if (filters.source) n += 1;
   return n;
 }
 
@@ -89,6 +93,7 @@ export function filtersFromSearchParams(params: URLSearchParams): TransactionLis
     startDate: params.get('startDate') || undefined,
     endDate: params.get('endDate') || undefined,
     tag: params.get('tag') || undefined,
+    source: params.get('source') === 'detected' || params.get('source') === 'manual' ? (params.get('source') as 'detected' | 'manual') : undefined,
   };
 }
 
@@ -104,5 +109,6 @@ export function filtersToSearchParams(filters: TransactionListFilters): URLSearc
     if (filters.endDate) params.set('endDate', filters.endDate);
   }
   if (filters.tag) params.set('tag', filters.tag);
+  if (filters.source) params.set('source', filters.source);
   return params;
 }

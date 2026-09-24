@@ -16,7 +16,7 @@ export const PROFILE_ACCOUNT_LINKS: { label: string; href: string; icon: AppIcon
   { label: 'Accounts', href: '/accounts', icon: 'wallet' },
   { label: 'Investments', href: '/investments', icon: 'chart' },
   { label: 'Family Groups', href: '/family', icon: 'family' },
-  { label: 'Integrations', href: '/integrations', icon: 'link' },
+  { label: 'Auto-tracking & import', href: '/integrations', icon: 'link' },
   { label: 'Notifications', href: '/notifications', icon: 'bell' },
   { label: 'Support', href: '/support', icon: 'support' },
   { label: 'Privacy Policy', href: '/privacy', icon: 'document' },

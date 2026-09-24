@@ -334,11 +334,3 @@ export interface AiConversation extends AiConversationSummary {
   messages: AiChatMessage[];
 }
 
-export interface ParsedTransactionPending {
-  id: string;
-  source: 'sms' | 'email';
-  parsedAmount: number | null;
-  parsedMerchant: string | null;
-  confidence: number;
-  createdAt: string;
-}
