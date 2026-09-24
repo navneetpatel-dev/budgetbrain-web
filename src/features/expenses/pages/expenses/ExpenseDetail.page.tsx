@@ -28,6 +28,7 @@ import {
   ValidationMessages,
 } from '@/shared/validation/fieldLimits';
 import { DateBounds } from '@/shared/utils/dateBounds';
+import { transactionKind } from '@/shared/utils/transactionKind';
 
 type FieldErrors = {
   amount?: string;
@@ -246,16 +247,18 @@ export function ExpenseDetailPage({ id: propId }: { id?: string } = {}) {
     );
   }
 
-  const title = txn.merchant || txn.category?.name || (txn.type === 'expense' ? 'Expense' : 'Income');
-  const amountPrefix = txn.type === 'expense' ? '-' : '+';
+  const kind = transactionKind(txn);
+  const title = txn.merchant || txn.category?.name || kind.label;
+  const amountColor =
+    kind.tone === 'spend' ? theme.colors.danger : kind.tone === 'gain' ? theme.colors.success : theme.colors.textSecondary;
 
   return (
     <>
-      <FormStackScreen title={title} eyebrow={txn.type === 'expense' ? 'Expense' : 'Income'}>
+      <FormStackScreen title={title} eyebrow={kind.label}>
         {showSuccess ? <FormSuccessBanner message="Changes saved" /> : null}
         <DetailHero
-          amount={`${amountPrefix}${formatCurrency(txn.amount, txn.currency)}`}
-          amountColor={txn.type === 'expense' ? theme.colors.danger : theme.colors.success}
+          amount={`${kind.sign}${formatCurrency(txn.amount, txn.currency)}`}
+          amountColor={amountColor}
           subtitle={txn.category?.name ?? undefined}
         />
         <DetailMetaList
