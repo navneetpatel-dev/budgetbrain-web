@@ -10,6 +10,7 @@ import { ListRowsSkeleton } from '@/shared/components/ui/skeleton';
 import { usePaginatedList } from '@/shared/hooks/usePaginatedList';
 import { useTheme } from '@/shared/theme';
 import { useCategories } from '@/features/categories';
+import { ReviewChip, useReviewCount } from '@/features/detection';
 import { TransactionFilters } from '../../components/expenses/TransactionFilters.component';
 import { useExpenses } from '../../hooks/expenses/useExpenses.hook';
 import {
@@ -118,8 +119,12 @@ function ExpensesPageContent() {
     [router]
   );
 
+  const reviewCount = useReviewCount();
+
   const activeChipId =
-    filters.type === 'expense'
+    filters.source === 'detected'
+      ? 'detected'
+      : filters.type === 'expense'
       ? 'expense'
       : filters.type === 'income'
         ? 'income'
@@ -132,11 +137,14 @@ function ExpensesPageContent() {
     { id: 'expense', label: 'Expenses', icon: 'expense' as const },
     { id: 'income', label: 'Income', icon: 'income' as const },
     { id: 'this_month', label: 'This Month' },
+    { id: 'detected', label: 'Auto-detected' },
   ];
 
   const handleChipSelect = (id: string) => {
     if (id === 'all') {
-      commitFilters({ ...filters, type: 'all', datePreset: 'all' });
+      commitFilters({ ...filters, type: 'all', datePreset: 'all', source: undefined });
+    } else if (id === 'detected') {
+      commitFilters({ ...filters, source: 'detected' });
     } else if (id === 'expense') {
       commitFilters({ ...filters, type: 'expense' });
     } else if (id === 'income') {
@@ -168,6 +176,8 @@ function ExpensesPageContent() {
                 // eslint-disable-next-line no-restricted-syntax -- display ratio derived from server-computed totals above (not a gap, see implementation-plan/web/19-wire-money-computed-fields.md).
                 netRate={totalEarned > 0 ? Math.round(((totalEarned - totalSpent) / totalEarned) * 100) : undefined}
               />
+
+              <ReviewChip count={reviewCount} />
 
               <FilterChipsRail
                 chips={filterChips}

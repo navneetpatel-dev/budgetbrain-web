@@ -157,6 +157,22 @@ export const TransactionRow = memo(function TransactionRow({
             }}>
               {dateLabel}
             </span>
+            {transaction.source === 'detected' ? (
+              <span
+                title="Added by auto-tracking or a statement import"
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: theme.colors.textSecondary,
+                  backgroundColor: theme.colors.surfaceHover,
+                  borderRadius: theme.radii.full,
+                  padding: '3px 9px',
+                }}
+              >
+                Auto
+              </span>
+            ) : null}
             {entityLabel ? (
               <span style={{
                 maxWidth: '70%',

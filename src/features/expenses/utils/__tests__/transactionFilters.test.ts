@@ -1,6 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveDateRange } from '../transactionFilters.ts';
+import {
+  countActiveFilters,
+  filtersFromSearchParams,
+  filtersToSearchParams,
+  resolveDateRange,
+  toExpenseListParams,
+} from '../transactionFilters.ts';
 import { toIsoDate } from '../../../../shared/utils/dateBounds.ts';
 
 describe('transactionFilters local-date presets', () => {
@@ -40,5 +46,16 @@ describe('transactionFilters local-date presets', () => {
       globalThis.Date = originalDate;
       Date.now = originalNow;
     }
+  });
+});
+
+describe('transactionFilters source (T6.4)', () => {
+  it('round-trips the auto-detected filter through the URL and the API params', () => {
+    const filters = filtersFromSearchParams(new URLSearchParams('source=detected'));
+    assert.equal(filters.source, 'detected');
+    assert.equal(filtersToSearchParams(filters).toString(), 'source=detected');
+    assert.deepEqual(toExpenseListParams(filters), { source: 'detected' });
+    assert.equal(countActiveFilters(filters), 1);
+    assert.equal(filtersFromSearchParams(new URLSearchParams('source=bogus')).source, undefined);
   });
 });
