@@ -36,9 +36,20 @@ export interface IncomeAllocation {
   financialAccount?: { id: string; name: string; currency: string };
 }
 
+/**
+ * `refund` and `transfer` are kept apart from income and expense; the server nets refunds
+ * against spending and leaves transfers out of both totals (spec §8–12).
+ */
+export type TransactionType = 'expense' | 'income' | 'refund' | 'transfer';
+
 export interface Transaction {
   id: string;
-  type: 'expense' | 'income';
+  type: TransactionType;
+  /** Transfers only: whether this leg took money out of (DEBIT) or into (CREDIT) the account. */
+  direction?: 'DEBIT' | 'CREDIT' | null;
+  subtype?: string | null;
+  /** `detected` for automatically detected transactions. */
+  source?: 'manual' | 'detected' | 'import' | 'open_banking';
   amount: number;
   currency: string;
   categoryId: string | null;

@@ -5,7 +5,7 @@ export const FILTER_PICKER_PREVIEW_COUNT = 4;
 /** Page size when loading income sources / categories for filters. */
 export const FILTER_PICKER_FETCH_LIMIT = 100;
 
-export type TransactionTypeFilter = 'all' | 'expense' | 'income';
+export type TransactionTypeFilter = 'all' | 'expense' | 'income' | 'refund' | 'transfer';
 export type DatePreset = 'all' | 'this_month' | 'last_30' | 'custom';
 
 export type TransactionListFilters = {
@@ -78,7 +78,7 @@ export function filtersFromSearchParams(params: URLSearchParams): TransactionLis
   const type = params.get('type');
   const datePreset = params.get('datePreset') as DatePreset | null;
   return {
-    type: type === 'expense' || type === 'income' ? type : 'all',
+    type: type === 'expense' || type === 'income' || type === 'refund' || type === 'transfer' ? type : 'all',
     categoryId: params.get('categoryId') || undefined,
     incomeSourceId: params.get('incomeSourceId') || undefined,
     paymentMethod: params.get('paymentMethod') || undefined,

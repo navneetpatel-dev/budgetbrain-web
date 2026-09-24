@@ -5,6 +5,7 @@ import { amountText, bodyMedium, caption } from '@/shared/theme/textStyles';
 import { formatCurrency } from '@/shared/utils/currency';
 import { AppIcon } from '@/shared/components/ui/icons/AppIcon';
 import type { Transaction } from '@/shared/types';
+import { transactionKind } from '@/shared/utils/transactionKind';
 
 function InlineProgress({ progress, color }: { progress: number; color: string }) {
   const theme = useTheme();
@@ -88,16 +89,22 @@ export const TransactionRow = memo(function TransactionRow({
   showBadge?: boolean;
 }) {
   const theme = useTheme();
-  const isExpense = transaction.type === 'expense';
+  const kind = transactionKind(transaction);
   const accent =
-    (isExpense ? transaction.category?.color : undefined) ?? theme.colors.primary;
-  const title = isExpense
-    ? (transaction.merchant || transaction.category?.name || 'Expense')
-    : (transaction.incomeSource?.name || transaction.merchant || 'Income');
+    (kind.hasCategory ? transaction.category?.color : undefined) ?? theme.colors.primary;
+  const title = transaction.type === 'income'
+    ? (transaction.incomeSource?.name || transaction.merchant || 'Income')
+    : (transaction.merchant || (kind.hasCategory ? transaction.category?.name : undefined) || kind.label);
   const dateLabel = formatDate(transaction.date);
-  const entityLabel = isExpense
-    ? transaction.category?.name
-    : transaction.incomeSource?.name;
+  const entityLabel = transaction.type === 'income'
+    ? transaction.incomeSource?.name
+    : kind.hasCategory
+      ? transaction.category?.name
+      : kind.label;
+  const toneColor =
+    kind.tone === 'spend' ? theme.colors.danger : kind.tone === 'gain' ? theme.colors.success : theme.colors.textSecondary;
+  const toneSoft =
+    kind.tone === 'spend' ? theme.colors.dangerSoft : kind.tone === 'gain' ? theme.colors.successSoft : theme.colors.surfaceHover;
 
   return (
     <Surface
@@ -186,12 +193,12 @@ export const TransactionRow = memo(function TransactionRow({
             fontSize: 15,
             fontWeight: 600,
             letterSpacing: -0.1,
-            color: isExpense ? theme.colors.danger : theme.colors.success,
+            color: toneColor,
             fontVariantNumeric: 'tabular-nums',
             textAlign: 'right',
             lineHeight: 1.2,
           }}>
-            {isExpense ? '−' : '+'}{formatCurrency(transaction.amount, transaction.currency)}
+            {kind.sign}{formatCurrency(transaction.amount, transaction.currency)}
           </span>
           {onPress ? <AppIcon name="chevronRight" size={15} color={theme.colors.textTertiary} /> : null}
         </div>
@@ -201,8 +208,8 @@ export const TransactionRow = memo(function TransactionRow({
             fontSize: 10,
             fontWeight: 600,
             lineHeight: 1.2,
-            color: isExpense ? theme.colors.danger : theme.colors.success,
-            backgroundColor: isExpense ? theme.colors.dangerSoft : theme.colors.successSoft,
+            color: toneColor,
+            backgroundColor: toneSoft,
             borderRadius: theme.radii.full,
             padding: '3px 9px',
             display: 'inline-flex',
@@ -210,7 +217,7 @@ export const TransactionRow = memo(function TransactionRow({
             justifyContent: 'center',
             marginRight: onPress ? 23 : 0,
           }}>
-            {isExpense ? 'Expense' : 'Income'}
+            {kind.label}
           </span>
         ) : null}
       </div>
